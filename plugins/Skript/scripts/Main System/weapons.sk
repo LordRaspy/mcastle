@@ -1,0 +1,578 @@
+options:
+	p: &bSystem &f|
+
+	max_weapons_hotbar: 1
+
+	#Weapons
+
+	sword_cooldown: 12
+	sword_radius: 4
+	sword_damage: 3.5
+
+	axe_range: 9
+	axe_cooldown: 18
+	axe_damage: 4.5
+
+	claymore_cooldown: 6
+	claymore_block_frames: 20
+
+	bow_cooldown: 28
+	bow_radius: 6
+	bow_damage: 3
+
+	crossbow_cooldown: 30
+	crossbow_knockback: 6
+
+	dagger_cooldown: 150
+	dagger_range: 5
+	dagger_damage: 7.5
+
+	blazing_staff_main_leftclick_cooldown: 3.5
+	blazing_staff_main_leftclick_range: 20
+	blazing_staff_main_leftclick_damage: 2.75
+	blazing_staff_main_leftclick_fire_tick: 5
+
+	blazing_staff_ability_cooldown: 60
+	blazing_staff_ability_range: 25
+	blazing_staff_ability_damage: 5.5
+	blazing_staff_ability_radius: 6
+
+
+	glacial_staff_main_leftclick_cooldown: 3.5
+	glacial_staff_main_leftclick_range: 20
+	glacial_staff_main_leftclick_damage: 2.75
+	glacial_staff_main_leftclick_slowness_tick: 2
+
+	glacial_staff_ability_cooldown: 60
+	glacial_staff_ability_range: 15
+	glacial_staff_ability_damage: 3.5
+	glacial_staff_ability_duration: 5
+
+
+
+
+	astral_staff_ability_power_divider: 30
+
+	astral_staff_main_leftclick_cooldown: 3.5
+	astral_staff_main_leftclick_range: 20
+	astral_staff_main_leftclick_damage: 3.5
+
+	astral_staff_ability_cooldown: 180
+	astral_staff_ability_range: 10
+	astral_staff_ability_radius: 6
+	astral_staff_ability_power_min: 25
+	astral_staff_ability_power_max: 100
+	astral_staff_ability_wither_skeleton_health: 20
+	astral_staff_ability_skeleton_health: 15
+	astral_staff_ability_mob_distance: 12
+
+
+#--------------Hotbar Cancel------------
+
+function gethotbarweapons(p: player) :: integer:
+	loop 9 times:
+		set {_item} to slot (loop-value -1) of {_p}'s inventory
+		if lore of {_item} contains "&fTag: &cWeapon":
+			add 1 to {_item.amount}
+	return {_item.amount}
+
+on click:
+	set {_amount} to gethotbarweapons(player)
+	if {_amount} is above {@max_weapons_hotbar}:
+		cancel event
+		send "{@p} Du hast zu viele &cWaffen&f in deiner &bHotbar&f und bist überladen!" to player
+		send "{@p} Du kannst solange du nicht nur &a{@max_weapons_hotbar}&f Waffe(n) in deiner &bHotbar &fträgst nichts machen!" to player
+
+
+
+#-----------Fähigkeiten Scoreboard------------
+
+
+on join:
+	set title of player's scoreboard to "&aAbilities"
+	while player is online:
+
+
+		if {cooldown.weapon.%player's uuid%} is not set:
+			set {_weapon} to "&aReady"
+		else:
+			set {_weapon} to "&c%{cooldown.weapon.%player's uuid%}%s"
+
+		if {cooldown.helmet.%player's uuid%} is not set:
+			set {_helmet} to "&aReady"
+		else:
+			set {_helmet} to "&c%{cooldown.helmet.%player's uuid%}%s"
+
+		if {cooldown.chestplate.%player's uuid%} is not set:
+			set {_chestplate} to "&aReady"
+		else:
+			set {_chestplate} to "&c%{cooldown.chestplate.%player's uuid%}%s"
+
+		if {cooldown.leggings.%player's uuid%} is not set:
+			set {_leggings} to "&aReady"
+		else:
+			set {_leggings} to "&c%{cooldown.leggings.%player's uuid%}%s"
+
+		if {cooldown.boots.%player's uuid%} is not set:
+			set {_boots} to "&aReady"
+		else:
+			set {_boots} to "&c%{cooldown.boots.%player's uuid%}%s"
+
+
+
+		set line 3 of player's scoreboard to "&fWeapon Ability: &c%{_weapon}%"
+		set line 5 of player's scoreboard to "&fHelmet Ability: &c%{_helmet}%"
+		set line 7 of player's scoreboard to "&fChestplate Ability: &c%{_chestplate}%"
+		set line 9 of player's scoreboard to "&fLeg Armor Ability: &c%{_leggings}%"
+		set line 11 of player's scoreboard to "&fBoots Ability: &c%{_boots}%"
+		wait 1 second
+
+
+
+#---------------Fähigkeiten-------------
+
+every second:
+	loop all players:
+
+		if {cooldown.multiplier.%loop-player's uuid%} is not set:
+			set {cooldown.multiplier.%loop-player's uuid%} to 1
+
+		if {cooldown.weapon.%loop-player's uuid%} is set:
+			remove 1 from {cooldown.weapon.%loop-player's uuid%}
+		if {cooldown.weapon.%loop-player's uuid%} is below 1:
+			clear {cooldown.weapon.%loop-player's uuid%}
+
+		if {cooldown.helmet.%loop-player's uuid%} is set:
+			remove 1 from {cooldown.helmet.%loop-player's uuid%}
+		if {cooldown.helmet.%loop-player's uuid%} is below 1:
+			clear {cooldown.helmet.%loop-player's uuid%}
+
+		if {cooldown.chestplate.%loop-player's uuid%} is set:
+			remove 1 from {cooldown.chestplate.%loop-player's uuid%}
+		if {cooldown.chestplate.%loop-player's uuid%} is below 1:
+			clear {cooldown.chestplate.%loop-player's uuid%}
+
+		if {cooldown.leggings.%loop-player's uuid%} is set:
+			remove 1 from {cooldown.leggings.%loop-player's uuid%}
+		if {cooldown.leggings.%loop-player's uuid%} is below 1:
+			clear {cooldown.leggings.%loop-player's uuid%}
+
+		if {cooldown.boots.%loop-player's uuid%} is set:
+			remove 1 from {cooldown.boots.%loop-player's uuid%}
+		if {cooldown.boots.%loop-player's uuid%} is below 1:
+			clear {cooldown.boots.%loop-player's uuid%}
+
+
+on rightclick:
+
+
+	if lore of player's tool contains "&fTag: &cWeapon":
+
+		if {ability.%player's uuid%} is set:
+
+			#Other Abilities
+			if {knight.leg.armor.timer.%player's uuid%} is set:
+				stop
+
+
+			#Hotbar Abfrage
+			set {_amount} to gethotbarweapons(player)
+			if {_amount} is above {@max_weapons_hotbar}:
+				send "{@p} Du hast zu viele &cWaffen&f in deiner &bHotbar&f und bist überladen!" to player
+				send "{@p} Du kannst solange du nicht nur &a{@max_weapons_hotbar}&f Waffe(n) in deiner &bHotbar &fträgst nichts machen!" to player
+				cancel event
+				stop
+
+
+			#Fähigkeiten
+			#Warrior
+			if name of player's tool contains "Sword":
+				if {cooldown.weapon.%player's uuid%} is not set:
+					set {cooldown.weapon.%player's uuid%} to {@sword_cooldown} * {cooldown.multiplier.%player's uuid%}
+					cancel event
+					play 100 enchanted hit with offset of 2, 1, 2 and speed 1 at player
+					play sound "minecraft:entity.player.attack.sweep" with volume 1 and pitch 1 at player
+					loop all entities in radius {@sword_radius} around the player:
+						if loop-value isn't player:
+							set {_dam} to calculateDamage({@sword_damage}, loop-value)
+							set {_dam} to getdamage(player, loop-value, {_dam})
+							damage loop-value by {_dam}
+							push loop-value upwards with speed 0.8
+
+			if name of player's tool contains "Axe":
+				if {cooldown.weapon.%player's uuid%} is not set:
+					set {cooldown.weapon.%player's uuid%} to {@axe_cooldown} * {cooldown.multiplier.%player's uuid%}
+					cancel event
+					play sound "minecraft:entity.player.attack.sweep" with volume 1 and pitch 0.5 at player
+					set {_block} to block {@axe_range} blocks infront of player
+					loop all blocks between player and {_block}:
+						set {_loc} to loop-value
+						loop all entities in radius 2 around {_loc}:
+							if loop-value-2 isn't player:
+								set {_dam} to calculateDamage({@axe_damage}, loop-value-2)
+								set {_dam} to getdamage(player, loop-value-2, {_dam})
+								damage loop-value-2 by {_dam}
+								push loop-value-2 upwards with speed 0.2
+						play 100 enchanted hit with offset of 0.3, 0.3, 0.3 and speed 0.2 at {_loc}
+						wait 1 tick
+
+			if name of player's tool contains "Claymore":
+				if {cooldown.weapon.%player's uuid%} is not set:
+					set {cooldown.weapon.%player's uuid%} to {@claymore_cooldown} * {cooldown.multiplier.%player's uuid%}
+					cancel event
+					play sound "minecraft:item.shield.block" with volume 1 and pitch 1.7 at player
+					set {block.frame.%player's uuid%} to true
+					wait {@claymore_block_frames} ticks
+					clear {block.frame.%player's uuid%}
+
+
+
+			#Vagabond
+			if name of player's tool contains "Dagger":
+				if player's targeted entity is a entity:
+					set {_t} to player's targeted entity
+					if distance between player and {_t} is below {@dagger_range} +1:
+						if {cooldown.weapon.%player's uuid%} is not set:
+							set {cooldown.weapon.%player's uuid%} to {@dagger_cooldown} * {cooldown.multiplier.%player's uuid%}
+							cancel event
+							play sound "minecraft:block.fire.extinguish" with volume 1 and pitch 1 at player
+							play 100 campfire cozy smoke with offset of 1, 1, 1 and speed 0.05 at player
+							hide the player from all entities
+							wait 1.5 seconds
+							teleport player to {_t}
+							reveal the player to all entities
+							play sound "minecraft:block.fire.extinguish" with volume 1 and pitch 1 at player
+							play 100 campfire cozy smoke with offset of 1, 1, 1 and speed 0.05 at player
+							play sound "minecraft:entity.player.attack.sweep" with volume 1 and pitch 0.8 at player
+							set {_dam} to calculateDamage({@dagger_damage}, {_t})
+							set {_dam} to getdamage(player, {_t}, {_dam})
+							damage {_t} by {_dam}
+
+
+			#Mage
+			if name of player's tool contains "Blazing Staff":
+				set {_t} to player's targeted block
+				add 1 to the y-coords of {_t}
+				if distance between player and {_t} is below {@blazing_staff_ability_range} +1:
+					if {cooldown.weapon.%player's uuid%} is not set:
+						set {cooldown.weapon.%player's uuid%} to {@blazing_staff_ability_cooldown} * {cooldown.multiplier.%player's uuid%}
+						cancel event
+						loop 5 times:
+							loop 360 times:
+								set {_v} to spherical vector radius 6 - loop-value-1, yaw loop-value-2, pitch 0
+								play 1 flame with offset of 0, 0, 0 and speed 0 at {_t} ~ {_v}
+							play sound "minecraft:item.firecharge.use" with volume 0.5 and pitch 1 at {_t}
+							wait 0.75 seconds
+						play 300 flame with offset of 2, 2, 2 and speed 0 at {_t}
+						play 300 flame with offset of 0, 0, 0 and speed 1 at {_t}
+						play sound "minecraft:entity.generic.explode" with volume 0.5 and pitch 0.5 at {_t}
+						loop all entities in radius {@blazing_staff_ability_radius} around {_t}:
+							if loop-value isn't player:
+								set {_dam} to calculateDamage({@blazing_staff_ability_damage}, loop-value)
+								set {_dam} to getdamage(player, loop-value, {_dam})
+								damage loop-value by {_dam}
+
+			if name of player's tool contains "Glacial Staff":
+				if player's targeted entity is a entity:
+					set {_t} to player's targeted entity
+					if distance between player and {_t} is below {@glacial_staff_ability_range} +1:
+						if {cooldown.weapon.%player's uuid%} is not set:
+							set {cooldown.weapon.%player's uuid%} to {@glacial_staff_ability_cooldown} * {cooldown.multiplier.%player's uuid%}		
+							cancel event
+							play 80 snowflake with offset of 1, 1, 1 and speed 0 at {_t}
+							play sound "minecraft:entity.player.hurt_freeze" with volume 1 and pitch 0.25 at {_t}
+							set {_dam} to calculateDamage({@glacial_staff_ability_damage}, {_t})
+							set {_dam} to getdamage(player, {_t}, {_dam})
+							damage {_t} by {_dam}
+							set {freeze.%{_t}'s uuid%} to true
+							wait {@glacial_staff_ability_duration} seconds
+							clear {freeze.%{_t}'s uuid%}
+
+			if name of player's tool contains "Astral Staff":
+				if {unit.cap.%player's uuid%} is not set:
+					set {unit.cap.%player's uuid%} to 0
+				set {_t} to player's targeted block
+				if distance between player and {_t} is below {@astral_staff_ability_range} +1:
+					set {_custom.player} to compound tag "custom" of nbt compound of player
+					set {_power} to int tag "power" of {_custom.player}
+					set {_unit.cap} to {_power} / {@astral_staff_ability_power_divider}
+					set {_unit.cap} to floor({_unit.cap})
+					if {unit.cap.%player's uuid%} is below {_unit.cap}:
+						loop all blocks in radius {@astral_staff_ability_radius} around {_t}:
+							if loop-block is air:
+								if block above loop-block is air:
+									if block below loop-block is not air:
+										add loop-block to {_spawns::*}
+						if {_spawns::*} is not set:
+							send "{@p} Couldn't find any valid spawns!" to player
+							stop
+						if {cooldown.weapon.%player's uuid%} is not set:
+							set {cooldown.weapon.%player's uuid%} to {@astral_staff_ability_cooldown} * {cooldown.multiplier.%player's uuid%}
+							cancel event
+							set {_units} to {_unit.cap} - {unit.cap.%player's uuid%}
+							play sound "minecraft:entity.wither.death" with volume 1 and pitch 1.5 at {_t}
+							play 250 warped spore with offset of 0, 0, 0 and speed 1 at {_t}
+							wait 2 seconds
+							loop {_units} times:
+								set {_spawn} to random element out of {_spawns::*}
+								set {_d} to random integer between 1 and 2
+								if {_d} is 1:
+									add 1 to {unit.cap.%player's uuid%}
+									play 100 warped spore with offset of 1, 1, 1 and speed 1 at {_spawn}
+									spawn wither skeleton at {_spawn}
+									set {_power} to random integer between {@astral_staff_ability_power_min} and {@astral_staff_ability_power_max}
+									set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+									set int tag "power" of {_custom} to {_power}
+									set string tag "owner" of {_custom} to "%player%"
+									set name of last spawned entity to "&d%player%'s Subordinate | Power: &d%{_power}%"
+									set max health of last spawned entity to {@astral_staff_ability_wither_skeleton_health}
+									heal last spawned entity
+									equip last spawned entity with unbreakable iron helmet
+									equip last spawned entity with unbreakable iron chestplate
+									set last spawned entity's held item to unbreakable iron sword
+								if {_d} is 2:
+									add 1 to {unit.cap.%player's uuid%}
+									play 100 warped spore with offset of 1, 1, 1 and speed 1 at {_spawn}
+									spawn skeleton at {_spawn}
+									set {_power} to random integer between {@astral_staff_ability_power_min} and {@astral_staff_ability_power_max}
+									set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+									set int tag "power" of {_custom} to {_power}
+									set string tag "owner" of {_custom} to "%player%"
+									set name of last spawned entity to "&d%player%'s Subordinate | Power: &d%{_power}%"
+									set max health of last spawned entity to {@astral_staff_ability_skeleton_health}
+									heal last spawned entity
+									equip last spawned entity with unbreakable iron helmet
+									equip last spawned entity with unbreakable iron chestplate
+									set last spawned entity's held item to unbreakable bow
+									set last spawned entity's offhand item to tipped arrow of poison
+								wait 8 ticks
+
+
+on leftclick:
+	if lore of player's tool contains "&fTag: &cWeapon":
+
+		if {ability.%player's uuid%} is set:
+
+			#Other Abilities
+			if {knight.leg.armor.timer.%player's uuid%} is set:
+				stop
+
+
+
+			#Hotbar Abfrage
+			set {_amount} to gethotbarweapons(player)
+			if {_amount} is above {@max_weapons_hotbar}:
+				send "{@p} Du hast zu viele &cWaffen&f in deiner &bHotbar&f und bist überladen!" to player
+				send "{@p} Du kannst solange du nicht nur &a{@max_weapons_hotbar}&f Waffe(n) in deiner &bHotbar &fträgst nichts machen!" to player
+				cancel event
+				stop
+
+			#Fähigkeiten
+			#Vagabond
+			if name of player's tool contains "Crossbow":
+				if {cooldown.weapon.%player's uuid%} is not set:
+					set {cooldown.weapon.%player's uuid%} to {@crossbow_cooldown} * {cooldown.multiplier.%player's uuid%}
+					cancel event
+					loop 3 times:
+						play 10 wax off with offset of 1, 1, 1 and speed 1 at player
+						play sound "minecraft:item.crossbow.loading_middle" with volume 1 and pitch 0.7 at player
+						wait 10 ticks
+					set {crossbow.ability.%player's uuid%} to true
+				stop
+
+			if name of player's tool contains "Bow":
+				if {cooldown.weapon.%player's uuid%} is not set:
+					set {cooldown.weapon.%player's uuid%} to {@bow_cooldown} * {cooldown.multiplier.%player's uuid%}
+					cancel event
+					loop 3 times:
+						play 10 wax off with offset of 1, 1, 1 and speed 1 at player
+						play sound "minecraft:item.crossbow.loading_middle" with volume 1 and pitch 0.7 at player
+						wait 10 ticks
+					set {bow.ability.%player's uuid%} to true
+				stop
+
+
+
+			#Normal Attack
+			#Mage
+			if name of player's tool contains "Blazing Staff":
+				set {_t} to block {@blazing_staff_main_leftclick_range} blocks infront of player
+				if player's targeted block is not air:
+					if distance between player and player's targeted block is below {@blazing_staff_main_leftclick_range} +1:
+						set {_t} to player's targeted block
+				if {blazing.staff.cooldown.leftclick.%player's uuid%} is not set:
+					set {blazing.staff.cooldown.leftclick.%player's uuid%} to true
+					cancel event
+					loop all blocks between player and {_t}:
+						set {_loc} to loop-value
+						add 1 to {_loc}'s y-coords
+						play 100 dripping lava with offset of 0.1, 0.1, 0.1 and speed 0 at {_loc}
+						play sound "minecraft:item.firecharge.use" with volume 0.5 and pitch 1.5 at {_loc}
+						loop all entities in radius 3 around {_loc}:
+							if loop-value-2 isn't player:
+								if {_is.hit.loop.%loop-value-2%} isn't set:
+									set {_is.hit.loop.%loop-value-2%} to true
+									set {_dam} to calculateDamage({@blazing_staff_main_leftclick_damage}, loop-value-2)
+									set {_dam} to getdamage(player, loop-value-2, {_dam})
+									damage loop-value-2 by {_dam}
+									ignite loop-value-2 for {@blazing_staff_main_leftclick_fire_tick} seconds
+						wait 1 tick
+					play 75 dripping lava with offset of 2, 2, 2 and speed 0.1 at {_t}
+					play sound "minecraft:item.firecharge.use" with volume 1 and pitch 0.75 at {_t}
+					wait {@blazing_staff_main_leftclick_cooldown} seconds
+					clear {blazing.staff.cooldown.leftclick.%player's uuid%}
+
+			if name of player's tool contains "Glacial Staff":
+				set {_t} to block {@glacial_staff_main_leftclick_range} blocks infront of player
+				if player's targeted block is not air:
+					if distance between player and player's targeted block is below {@glacial_staff_main_leftclick_range} +1:
+						set {_t} to player's targeted block
+				if {glacial.staff.cooldown.leftclick.%player's uuid%} is not set:
+					set {glacial.staff.cooldown.leftclick.%player's uuid%} to true
+					cancel event
+					loop all blocks between player and {_t}:
+						set {_loc} to loop-value
+						add 1 to {_loc}'s y-coords
+						play 100 scrape with offset of 0.1, 0.1, 0.1 and speed 0 at {_loc}
+						play sound "minecraft:entity.player.hurt_freeze" with volume 0.5 and pitch 0.6 at {_loc}
+						loop all entities in radius 3 around {_loc}:
+							if loop-value-2 isn't player:
+								if {_is.hit.loop.%loop-value-2%} isn't set:
+									set {_is.hit.loop.%loop-value-2%} to true
+									set {_dam} to calculateDamage({@glacial_staff_main_leftclick_damage}, loop-value-2)
+									set {_dam} to getdamage(player, loop-value-2, {_dam})
+									damage loop-value-2 by {_dam}
+									apply slowness of tier 1 without any particles to loop-value-2 for {@glacial_staff_main_leftclick_slowness_tick} seconds
+						wait 1 tick
+					play 75 scrape with offset of 2, 2, 2 and speed 0.1 at {_t}
+					play sound "minecraft:entity.player.hurt_freeze" with volume 1 and pitch 0.5 at {_t}
+					wait {@glacial_staff_main_leftclick_cooldown} seconds
+					clear {glacial.staff.cooldown.leftclick.%player's uuid%}
+
+
+			if name of player's tool contains "Astral Staff":
+				set {_t} to block {@astral_staff_main_leftclick_range} blocks infront of player
+				if player's targeted block is not air:
+					if distance between player and player's targeted block is below {@astral_staff_main_leftclick_range} +1:
+						set {_t} to player's targeted block
+				if {astral.staff.cooldown.leftclick.%player's uuid%} is not set:
+					set {astral.staff.cooldown.leftclick.%player's uuid%} to true
+					cancel event
+					loop all blocks between player and {_t}:
+						set {_loc} to loop-value
+						add 1 to {_loc}'s y-coords
+						play 100 witch spell with offset of 0.1, 0.1, 0.1 and speed 0 at {_loc}
+						play sound "minecraft:block.enchantment_table.use" with volume 0.5 and pitch 1.3 at {_loc}
+						loop all entities in radius 3 around {_loc}:
+							if loop-value-2 isn't player:
+								if {_is.hit.loop.%loop-value-2%} isn't set:
+									set {_is.hit.loop.%loop-value-2%} to true
+									set {_dam} to calculateDamage({@astral_staff_main_leftclick_damage}, loop-value-2)
+									set {_dam} to getdamage(player, loop-value-2, {_dam})
+									damage loop-value-2 by {_dam}
+						wait 1 tick
+					play 75 witch spell with offset of 2, 2, 2 and speed 0.1 at {_t}
+					play sound "minecraft:block.enchantment_table.use" with volume 1 and pitch 0.5 at {_t}
+					wait {@astral_staff_main_leftclick_cooldown} seconds
+					clear {astral.staff.cooldown.leftclick.%player's uuid%}
+
+on projectile hit:
+	if lore of shooter's tool contains "&fTag: &cWeapon":
+		if shooter's held item is a bow:
+			if {bow.ability.%shooter's uuid%} is set:
+				clear {bow.ability.%shooter's uuid%}
+				play 150 wax off with offset of 2, 1, 2 and speed 1 at projectile
+				loop all entities in radius {@bow_radius} around the projectile:
+					set {_dam} to calculateDamage({@bow_damage}, loop-value)
+					set {_dam} to getdamage(shooter, loop-value, {_dam})
+					damage loop-value by {_dam}
+		if shooter's held item is a crossbow:		
+			if {crossbow.ability.%shooter's uuid%} is set:
+				clear {crossbow.ability.%shooter's uuid%}
+				play 15 sweep attack with offset of 1, 1, 1 and speed 1 at projectile
+				play sound "minecraft:entity.player.attack.knockback" with volume 1 and pitch 1.25 at projectile
+				knock victim (vector from shooter to victim) with strength {@crossbow_knockback}
+
+
+
+#----Extra------
+
+on leave:
+	loop all entities:
+		clear {freeze.%loop-value's uuid%}
+		clear {block.frame.%loop-value's uuid%}
+		clear {blazing.staff.cooldown.leftclick.%loop-value's uuid%}
+		clear {glacial.staff.cooldown.leftclick.%loop-value's uuid%}
+
+on stop:
+	loop all entities:
+		clear {freeze.%loop-value's uuid%}
+		clear {block.frame.%loop-value's uuid%}
+		clear {blazing.staff.cooldown.leftclick.%loop-value's uuid%}
+		clear {glacial.staff.cooldown.leftclick.%loop-value's uuid%}
+
+#Astral Stab
+
+every second:
+	loop all entities:
+		set {_custom} to compound tag "custom" of nbt compound of loop-value
+		set {_owner} to string tag "owner" of {_custom}
+		if {_owner} is set:
+			if distance between loop-value and {_owner} parsed as a player is above {@astral_staff_ability_mob_distance} -1:
+				set path target of loop-value to {_owner} parsed as a player
+
+on entity target:
+	set {_custom} to compound tag "custom" of nbt compound of entity
+	set {_owner} to string tag "owner" of {_custom}
+	if {_owner} is set:
+		if {_owner} is target:
+			cancel event
+		if {trusted.%{_owner}'s uuid%} contains target: 
+			cancel event
+		if target is a mob:
+			cancel event
+
+on death:
+	set {_custom} to compound tag "custom" of nbt compound of victim
+	set {_owner} to string tag "owner" of {_custom}
+	loop all offline players:
+		if {_owner} is loop-value:
+			remove 1 from {unit.cap.%loop-value's uuid%}
+
+on leave:
+	loop all entities:
+		set {_custom} to compound tag "custom" of nbt compound of loop-value
+		set {_owner} to string tag "owner" of {_custom}
+		loop all offline players:
+			if {_owner} is loop-value-2:	
+				kill loop-value-1
+
+on stop:
+	loop all entities:
+		set {_custom} to compound tag "custom" of nbt compound of loop-value
+		set {_owner} to string tag "owner" of {_custom}
+		loop all offline players:
+			if {_owner} is loop-value-2:	
+				kill loop-value-1
+				remove 1 from {unit.cap.%loop-value-2's uuid%}
+
+command /KillSummons:
+	trigger:
+		play sound "minecraft:entity.experience_orb.pickup" to player
+		loop all entities:
+			set {_custom} to compound tag "custom" of nbt compound of loop-value
+			set {_owner} to string tag "owner" of {_custom}
+			if {_owner} is set:
+				if {_owner} is player:
+					kill loop-value
+			
+
+#Glacial Stab
+
+on player move:
+	if {freeze.%player's uuid%} is set:
+		cancel event
+
+on entity move:
+	if {freeze.%entity's uuid%} is set:
+		cancel event

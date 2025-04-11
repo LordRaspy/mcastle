@@ -1,0 +1,805 @@
+options:
+	p: &bSystem &f|
+
+	death_max: 1
+
+	player_min_power_spawn: 10 #10Power = 1% Damage Reduce / Increase
+	player_max_power_spawn: 100 
+
+
+	see_range_city: 45 #Wie weit reicht die Range, bis Darkness anfängt
+
+	beacon_price: 1280 #4 Stacks Gold
+
+	start_needed: 15 #Needed Amount of Fame for next Level Up
+	level_add: 10 #Level extra needed for next level
+
+
+	raw_gold_worth: 5 #1 Gold inserted in das System = x Gold Variable
+
+	ability_timer: 180 #Zeit in PvP Mode nach hit
+
+	combat_timer: 10 #Zeit für den NoCombat Command
+
+	start_year: 1250
+
+	#Leveling
+
+	mining_requirement_journeyman: 10
+	mining_requirement_adept: 30
+	mining_requirement_expert: 60
+	mining_requirement_master: 90
+
+	#Diese Werte sind kummulativ errechnet, um folgende Stundenanzahl für die Etappen zu gewährleisten
+	mining_skill_coal_ore_add: 0.7638 #2h bis iron
+	mining_skill_copper_ore_add: 0.7638 #2h bis iron
+	mining_skill_iron_ore_add: 1.6666 #8h bis redstone
+	mining_skill_redstone_ore_add: 3.1250 #12h bis gold
+	mining_skill_lapis_ore_add: 3.1250 #12h bis gold
+	mining_skill_gold_ore_add: 3.4467 #16h bis diamond
+	mining_skill_diamond_ore_add: 21.8750 #20h bis Level 120
+
+
+	wood_cutting_requirement_journeyman: 10
+	wood_cutting_requirement_adept: 30
+	wood_cutting_requirement_expert: 60
+	wood_cutting_requirement_master: 90
+
+	#Diese Werte sind kummulativ errechnet, um folgende Stundenanzahl für die Etappen zu gewährleisten
+	wood_cutting_skill_oak_log_add: 0.2578 #2h bis birch
+	wood_cutting_skill_birch_log_add: 0.5208 #8h bis spruce
+	wood_cutting_skill_spruce_log_add: 0.7813 #12h bis dark_oak
+	wood_cutting_skill_dark_oak_log_add: 0.7813 #16h bis acacia
+	wood_cutting_skill_acacia_log_add: 0.8059 #19h bis Level 120
+
+
+
+	farming_requirement_journeyman: 10
+	farming_requirement_adept: 30
+	farming_requirement_expert: 60
+	farming_requirement_master: 90
+
+	#Diese Werte sind kummulativ errechnet, um folgende Stundenanzahl für die Etappen zu gewährleisten
+	farming_skill_wheat_add: 0.1375 #2h bis Carrots
+	farming_skill_carrots_add: 0.2777 #8h bis potatoes
+	farming_skill_potatoes_add: 0.625 #12h bis beetroots 
+	farming_skill_beetroots_add: 0.78125 #16h bis pumpkins
+	farming_skill_pumpkin_add: 0.875 #20h bis Level 120
+
+
+	#Farming Explanation , Es droppt immer 1 ReCrop. x_seed gibt die Chance an, dass ein zusätzlicher Seed droppt, was entsprechend zu einer Verdopplung des Felde führt.
+	# Die Steigerung der Nahrung ist auf 20 Spieler ausgelegt.
+	farming_drop_wheat: 28%
+	farming_drop_wheat_seed: 75%
+
+	farming_drop_carrots: 44%
+	farming_drop_carrots_seed: 75%
+
+	farming_drop_potatoes: 33%
+	farming_drop_potatoes_seed: 75%
+
+	farming_drop_beetroot: 40%
+	farming_drop_beetroot_seed: 75%
+
+	farming_drop_pumpkin: 57%
+
+
+	trading_requirement_journeyman: 10
+	trading_requirement_adept: 30
+	trading_requirement_expert: 60
+	trading_requirement_master: 90
+
+
+
+every second:
+	loop all players:
+		if {unit.cap.%loop-player's uuid%} is not set:
+			set {unit.cap.%loop-player's uuid%} to 0
+		if {gold.%loop-player's uuid%} is not set:
+			set {gold.%loop-player's uuid%} to 0		
+
+
+#-------Menu guiding--------
+
+command /Menu:
+	trigger:
+		Menu(player)
+
+function Menu(p: player):
+	if {gold.%{_p}'s uuid%} is not set:
+		set {gold.%{_p}'s uuid%} to 0
+	set {_nbt} to nbt compound of {_p}
+	set {_power} to int tag "custom;power" of {_nbt}
+	if {pray.%{_p}'s uuid%} is not set:
+		set {_pray} to "&aDone!"
+	else:
+		set {_pray} to "%{pray.%{_p}'s uuid%} / 60% &fMinutes"
+
+	set {_gui} to a new chest inventory with 3 rows with name "&7System | Menu"
+	set slot 4 of {_gui} to clock named "&e---Time---" with lore "&fThe current &eDate &fis: &e%{day}%&f.&e%{month}%&f.&e%{@start_year} + {year}%&f.", "&fThe current &eTime &fis: &e%time of "world"% &fUhr", "" and "&dRightclick &fto update the timer!"
+	set slot 9 of {_gui} to chest named "&bBuild and Craft" with lore "" and "&fClick to open the Build and Craft Menu!"
+	set slot 11 of {_gui} to gold block named "&bReligions" with lore "", "&a----------------------", "&fTime remaining: &e%{_pray}%", "&a----------------------", "", "&dLeftclick &fto pray (you need to be in range of a prayer point)!" and "&dRightclick &fto update the timer!"
+	set slot 13 of {_gui} to {_p}'s skull named "&b%{_p}%'s Stats" with lore "", "&a----------------------", "&fGold: &6%{gold.%{_p}'s uuid%}%", "&fExact Life: %{_p}'s health% &cHearts", "&fPower: &c%{_power}%", "&fDeaths: &c%{death.counter.%{_p}'s uuid%}%&f/&c{@death_max}", "&a----------------------", "", "&a----------------------", "&fMining Level: &b%{mining.skill.%{_p}'s uuid%}%", "&fWoodcutting Level: &2%{wood.cutting.skill.%{_p}'s uuid%}%", "&fFarming / Leatherworking Level: &a%{farming.skill.%{_p}'s uuid%}%", "&fCrafting / Trading Level: &e%{trading.skill.%{_p}'s uuid%}%", "&a----------------------", "" and "&fClick to open the Leaderboard!"
+	set slot 15 of {_gui} to book and quill named "&bLicenses" with lore "" and "&fClick to open the License Menu!"
+	set slot 17 of {_gui} to iron pickaxe named "&bSkills and Abilities" with lore "" and "&fClick to open the Skills and Abilities Menu!"
+	open {_gui} to {_p}
+	play sound "minecraft:entity.experience_orb.pickup" to {_p}
+
+
+function BuildandCraft(p: player):
+	if {outpost.name.%{_p}'s uuid%} is not set:
+		set {_outpost.display} to "Name"
+	else:
+		set {_outpost.display} to {outpost.name.%{_p}'s uuid%}
+	set {_gui} to a new chest inventory with 3 rows with name "&7System | Build and Craft"
+	set slot 26 of {_gui} to barrier named "&cGo Back" with lore "" and "&fClick to go back!"
+	set slot 11 of {_gui} to beacon named "&bNew Outpost" with lore "", "&fPrice: &6{@beacon_price} &fGold", "&fName: &b%{_outpost.display}%", "", "&fPress &dLeftclick &fto buy!" and "&fPress &dRightclick &fto set the name!"
+	set slot 15 of {_gui} to chest named "&eInsert Gold" with lore "", "&a----------------------", "&fGold: &6%{gold.%{_p}'s uuid%}%", "&a----------------------", "", "&a----------------------", "&fExper's Ore Worth: &6{@raw_gold_worth}", "&fChest of Expert's Ore Worth: &6%{@raw_gold_worth} * 9%", "&fMinecart of Expert's Ore Worth: &6%{@raw_gold_worth} * 9 * 9%", "&a----------------------", "" and "&fClick to insert Gold!"
+	open {_gui} to {_p}
+	play sound "minecraft:entity.experience_orb.pickup" to {_p}
+
+
+function SkillsandAbilities(p: player):
+	set {_gui} to a new chest inventory with 3 rows with name "&7System | Skills and Abilities"
+	open {_gui} to {_p}
+	set slot 10 of {_gui} to iron pickaxe named "&bMining Skill" with lore "&fLevel: &b%{mining.skill.%{_p}'s uuid%}%", "&fProgress: &b%{mining.skill.current.%{_p}'s uuid%} / {mining.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &b%{mining.skill.current.%{_p}'s uuid%}% &f/ &b%{mining.skill.needed.%{_p}'s uuid%}%", "", "&bRequirements", "&fJourneyman: <##475b37>{@mining_requirement_journeyman}", "&fAdept: <##385466>{@mining_requirement_adept}", "&fExpert: <##77322c>{@mining_requirement_expert}" and "&fMaster: <##aa6837>{@mining_requirement_master}"
+	set slot 12 of {_gui} to iron axe named "&2Wood Cutting Skill" with lore "&fLevel: &2%{wood.cutting.skill.%{_p}'s uuid%}%", "&fProgress: &2%{wood.cutting.skill.current.%{_p}'s uuid%} / {wood.cutting.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &2%{wood.cutting.skill.current.%{_p}'s uuid%}% &f/ &2%{wood.cutting.skill.needed.%{_p}'s uuid%}%", "", "&bRequirements", "&fJourneyman: <##475b37>{@wood_cutting_requirement_journeyman}", "&fAdept: <##385466>{@wood_cutting_requirement_adept}", "&fExpert: <##77322c>{@wood_cutting_requirement_expert}" and "&fMaster: <##aa6837>{@wood_cutting_requirement_master}"
+	set slot 14 of {_gui} to iron hoe named "&aFarming Skill" with lore "&fLevel: &a%{farming.skill.%{_p}'s uuid%}%", "&fProgress: &a%{farming.skill.current.%{_p}'s uuid%} / {farming.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &a%{farming.skill.current.%{_p}'s uuid%}% &f/ &a%{farming.skill.needed.%{_p}'s uuid%}%", "", "&bRequirements", "&fJourneyman: <##475b37>{@farming_requirement_journeyman}", "&fAdept: <##385466>{@farming_requirement_adept}", "&fExpert: <##77322c>{@farming_requirement_expert}" and "&fMaster: <##aa6837>{@farming_requirement_master}"
+	set slot 16 of {_gui} to name tag named "&eCrafting Skill" with lore "&fLevel: &e%{trading.skill.%{_p}'s uuid%}%", "&fProgress: &e%{trading.skill.current.%{_p}'s uuid%} / {trading.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &e%{trading.skill.current.%{_p}'s uuid%}% &f/ &e%{trading.skill.needed.%{_p}'s uuid%}%", "", "&bRequirements", "&fJourneyman: <##475b37>{@trading_requirement_journeyman}", "&fAdept: <##385466>{@trading_requirement_adept}", "&fExpert: <##77322c>{@trading_requirement_expert}" and "&fMaster: <##aa6837>{@trading_requirement_master}"
+	set slot 26 of {_gui} to barrier named "&cGo Back" with lore "" and "&fClick to go back!"
+	play sound "minecraft:entity.experience_orb.pickup" to {_p}
+
+
+on first join:
+	set {_nbt} to nbt compound of player
+	set {_power} to random integer between {@player_min_power_spawn} and {@player_max_power_spawn}
+	set int tag "custom;power" of {_nbt} to {_power}
+
+command /GetPower [<player>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				set {_nbt} to nbt compound of arg 1
+				set {_power.attacker} to int tag "custom;power" of {_nbt}
+				send "{@p} Power of %arg 1%: %{_power.attacker}%"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+command /SetPower [<player>] [<integer>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				if arg 2 is set:
+					set {_nbt} to nbt compound of arg 1
+					set int tag "custom;power" of {_nbt} to arg 2
+					send "{@p} Power of &b%arg 1% &fhas been set to &b%arg 2%&f!"
+					play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+command /RerollPower [<player>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				set {_nbt} to nbt compound of arg 1
+				set {_power} to random integer between {@player_min_power_spawn} and {@player_max_power_spawn}
+				set int tag "custom;power" of {_nbt} to {_power}
+				send "{@p} Power of &b%arg 1% &frerolled!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+
+
+#---------Insert Gold--------------
+
+function insertgold(p: player):
+	set {_gui} to a new chest inventory with 1 row with name "&7System | Insert Gold"
+	open {_gui} to {_p}
+	set slot 8 of {_gui} to barrier named "&cGo Back" with lore "" and "&fClick to go back!"
+	set {inventory.close.gold.insert.%{_p}'s uuid%} to true
+	play sound "minecraft:entity.experience_orb.pickup" to {_p}
+
+
+on inventory close:
+	if {inventory.close.gold.insert.%player's uuid%} is set:
+		clear {inventory.close.gold.insert.%player's uuid%}
+		loop all items in event-inventory:
+			add loop-value to {_list::*}
+		loop {_list::*}:
+			if name of loop-value contains "<##77322c>Expert's Ore":
+				add {@raw_gold_worth} * item amount of loop-value to {_add}
+			if name of loop-value contains "<##77322c>Chest with Expert's Ore":
+				add {@raw_gold_worth} * 9 * item amount of loop-value to {_add}
+			if name of loop-value contains "<##77322c>Minecart with Expert's Ore":
+				add {@raw_gold_worth} * 9 * 9 * item amount of loop-value to {_add}
+		if {_add} is not set:
+			set {_add} to 0
+		add {_add} to {gold.%player's uuid%}
+		send "{@p} Added &e%{_add}% Gold &fto your &eGold&f!"
+		play sound "minecraft:entity.experience_orb.pickup" to player
+
+#--------Variable reset & start set----------
+
+every second:
+	loop all players:
+		set {_joblist::*} to "mining", "wood.cutting", "farming" and "trading"
+		loop {_joblist::*}:
+			if {%loop-value-2%.skill.%loop-value-1's uuid%} is not set:
+				set {%loop-value-2%.skill.%loop-value-1's uuid%} to 0
+				set {%loop-value-2%.skill.current.%loop-value-1's uuid%} to 0
+				set {%loop-value-2%.skill.needed.%loop-value-1's uuid%} to {@start_needed}
+
+command /ResetAllSkills [<player>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				set {_joblist::*} to "mining", "wood.cutting", "farming" and "trading"
+				loop {_joblist::*}:
+					set {%loop-value%.skill.%player's uuid%} to 0
+					set {%loop-value%.skill.current.%player's uuid%} to 0
+					set {%loop-value%.skill.needed.%player's uuid%} to {@start_needed}
+				send "{@p} Skills von %arg 1% wurden zurückgesetzt!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+#--------Inventory Click event for Menu guidance and click effects---------
+
+on inventory click:
+	if name of event-inventory is "&7System | Menu":
+		cancel event
+
+		if index of event-slot = 4:
+			if click type = right mouse button:
+				Menu(player)
+
+		if index of event-slot = 9:
+			if click type = left mouse button:
+				BuildandCraft(player)
+
+		if index of event-slot = 11:
+			if click type = left mouse button:
+				pray(player)
+			if click type = right mouse button:
+				Menu(player)
+		
+		if index of event-slot = 13:
+			if click type = left mouse button:
+				leaderboard(player)
+
+		if index of event-slot = 15:
+			if click type = left mouse button:
+				licenses(player)
+
+		if index of event-slot = 17:
+			if click type = left mouse button:
+				SkillsandAbilities(player)
+
+
+
+	if name of event-inventory is "&7System | Build and Craft":
+		cancel event
+
+		if index of event-slot = 26:
+			Menu(player)
+		if index of event-slot = 11:
+			if click type = right mouse button:
+				close player's inventory
+				send "{@p} Enter the name in the chat! (""exit"" to exit)"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				set {chat.var.outpost.%player's uuid%} to true
+			if click type = left mouse button:
+				if {outpost.name.%player's uuid%} is set:
+					play sound "minecraft:entity.experience_orb.pickup" to player
+					AddCity(player, {outpost.name.%player's uuid%})
+				else:
+					send "{@p} Gebe zu erst einen Namen an!"
+		if index of event-slot = 15:
+			if click type = left mouse button:
+				insertgold(player)
+
+
+	if name of event-inventory is "&7System | Skills and Abilities":
+		cancel event
+
+		if index of event-slot = 26:
+			Menu(player)
+
+
+	if name of event-inventory is "&7System | Insert Gold":
+		if index of event-slot = 8:
+			cancel event
+			clear {inventory.close.gold.insert.%player's uuid%}
+			loop all items in player's current inventory:
+				add loop-value to {_list::*}
+			loop {_list::*}:
+				if name of loop-value contains "<##77322c>Expert's Ore":
+					add {@raw_gold_worth} * item amount of loop-value to {_add}
+				if name of loop-value contains "<##77322c>Chest with Expert's Ore":
+					add {@raw_gold_worth} * 9 * item amount of loop-value to {_add}
+			if {_add} is not set:
+				set {_add} to 0
+			add {_add} to {gold.%player's uuid%}
+			send "{@p} Added &e%{_add}% Gold &fto your &eGold&f!"
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			BuildandCraft(player)
+
+
+on chat:
+	if {chat.var.outpost.%player's uuid%} is set:
+		cancel event
+		clear {chat.var.outpost.%player's uuid%}
+		if message = "exit":
+			send "{@p} Stopped selection."
+			stop
+		set {outpost.name.%player's uuid%} to message
+		send "{@p} Set ""&b%message%&f"" as the new outpost name!"
+		BuildandCraft(player)
+
+
+
+
+
+#----Block break events for leveling and ifs for level requirements----
+
+
+function getifnearcity(p: player) :: boolean:
+	loop {cities::*}:
+		if distance between {_p} and {city.block.%loop-value%} is below {@see_range_city} +1:
+			set {_isnear} to true
+	
+	if {_isnear} is not set:
+		set {_isnear} to false
+
+	return {_isnear}
+
+
+
+#Mining
+
+on block break:
+	if {admin.%player's uuid%} is not set:
+		set {_isnear} to getifnearcity(player)
+
+		if event-block is any ore:
+			if player's tool is any pickaxe:
+				if lore of player's tool contains "&fTag: &eTool":
+					if lore of player's tool contains "&fTier: <##475b37>Journeyman":
+						set {_level.tool} to 2
+					if lore of player's tool contains "&fTier: <##385466>Adept":
+						set {_level.tool} to 3
+					if lore of player's tool contains "&fTier: <##77322c>Expert":
+						set {_level.tool} to 4
+					if lore of player's tool contains "&fTier: <##aa6837>Master":
+						set {_level.tool} to 5
+			
+		if event-block is coal ore or deepslate coal ore:
+			if {_isnear} is false:
+				add {@mining_skill_coal_ore_add} to {mining.skill.current.%player's uuid%}
+				send action bar "&f+ &b{@mining_skill_coal_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+			cancel drops
+			drop coal named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		if event-block is copper ore or deepslate copper ore:
+			if {_isnear} is false:
+				add {@mining_skill_copper_ore_add} to {mining.skill.current.%player's uuid%}
+				send action bar "&f+ &b{@mining_skill_copper_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+			cancel drops
+			drop raw copper named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+		if event-block is iron ore or deepslate iron ore:
+			if {mining.skill.%player's uuid%} is above {@mining_requirement_journeyman} - 1:
+				if {_level.tool} is 2 or above:
+					if {_isnear} is false:
+						add {@mining_skill_iron_ore_add} to {mining.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@mining_skill_iron_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop raw iron named "<##475b37>Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##475b37>Journeyman's Pickaxe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Mining <##475b37>Journeyman&f to break this block!" to player
+				cancel event
+
+		if event-block is redstone ore or deepslate redstone ore:
+			if {mining.skill.%player's uuid%} is above {@mining_requirement_adept} - 1:
+				if {_level.tool} is 3 or above:
+					if {_isnear} is false:
+						add {@mining_skill_redstone_ore_add} to {mining.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@mining_skill_redstone_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop redstone named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##385466>Adept's Pickaxe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Mining <##385466>Adept&f to break this block!" to player
+				cancel event
+		if event-block is lapis ore or deepslate lapis ore:
+			if {mining.skill.%player's uuid%} is above {@mining_requirement_adept} - 1:
+				if {_level.tool} is 3 or above:
+					if {_isnear} is false:
+						add {@mining_skill_lapis_ore_add} to {mining.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@mining_skill_lapis_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop lapis lazuli named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##385466>Adept's Pickaxe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Mining <##385466>Adept&f to break this block!" to player
+				cancel event
+
+		if event-block is gold ore or deepslate gold ore:
+			if {mining.skill.%player's uuid%} is above {@mining_requirement_expert} - 1:
+				if {_level.tool} is 4 or above:
+					if {_isnear} is false:
+						add {@mining_skill_gold_ore_add} to {mining.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@mining_skill_gold_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop raw gold named "<##77322c>Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##77322c>Expert's Pickaxe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Mining <##77322c>Expert&f to break this block!" to player
+				cancel event
+
+		if event-block is diamond ore or deepslate diamond ore:
+			if {mining.skill.%player's uuid%} is above {@mining_requirement_master} - 1:
+				if {_level.tool} is 5 or above:
+					if {_isnear} is false:
+						add {@mining_skill_diamond_ore_add} to {mining.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@mining_skill_diamond_ore_add}&f to &bMining &f| &b%{mining.skill.current.%player's uuid%} / {mining.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop diamond named "<##aa6837>Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##aa6837>Master's Pickaxe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Mining <##aa6837>Master&f to break this block!" to player
+				cancel event
+
+
+		if {mining.skill.current.%player's uuid%} is above {mining.skill.needed.%player's uuid%} -1:
+			add 1 to {mining.skill.%player's uuid%}
+			set {mining.skill.current.%player's uuid%} to 0
+			set {mining.skill.needed.%player's uuid%} to {mining.skill.needed.%player's uuid%} + {@level_add}
+			send action bar "&fLevel up in &bMining&f! | Mining: &b%{mining.skill.%player's uuid%}%"
+			play sound "minecraft:entity.player.levelup" to player
+
+
+
+#Wood Cutting
+
+on block break:
+	if {admin.%player's uuid%} is not set:
+		set {_isnear} to getifnearcity(player)
+
+
+		if event-block is any log:
+			if player's tool is any axe:
+				if lore of player's tool contains "&fTag: &eTool":
+					if lore of player's tool contains "&fTier: <##475b37>Journeyman":
+						set {_level.tool} to 2
+					if lore of player's tool contains "&fTier: <##385466>Adept":
+						set {_level.tool} to 3
+					if lore of player's tool contains "&fTier: <##77322c>Expert":
+						set {_level.tool} to 4
+					if lore of player's tool contains "&fTier: <##aa6837>Master":
+						set {_level.tool} to 5
+			
+		if event-block is oak log or stripped oak log:
+			if {_isnear} is false:
+				add {@wood_cutting_skill_oak_log_add} to {wood.cutting.skill.current.%player's uuid%}
+				send action bar "&f+ &b{@wood_cutting_skill_oak_log_add}&f to &2Wood Cutting &f| &b%{wood.cutting.skill.current.%player's uuid%} / {wood.cutting.skill.needed.%player's uuid%} * 100%%% &fFame"
+			cancel drops
+			drop oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+		if event-block is birch log or stripped birch log:
+			if {wood.cutting.skill.%player's uuid%} is above {@wood_cutting_requirement_journeyman} - 1:
+				if {_level.tool} is 2 or above:
+					if {_isnear} is false:
+						add {@wood_cutting_skill_birch_log_add} to {wood.cutting.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@wood_cutting_skill_birch_log_add}&f to &2Wood Cutting &f| &b%{wood.cutting.skill.current.%player's uuid%} / {wood.cutting.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##475b37>Journeyman's Axe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Wood Cutting <##475b37>Journeyman&f to break this block!" to player
+				cancel event
+
+		if event-block is spruce log or stripped spruce log:
+			if {wood.cutting.skill.%player's uuid%} is above {@wood_cutting_requirement_adept} - 1:
+				if {_level.tool} is 3 or above:
+					if {_isnear} is false:
+						add {@wood_cutting_skill_spruce_log_add} to {wood.cutting.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@wood_cutting_skill_spruce_log_add}&f to &2Wood Cutting &f| &b%{wood.cutting.skill.current.%player's uuid%} / {wood.cutting.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##385466>Adept's Axe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Wood Cutting <##385466>Adept&f to break this block!" to player
+				cancel event
+
+		if event-block is dark oak log or stripped dark oak log:
+			if {wood.cutting.skill.%player's uuid%} is above {@wood_cutting_requirement_expert} - 1:
+				if {_level.tool} is 4 or above:
+					if {_isnear} is false:
+						add {@wood_cutting_skill_dark_oak_log_add} to {wood.cutting.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@wood_cutting_skill_dark_oak_log_add}&f to &2Wood Cutting &f| &b%{wood.cutting.skill.current.%player's uuid%} / {wood.cutting.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##77322c>Expert's Axe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Wood Cutting <##77322c>Expert&f to break this block!" to player
+				cancel event
+
+		if event-block is acacia log or stripped acacia log:
+			if {wood.cutting.skill.%player's uuid%} is above {@wood_cutting_requirement_master} - 1:
+				if {_level.tool} is 5 or above:
+					if {_isnear} is false:
+						add {@wood_cutting_skill_acacia_log_add} to {wood.cutting.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@wood_cutting_skill_acacia_log_add}&f to &2Wood Cutting &f| &b%{wood.cutting.skill.current.%player's uuid%} / {wood.cutting.skill.needed.%player's uuid%} * 100%%% &fFame"
+					cancel drops
+					drop acacia log named "<##aa6837>Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+				else:
+					send "{@p} You need a <##aa6837>Master's Axe &for better!" to player
+					cancel event
+			else:
+				send "{@p} You need to be a Wood Cutting <##aa6837>Master&f to break this block!" to player
+				cancel event
+
+
+		if {wood.cutting.skill.current.%player's uuid%} is above {wood.cutting.skill.needed.%player's uuid%} -1:
+			add 1 to {wood.cutting.skill.%player's uuid%}
+			set {wood.cutting.skill.current.%player's uuid%} to 0
+			set {wood.cutting.skill.needed.%player's uuid%} to {wood.cutting.skill.needed.%player's uuid%} + {@level_add}
+			send action bar "&fLevel up in &2Wood Cutting&f! | &2Wood Cutting: &b%{wood.cutting.skill.%player's uuid%}%"
+			play sound "minecraft:entity.player.levelup" to player
+
+		
+#Farming
+
+on block break:
+	if {admin.%player's uuid%} is not set:
+
+		if event-block is wheat plant, carrot plant, potato plant, beetroot plant or pumpkin:
+			if player's tool is any hoe:
+				if lore of player's tool contains "&fTag: &eTool":
+					if lore of player's tool contains "&fTier: <##475b37>Journeyman":
+						set {_level.tool} to 2
+					if lore of player's tool contains "&fTier: <##385466>Adept":
+						set {_level.tool} to 3
+					if lore of player's tool contains "&fTier: <##77322c>Expert":
+						set {_level.tool} to 4
+					if lore of player's tool contains "&fTier: <##aa6837>Master":
+						set {_level.tool} to 5
+			
+		if event-block is wheat plant:
+			if age of event-block is maximum age of event-block:
+				add {@farming_skill_wheat_add} to {farming.skill.current.%player's uuid%}
+				send action bar "&f+ &b{@farming_skill_wheat_add}&f to &aFarming &f| &b%{farming.skill.current.%player's uuid%} / {farming.skill.needed.%player's uuid%} * 100%%% &fFame"
+				cancel drops
+				drop 1 wheat seeds named "<##6c594b>Novice's Seed" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" #ReCrop
+				chance of {@farming_drop_wheat}:
+					drop 2 wheat named "<##6c594b>Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+				chance of {@farming_drop_wheat_seed}:
+					drop 1 wheat seeds named "<##6c594b>Novice's Seed" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+		if event-block is carrot plant:
+			if age of event-block is maximum age of event-block:
+				if {farming.skill.%player's uuid%} is above {@farming_requirement_journeyman} - 1:
+					if {_level.tool} is 2 or above:
+						add {@farming_skill_carrots_add} to {farming.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@farming_skill_carrots_add}&f to &aFarming &f| &b%{farming.skill.current.%player's uuid%} / {farming.skill.needed.%player's uuid%} * 100%%% &fFame"
+						cancel drops
+						drop 1 carrots named "<##475b37>Journeyman's Seed" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" # ReCrop
+						chance of {@farming_drop_carrots}:
+							drop 1 carrots named "<##475b37>Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+						chance of {@farming_drop_carrots_seed}:
+							drop 1 carrots named "<##475b37>Journeyman's Seed" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+					else:
+						send "{@p} You need a <##475b37>Journeyman's Hoe &for better!" to player
+						cancel event
+				else:
+					send "{@p} You need to be a Farming <##475b37>Journeyman&f to break this block!" to player
+					cancel event
+
+		if event-block is potato plant:
+			if age of event-block is maximum age of event-block:
+				if {farming.skill.%player's uuid%} is above {@farming_requirement_adept} - 1:
+					if {_level.tool} is 3 or above:
+						add {@farming_skill_potatoes_add} to {farming.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@farming_skill_potatoes_add}&f to &aFarming &f| &b%{farming.skill.current.%player's uuid%} / {farming.skill.needed.%player's uuid%} * 100%%% &fFame"
+						cancel drops
+						drop 1 potatoes named "<##385466>Adept's Seed" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" #ReCrop
+						chance of {@farming_drop_potatoes}:
+							drop 1 potatoes named "<##385466>Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+						chance of {@farming_drop_potatoes_seed}:
+							drop 1 potatoes named "<##385466>Adept's Seed" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+					else:
+						send "{@p} You need a <##385466>Adept's Hoe &for better!" to player
+						cancel event
+				else:
+					send "{@p} You need to be a Farming <##385466>Adept&f to break this block!" to player
+					cancel event
+
+		if event-block is beetroot plant:
+			if age of event-block is maximum age of event-block:
+				if {farming.skill.%player's uuid%} is above {@farming_requirement_expert} - 1:
+					if {_level.tool} is 4 or above:
+						add {@farming_skill_beetroots_add} to {farming.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@farming_skill_beetroots_add}&f to &aFarming &f| &b%{farming.skill.current.%player's uuid%} / {farming.skill.needed.%player's uuid%} * 100%%% &fFame"
+						cancel drops
+						drop 1 beetroot seeds named "<##77322c>Expert's Seed" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" #ReCrop
+						chance of {@farming_drop_beetroot}:
+							drop 5 beetroots named "<##77322c>Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+						chance of {@farming_drop_beetroot_seed}:
+							drop 1 beetroot seeds named "<##77322c>Expert's Seed" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+					else:
+						send "{@p} You need a <##77322c>Expert's Hoe &for better!" to player
+						cancel event
+				else:
+					send "{@p} You need to be a Farming <##77322c>Expert&f to break this block!" to player
+					cancel event
+
+		if event-block is pumpkin:
+			if age of event-block is maximum age of event-block:
+				if {farming.skill.%player's uuid%} is above {@farming_requirement_master} - 1:
+					if {_level.tool} is 5 or above:
+						add {@farming_skill_pumpkin_add} to {farming.skill.current.%player's uuid%}
+						send action bar "&f+ &b{@farming_skill_pumpkin_add}&f to &aFarming &f| &b%{farming.skill.current.%player's uuid%} / {farming.skill.needed.%player's uuid%} * 100%%% &fFame"
+						cancel drops
+						chance of {@farming_drop_pumpkin}:
+							drop 1 pumpkins named "<##aa6837>Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+					else:
+						send "{@p} You need a <##aa6837>Master's Hoe &for better!" to player
+						cancel event
+				else:
+					send "{@p} You need to be a Farming <##aa6837>Master&f to break this block!" to player
+					cancel event
+
+
+		if {farming.skill.current.%player's uuid%} is above {farming.skill.needed.%player's uuid%} -1:
+			add 1 to {farming.skill.%player's uuid%}
+			set {farming.skill.current.%player's uuid%} to 0
+			set {farming.skill.needed.%player's uuid%} to {farming.skill.needed.%player's uuid%} + {@level_add}
+			send action bar "&fLevel up in &aFarming&f! | &aFarming: &b%{farming.skill.%player's uuid%}%"
+			play sound "minecraft:entity.player.levelup" to player
+
+#Duplicate Pumpkin Cancel
+on block place:
+	if {admin.%player's uuid%} is not set:
+		if event-block is pumpkin:
+			cancel event
+
+#Eat Seeds cancel
+on consume:
+	if name of player's held item contains "Seed":
+		cancel event
+
+#---------Level Berechner---------
+
+command /LvLCost [<integer>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			set {_d} to {@start_needed} + ({@level_add} * (arg 1 - 1))
+			send "{@p} LvL %arg 1% kostet &e%{_d}% Fame&f!"
+			play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+command /UntilLvLCost [<integer>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			set {_d} to 5*(arg 1^2 -1)
+			send "{@p} LvL %arg 1% kostet &e%{_d}% Fame&f!"
+			play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+
+#------------Extra---------------
+
+command /Trust [<player>]:
+	trigger:
+		if arg 1 is set:
+			if {trusted.%player's uuid%::*} doesn't contain arg 1:
+				add arg 1 to {trusted.%player's uuid%::*}
+				send "{@p} Du hast %arg 1% &bgetrusted&f!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+			else:
+				remove arg 1 from {trusted.%player's uuid%::*}
+				send "{@p} Du hast %arg 1% &benttrusted&f!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du musst einen Spieler angeben!"
+
+
+command /Combat:
+	trigger:
+		play sound "minecraft:entity.experience_orb.pickup" to player
+		send action bar "You are now in &cCombat&f!" to player
+		set {ability.%player's uuid%} to {@ability_timer}
+
+command /NoCombat:
+	trigger:
+		if {ability.%player's uuid%} is set:
+			clear {damage.no.combat.%player's uuid%}
+			loop {@combat_timer} times:
+				if {damage.no.combat.%player's uuid%} is not set:
+					send "{@p} No-Combat : &c%{@combat_timer} - loop-value +1%"
+					play sound "minecraft:entity.experience_orb.pickup" to player
+					wait 1 second
+				else:
+					send "{@p} No-Combat : Der Timer wurde &cunterbrochen&f!"
+					stop
+			send "{@p} No-Combat : &c0"
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			send action bar "You are no longer in &cCombat&f!" to player
+			clear {ability.%player's uuid%}
+		else:
+			send "{@p} Du bist nicht im &cKampf&f!"
+
+
+on damage:
+	if attacker is not a mob:
+		set {damage.no.combat.%attacker's uuid%} to true
+	if victim is not a mob:
+		set {damage.no.combat.%victim's uuid%} to true
+
+on death:
+	if victim is a player:
+		clear {ability.%victim's uuid%}
+
+on damage:
+	if attacker is not a mob:
+		if {ability.%attacker's uuid%} is not set:
+			send action bar "You are now in &cCombat&f!" to attacker
+		set {ability.%attacker's uuid%} to {@ability_timer}
+	if victim is not a mob:
+		if {ability.%victim's uuid%} is not set:
+			send action bar "You are now in &cCombat&f!" to victim
+		set {ability.%victim's uuid%} to {@ability_timer}
+
+every second:
+	loop all players:
+		if {ability.%loop-player's uuid%} is set:
+			remove 1 from {ability.%loop-player's uuid%}
+		if {ability.%loop-player's uuid%} is below 1:
+			send action bar "You are no longer in &cCombat&f!" to loop-player
+			clear {ability.%loop-player's uuid%}
+
+
+on drop:
+	if {ability.%player's uuid%} is set:
+		cancel event
+
+on pick up:
+	if {ability.%player's uuid%} is set:
+		cancel event
+
+command /AllCommands:
+	trigger:
+		play sound "minecraft:entity.experience_orb.pickup" to player
+		loop all script commands:
+			add loop-value to {_d::*}
+		send "&b-----------------------------------------------------" to player
+		loop {_d::*}:
+			send "{@p} | %loop-value%" to player
+			wait 1 tick
+		send "&b-----------------------------------------------------" to player

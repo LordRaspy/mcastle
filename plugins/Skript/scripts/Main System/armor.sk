@@ -1,0 +1,532 @@
+options:
+	p: &bSystem &f|
+
+
+	minecraft_natural_regeneration: 0.5
+
+	# Helmet
+	knight_helmet_health_add: 2.5
+
+	soldier_helmet_food_add: 1
+
+	mercenary_helmet_regeneration: 0.1
+
+	assassin_helmet_speed_add: 0.01
+
+	feyscale_helmet_cooldown_buff_add: 0.1
+
+	# Chestplate
+	guardian_chestplate_cooldown: 60
+	guardian_chestplate_radius: 6
+	guardian_chestplate_damage: 3.5
+
+	knight_chestplate_cooldown: 55
+	knight_chestplate_ability_timer: 25
+
+	soldier_chestplate_cooldown: 45
+	soldier_chestplate_ability_timer: 10
+	soldier_chestplate_radius: 6
+	soldier_chestplate_area_damage: 2
+
+	hunter_chestplate_cooldown: 30
+	hunter_chestplate_ability_timer: 7
+	hunter_chestplate_ability_boost: 0.1
+
+	mercenary_chestplate_cooldown: 60
+	mercenary_chestplate_duration: 15
+	mercenary_chestplate_tier: 2
+
+	assassin_chestplate_cooldown: 90
+	assassin_chestplate_duration: 10
+
+	royal_chestplate_cooldown: 30
+	royal_chestplate_range: 20
+
+	feyscale_chestplate_cooldown: 120
+
+	cultist_chestplate_cooldown: 60
+	cultist_chestplate_ability_timer: 25
+
+	# Leggings
+	guardian_leg_armor_cooldown: 45
+	guardian_leg_armor_ability_timer: 10
+
+	knight_leg_armor_cooldown: 60
+	knight_leg_armor_ability_timer: 10
+
+	soldier_leg_armor_cooldown: 30
+	soldier_leg_armor_ability_timer: 10
+	soldier_leg_armor_radius: 6
+
+	hunter_leg_armor_cooldown: 30
+	hunter_leg_armor_ability_timer: 10
+	hunter_leg_armor_ability_duration: 3
+
+	mercenary_leg_armor_cooldown: 35
+	mercenary_leg_armor_ability_timer: 1.5
+
+	assassin_leg_armor_cooldown: 150
+	assassin_leg_armor_ability_timer: 15
+
+	royal_leg_armor_cooldown: 120
+
+	feyscale_leg_armor_cooldown: 120
+
+	cultist_leg_armor_cooldown: 90
+	cultist_leg_armor_range: 4
+	cultist_leg_armor_damage: 4
+	cultist_leg_armor_bleed_build_up: 5
+
+
+	# Boots
+	knight_boots_health_add: 1.5
+
+	soldier_boots_food_add: 0.5
+
+	mercenary_boots_regeneration: 0.05
+
+	assassin_boots_speed_add: 0.005
+
+	feyscale_boots_cooldown_buff_add: 0.05
+
+#--------Ability Click Event----------
+
+on leftclick:
+	if {ability.%player's uuid%} is set:
+		if player's tool is air:
+			# CHESTPLATES
+			if player is not sneaking:
+				if lore of player's chestplate contains "&fTag: &bArmor":
+					if name of player's chestplate contains "Guardian Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@guardian_chestplate_cooldown}
+
+							play 120 wax off with offset of 2, 1, 2 and speed 1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							loop all entities in radius {@guardian_chestplate_radius} around the player:
+								if loop-value is not player:
+									set {_v} to vector between player and loop-value / 2
+
+									set {_dam} to calculateDamage({@guardian_chestplate_damage}, loop-value)
+									set {_dam} to getdamage(player, loop-value, {_dam})
+									damage loop-value by {_dam}
+
+									push loop-value upwards with speed 0.5
+									push loop-value {_v}
+
+					if name of player's chestplate contains "Knight Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@knight_chestplate_cooldown}
+
+							play 50 lava pop at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {knight.chestplate.armor.timer.%player's uuid%} to true
+							wait {@knight_chestplate_ability_timer} seconds
+							clear {knight.chestplate.armor.timer.%player's uuid%}
+
+							play 15 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's chestplate contains "Soldier Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@soldier_chestplate_cooldown}
+
+							play 50 glow with offset of 2, 2, 2 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {soldier.chestplate.armor.timer.%player's uuid%} to true
+							set {soldier.chestplate.area.position.%player's uuid%} to player's position
+							wait {@soldier_chestplate_ability_timer} seconds
+							clear {soldier.chestplate.area.position.%player's uuid%}
+							clear {soldier.chestplate.armor.timer.%player's uuid%}
+
+							play 15 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's chestplate contains "Hunter Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@hunter_chestplate_cooldown}
+							
+							play 100 splash with offset of 1, 1, 1 and speed 1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {hunter.chestplate.armor.timer.%player's uuid%} to true
+							add {@hunter_chestplate_ability_boost} to {movement.speed.%player's uuid%}
+							wait {@hunter_chestplate_ability_timer} seconds
+							remove {@hunter_chestplate_ability_boost} from {movement.speed.%player's uuid%}
+							clear {hunter.chestplate.armor.timer.%player's uuid%}
+
+							play 15 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's chestplate contains "Mercenary Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@mercenary_chestplate_cooldown}
+							
+							play 50 glow with offset of 2, 2, 2 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							apply regeneration of tier {@mercenary_chestplate_tier} without any particles to player for {@mercenary_chestplate_duration} seconds
+
+					if name of player's chestplate contains "Assassin Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@assassin_chestplate_cooldown}
+							
+
+							play sound "minecraft:block.fire.extinguish" with volume 1 and pitch 1 at player
+							play 100 campfire cozy smoke with offset of 1, 1, 1 and speed 0.05 at player
+							hide the player from all entities
+							set {assassin.chestplate.armor.timer.%player's uuid%} to true
+							wait {@assassin_chestplate_duration} seconds
+							if {assassin.chestplate.armor.timer.%player's uuid%} is set:
+								clear {assassin.chestplate.armor.timer.%player's uuid%}
+								reveal the player to all entities
+								play sound "minecraft:block.fire.extinguish" with volume 1 and pitch 1 at player
+								play 100 campfire cozy smoke with offset of 1, 1, 1 and speed 0.05 at player
+
+					if name of player's chestplate contains "Royal Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@royal_chestplate_cooldown}
+
+							play 50 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 2 at player
+							set {_t} to location of block {@royal_chestplate_range} blocks infront of player
+							if player's targeted block is not air:
+								if distance between player and player's targeted block is below {@royal_chestplate_range} +1:
+									set {_t} to location of player's targeted block
+							set pitch of {_t} to player's pitch
+							set yaw of {_t} to player's yaw
+							wait 10 ticks
+							teleport player to {_t}
+							play 50 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 2 at player
+
+					if name of player's chestplate contains "Feyscale Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@feyscale_chestplate_cooldown}
+							clear {cooldown.leggings.%player's uuid%}
+							play 15 shriek with offset of 0.1, 0.6, 0.1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+					if name of player's chestplate contains "Cultist Chestplate":
+						if {cooldown.chestplate.%player's uuid%} is not set:
+							set {cooldown.chestplate.%player's uuid%} to {@cultist_chestplate_cooldown}
+
+							play 15 shriek with offset of 0.1, 0.6, 0.1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {cultist.chestplate.armor.timer.%player's uuid%} to true
+							wait {@cultist_chestplate_ability_timer} seconds
+							clear {cultist.chestplate.armor.timer.%player's uuid%}
+
+							play 15 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+
+
+
+			# LEG ARMOR
+			if player is sneaking:
+				if lore of player's leggings contains "&fTag: &bArmor":
+					if name of player's leggings contains "Guardian Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@guardian_leg_armor_cooldown}
+
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {guardian.leg.armor.timer.%player's uuid%} to true
+							wait {@guardian_leg_armor_ability_timer} seconds
+							clear {guardian.leg.armor.timer.%player's uuid%}
+
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Knight Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@knight_leg_armor_cooldown}
+
+							play 15 shriek with offset of 0.1, 0.6, 0.1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {knight.leg.armor.timer.%player's uuid%} to true
+							wait {@knight_leg_armor_ability_timer} seconds
+							clear {knight.leg.armor.timer.%player's uuid%}
+
+							play 15 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Soldier Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@soldier_leg_armor_cooldown}
+
+							play 50 glow with offset of 2, 2, 2 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {soldier.leg.armor.timer.%player's uuid%} to true
+							set {soldier.leggings.area.position.%player's uuid%} to player's position
+							wait {@soldier_leg_armor_ability_timer} seconds
+							clear {soldier.leggings.area.position.%player's uuid%}
+							clear {soldier.leg.armor.timer.%player's uuid%}
+
+							play 15 scrape with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Hunter Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@hunter_leg_armor_cooldown}
+
+							play 50 sneeze with offset of 1, 1, 1 and speed 0 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {hunter.leg.armor.timer.%player's uuid%} to true
+							wait {@hunter_leg_armor_ability_timer} seconds
+							if {hunter.leg.armor.timer.%player's uuid%} is set:
+								clear {hunter.leg.armor.timer.%player's uuid%}
+
+								play 15 scrape with offset of 1, 1, 1 at player
+								play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Mercenary Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@mercenary_leg_armor_cooldown}
+
+							play 100 witch spell with offset of 0.25, 0.25, 0.25 and speed 1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 0.75 at player
+							set gravity of player to false
+							push player upwards with speed 0.2
+							push player forwards with speed 0.9
+							set {mercenary.leg.armor.timer.%player's uuid%} to true
+							wait {@mercenary_leg_armor_ability_timer} seconds
+							clear {mercenary.leg.armor.timer.%player's uuid%}
+							set gravity of player to true
+							play 15 witch spell with offset of 1, 1, 1 at player
+							play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 0.75 at player
+
+					if name of player's leggings contains "Assassin Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@assassin_leg_armor_cooldown}
+
+							play 15 shriek with offset of 0.1, 0.6, 0.1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+							set {assassin.leg.armor.timer.%player's uuid%} to true
+							wait {@assassin_leg_armor_ability_timer} seconds
+							if {assassin.leg.armor.timer.%player's uuid%} is set:
+								clear {assassin.leg.armor.timer.%player's uuid%}
+								play 15 scrape with offset of 1, 1, 1 at player
+								play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Royal Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@royal_leg_armor_cooldown}
+							clear {cooldown.weapon.%player's uuid%}
+							play 15 shriek with offset of 0.1, 0.6, 0.1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Feyscale Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@feyscale_leg_armor_cooldown}
+							clear {cooldown.chestplate.%player's uuid%}
+							play 15 shriek with offset of 0.1, 0.6, 0.1 at player
+							play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1.5 at player
+
+					if name of player's leggings contains "Cultist Leg Armor":
+						if {cooldown.leggings.%player's uuid%} is not set:
+							set {cooldown.leggings.%player's uuid%} to {@cultist_leg_armor_cooldown}
+							draw 100 of item using redstone at player with offset vector(2, 1, 2) with extra 0.15
+							play sound "minecraft:entity.player.attack.sweep" with volume 1 and pitch 1 at player
+							loop all entities in radius {@cultist_leg_armor_range} around the player:
+								if loop-value isn't player:
+									add {@cultist_leg_armor_bleed_build_up} to {bleed.%loop-value's uuid%}
+									set {_dam} to calculateDamage({@cultist_leg_armor_damage}, loop-value)
+									set {_dam} to getdamage(player, loop-value, {_dam})
+									damage loop-value by {_dam}
+									push loop-value upwards with speed 0.8
+
+
+#--------Ability Extra--------
+
+every second:
+	loop all entities:
+		if {bleed.%loop-value's uuid%} is set:
+			remove 1 from {bleed.%loop-value's uuid%}
+		if {bleed.%loop-value's uuid%} is below 1:
+			clear {bleed.%loop-value's uuid%}
+
+	loop all players:
+		if {health.%loop-player's uuid%} is not set:
+			set {health.%loop-player's uuid%} to loop-player's max health
+		set loop-player's max health to {health.%loop-player's uuid%}
+
+		if {movement.speed.%loop-player's uuid%} is not set:
+			set {movement.speed.%loop-player's uuid%} to loop-player's generic movement speed attribute
+		set loop-player's generic movement speed attribute to {movement.speed.%loop-player's uuid%}
+
+		if {soldier.chestplate.area.position.%loop-player's uuid%} is set:
+			loop all entities in radius {@soldier_chestplate_radius} around {soldier.chestplate.area.position.%loop-player's uuid%}:
+				if loop-value-1 isn't loop-value-2:
+					set {_dam} to calculateDamage({@soldier_chestplate_area_damage}, loop-value-2)
+					set {_dam} to getdamage(loop-value-1, loop-value-2, {_dam})
+					damage loop-value-2 by {_dam}
+		if {soldier.leggings.area.position.%loop-player's uuid%} is set:
+			loop all entities in radius {@soldier_leg_armor_radius} around {soldier.leggings.area.position.%loop-player's uuid%}:
+				if loop-value-1 isn't loop-value-2:
+					add potion effect of slowness 3 for 1.5 second to potion effects of loop-value-2
+
+every tick:
+	loop all players:
+		if {soldier.chestplate.area.position.%loop-player's uuid%} is set:
+			play 50 small flame with offset of 2, 0.4, 2 at {soldier.chestplate.area.position.%loop-player's uuid%}
+
+		if {soldier.leggings.area.position.%loop-player's uuid%} is set:
+			play 50 nautilus with offset of 2, 0.4, 2 at {soldier.leggings.area.position.%loop-player's uuid%}
+
+on armor change:
+	if lore of event-item contains "&fTag: &bArmor":
+		if name of player's helmet contains "Knight Helmet":
+			if {pass.knight.helmet.%player's uuid%} is not set:
+				set {pass.knight.helmet.%player's uuid%} to true
+				add {@knight_helmet_health_add} to {health.%player's uuid%}
+	if name of player's helmet does not contain "Knight Helmet":
+		if {pass.knight.helmet.%player's uuid%} is set:
+			remove {@knight_helmet_health_add} from {health.%player's uuid%}
+			clear {pass.knight.helmet.%player's uuid%}
+
+	if lore of event-item contains "&fTag: &bArmor":
+		if name of player's boots contains "Knight Boots":
+			if {pass.knight.boots.%player's uuid%} is not set:
+				set {pass.knight.boots.%player's uuid%} to true
+				add {@knight_boots_health_add} to {health.%player's uuid%}
+	if name of player's boots does not contain "Knight Boots":
+		if {pass.knight.boots.%player's uuid%} is set:
+			remove {@knight_boots_health_add} from {health.%player's uuid%}
+			clear {pass.knight.boots.%player's uuid%}
+
+
+
+	if lore of event-item contains "&fTag: &bArmor":
+		if name of player's helmet contains "Assassin Helmet":
+			if {pass.assassin.helmet.%player's uuid%} is not set:
+				set {pass.assassin.helmet.%player's uuid%} to true
+				add {@assassin_helmet_speed_add} to {movement.speed.%player's uuid%}
+	if name of player's helmet does not contain "Assassin Helmet":
+		if {pass.assassin.helmet.%player's uuid%} is set:
+			remove {@assassin_helmet_speed_add} from {movement.speed.%player's uuid%}
+			clear {pass.assassin.helmet.%player's uuid%}
+
+
+	if lore of event-item contains "&fTag: &bArmor":
+		if name of player's boots contains "Assassin Boots":
+			if {pass.assassin.boots.%player's uuid%} is not set:
+				set {pass.assassin.boots.%player's uuid%} to true
+				add {@assassin_boots_speed_add} to {movement.speed.%player's uuid%}
+	if name of player's boots does not contain "Assassin Boots":
+		if {pass.assassin.boots.%player's uuid%} is set:
+			remove {@assassin_boots_speed_add} from {movement.speed.%player's uuid%}
+			clear {pass.assassin.boots.%player's uuid%}
+
+
+
+	if lore of event-item contains "&fTag: &bArmor":
+		if name of player's helmet contains "Feyscale Helmet":
+			if {pass.feyscale.helmet.%player's uuid%} is not set:
+				set {pass.feyscale.helmet.%player's uuid%} to true
+				remove {@feyscale_helmet_cooldown_buff_add} from {cooldown.multiplier.%player's uuid%}
+	if name of player's helmet does not contain "Feyscale Helmet":
+		if {pass.feyscale.helmet.%player's uuid%} is set:
+			add {@feyscale_helmet_cooldown_buff_add} to {cooldown.multiplier.%player's uuid%}
+			clear {pass.feyscale.helmet.%player's uuid%}
+
+
+	if lore of event-item contains "&fTag: &bArmor":
+		if name of player's boots contains "Feyscale Boots":
+			if {pass.feyscale.boots.%player's uuid%} is not set:
+				set {pass.feyscale.boots.%player's uuid%} to true
+				remove {@feyscale_boots_cooldown_buff_add} from {cooldown.multiplier.%player's uuid%}
+	if name of player's boots does not contain "Feyscale Boots":
+		if {pass.feyscale.boots.%player's uuid%} is set:
+			add {@feyscale_boots_cooldown_buff_add} to {cooldown.multiplier.%player's uuid%}
+			clear {pass.feyscale.boots.%player's uuid%}
+
+
+on eat:
+	if lore of player's helmet contains "&fTag: &bArmor":
+		if name of player's helmet contains "Soldier Helmet":
+			add {@soldier_helmet_food_add} to player's food level
+	if lore of player's boots contains "&fTag: &bArmor":
+		if name of player's boots contains "Soldier Boots":
+			add {@soldier_boots_food_add} to player's food level
+
+on projectile hit:
+	if {hunter.leg.armor.timer.%shooter's uuid%} is set:
+		clear {hunter.leg.armor.timer.%shooter's uuid%}
+		play 15 scrape with offset of 1, 1, 1 at shooter
+		play sound "minecraft:block.beacon.deactivate" with volume 1 and pitch 1.5 at shooter
+
+		
+		set {freeze.%victim's uuid%} to true
+		play 50 sneeze with offset of 1, 1, 1 and speed 0 at victim
+		play sound "minecraft:block.big_dripleaf.place" with volume 1 and pitch 0.1 at victim
+		wait {@hunter_leg_armor_ability_duration} seconds
+		clear {freeze.%victim's uuid%}
+
+on heal:
+	if event-entity is a player:
+		if heal reason = satiated:
+			if lore of player's helmet contains "&fTag: &bArmor":
+				if name of player's helmet contains "Mercenary Helmet":
+					heal player by {@minecraft_natural_regeneration} * {@mercenary_helmet_regeneration} hearts
+			if lore of player's boots contains "&fTag: &bArmor":
+				if name of player's boots contains "Mercenary Boots":
+					heal player by {@minecraft_natural_regeneration} * {@mercenary_boots_regeneration} hearts
+
+on damage:
+	if victim is a player:
+		if {assassin.chestplate.armor.timer.%victim's uuid%} is set:
+			clear {assassin.chestplate.armor.timer.%victim's uuid%}
+			reveal the victim to all entities
+			play sound "minecraft:block.fire.extinguish" with volume 1 and pitch 1 at victim
+			play 100 campfire cozy smoke with offset of 1, 1, 1 and speed 0.05 at victim
+	if attacker is a player:
+		if {assassin.chestplate.armor.timer.%attacker's uuid%} is set:
+			clear {assassin.chestplate.armor.timer.%attacker's uuid%}
+			reveal the attacker to all entities
+			play sound "minecraft:block.fire.extinguish" with volume 1 and pitch 1 at attacker
+			play 100 campfire cozy smoke with offset of 1, 1, 1 and speed 0.05 at attacker
+
+
+#----------Remove Variables----------
+
+on leave:
+	loop all entities:
+		clear {guardian.leg.armor.timer.%loop-value's uuid%}
+
+
+		clear {knight.leg.armor.timer.%loop-value's uuid%}
+		clear {knight.chestplate.armor.timer.%loop-value's uuid%}
+
+
+		clear {soldier.chestplate.area.position.%loop-value's uuid%}
+		clear {soldier.chestplate.armor.timer.%loop-value's uuid%}
+
+		clear {soldier.leggings.area.position.%loop-value's uuid%}
+		clear {soldier.leg.armor.timer.%loop-value's uuid%}
+
+		if {hunter.chestplate.armor.timer.%loop-value's uuid%} is set:
+			clear {hunter.chestplate.armor.timer.%loop-value's uuid%}
+			remove {@hunter_chestplate_ability_boost} from {movement.speed.%loop-value's uuid%}
+
+		clear {hunter.leg.armor.timer.%loop-value's uuid%}
+
+
+		if {mercenary.leg.armor.timer.%loop-value's uuid%} is set:
+			clear {mercenary.leg.armor.timer.%loop-value's uuid%}
+			set gravity of loop-value to true
+
+		clear {assassin.chestplate.armor.timer.%loop-value's uuid%}
+		clear {assassin.leg.armor.timer.%loop-value's uuid%}
+
+		clear {cultist.chestplate.armor.timer.%player's uuid%}
+
+#On Stop adden

@@ -1,0 +1,23 @@
+options:
+	p: &bSystem &f|
+
+
+command /Admin [<player>]:
+	permission: *
+	trigger:
+		if arg 1 is not set:
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			if {admin.%player's uuid%} is not set:
+				set {admin.%player's uuid%} to true
+				send "{@p} Du bist nun ein Admin!"
+			else:
+				clear {admin.%player's uuid%}
+				send "{@p} Du bist nun kein Admin mehr!"
+		if arg 1 is set:
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			if {admin.%arg 1's uuid%} is not set:
+				set {admin.%arg 1's uuid%} to true
+				send "{@p} %arg 1% ist nun ein Admin!"
+			else:
+				clear {admin.%arg 1's uuid%}
+				send "{@p} %arg 1% ist nun kein Admin mehr!"

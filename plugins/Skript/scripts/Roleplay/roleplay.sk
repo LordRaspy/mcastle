@@ -1,0 +1,252 @@
+options:
+	p: &bSystem &f|
+
+	seat_range: 4
+
+	lockpick_chance: 33.333
+
+	start_year: 1250
+
+	show_item_radius: 5
+
+variables:
+	{day} = 1
+	{month} = 0
+	{year} = 0
+
+#----Ingame Name & Roles----
+
+command /IngameName [<text>]:
+	trigger:
+		if arg 1 is set:
+			send "{@p} Du hast deinen Ingame-Name zu ""&b%arg 1%&f"" gesetzt!"
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			set {ingame.name.%player's uuid%} to arg 1
+		if arg 1 is not set:
+			send "{@p} Du hast deinen Ingame-Name zurückgesetzt!"
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			clear {ingame.name.%player's uuid%}
+
+function getname(p: player) :: text:
+	if {ingame.name.%{_p}'s uuid%} is set:
+		set {_name} to "%{ingame.name.%{_p}'s uuid%}%"
+	else:
+		set {_name} to "%{_p}%"
+
+	if {title.%{_p}'s uuid%} is set:
+		set {_title} to "%{title.%{_p}'s uuid%}%"
+	else:
+		set {_title} to "&aBauer"
+	
+	return "%{_title}% &f| %{_name}%"
+
+every second:
+	loop all players:
+		set {_name} to getname(loop-player)
+		set tab list name of loop-player to {_name}
+		set display name of loop-player to {_name}
+
+command /RoleRights [<player>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				if {role.right.%arg 1's uuid%} is not set:
+					set {role.right.%arg 1's uuid%} to true
+					send "{@p} &b%arg 1% &fhat nun Rollen-Rechte!"
+					play sound "minecraft:entity.experience_orb.pickup" to player
+					stop
+				else:
+					clear {role.right.%arg 1's uuid%}
+					send "{@p} &b%arg 1% &fhat nun keine Rollen-Rechte mehr!"
+					play sound "minecraft:entity.experience_orb.pickup" to player
+					stop
+			else:
+				send "{@p} Du musst einen Spieler angeben!"
+		else:
+			send "{@p} Du bist kein Admin!"
+command /Role [<player>] [<text>]:
+	trigger:
+		if {role.right.%player's uuid%} is set:
+			if arg 1 is set:
+				if arg 2 is set:
+					set {title.%arg 1's uuid%} to colored arg 2
+					send "{@p} &b%arg 1% &fhat nun die Rolle %colored arg 2%&f!" to player
+					play sound "minecraft:entity.experience_orb.pickup" to player
+				if arg 2 is not set:
+					clear {title.%arg 1's uuid%}
+					send "{@p} &b%arg 1% &fhat nun keine Rolle mehr!" to player
+					play sound "minecraft:entity.experience_orb.pickup" to player
+		else:
+			send "{@p} Du bist nicht berechtigt die Rollen zu verwalten!"
+
+
+#----Nametag Hide----
+
+on load:
+	if {team.hide.nametag.%player's uuid%} is not set:
+		set {team.hide.nametag.%player's uuid%} to true
+		make console execute command "/Team add NoTag"
+		make console execute command "/Team modify NoTag nametagVisibility never"
+		send "&dSkript : Team ""NoTag"" has been created." to console
+	else:
+		send "&dSkript : Team ""NoTag"" should be working fine." to console
+
+on join:
+	make console execute command "/team join NoTag %player%"
+
+
+#----Stair Sitting----
+
+command /Seatable:
+	trigger:
+		if player's targeted block is any stair:
+			if {seatable.stairs::*} doesn't contain player's targeted block:
+				add player's targeted block to {seatable.stairs::*}
+				send "{@p} This Block has been added!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+			else:
+				remove player's targeted block from {seatable.stairs::*}
+				send "{@p} This Block has been removed!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+		if player's targeted block is any slab:
+			if {seatable.slabs::*} doesn't contain player's targeted block:
+				add player's targeted block to {seatable.slabs::*}
+				send "{@p} This Block has been added!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+			else:
+				remove player's targeted block from {seatable.slabs::*}
+				send "{@p} This Block has been removed!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+
+on rightclick:
+	if distance between player and player's targeted block is below {@seat_range} +1:
+		if {seatable.stairs::*} contains player's targeted block:
+			set {_t} to player's targeted block
+			remove 0.3 from the y-coords of {_t}
+			spawn arrow at {_t}
+			set {seat.%player's uuid%} to last spawned arrow
+			make player ride {seat.%player's uuid%}
+		if {seatable.slabs::*} contains player's targeted block:
+			set {_t} to player's targeted block
+			remove 0.5 from the y-coords of {_t}
+			spawn arrow at {_t}
+			set {seat.%player's uuid%} to last spawned arrow
+			make player ride {seat.%player's uuid%}
+
+
+on sneak toggle:
+	if {seat.%player's uuid%} is set:
+		kill {seat.%player's uuid%}
+		clear {seat.%player's uuid%}
+
+
+on block break:
+	if {seatable.stairs::*} contains event-block:
+		remove event-block from {seatable.stairs::*}
+	if {seatable.slabs::*} contains event-block:
+		remove event-block from {seatable.slabs::*}
+
+
+
+#----Lock System----
+
+function getdoorblock(e: block) :: block:
+	if block above {_e} is any door:
+		return block above {_e}
+	if block below {_e} is any door:
+		return block below {_e}
+
+command /Lock:
+	trigger:
+		if player's targeted block is any chest or any trapdoor:
+			loop all players:
+				if {locked.%loop-player's uuid%::*} contains player's targeted block:
+					if loop-player isn't player:
+						send "{@p} Dieses &fist bereits von einem anderen Spieler &7verschlossen&f!"
+						stop
+			if {locked.%player's uuid%::*} doesn't contain player's targeted block:
+				add player's targeted block to {locked.%player's uuid%::*}
+				send "{@p} This Block has been added!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+			else:
+				remove player's targeted block from {locked.%player's uuid%::*}
+				send "{@p} This Block has been removed!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+		if player's targeted block is any door:
+			set {_b2} to getdoorblock(player's targeted block)
+			loop all players:
+				if {locked.%loop-player's uuid%::*} or {_b2} contains player's targeted block:
+					if loop-player isn't player:
+						send "{@p} Diese &7Tür &fist bereits von einem anderen Spieler &7verschlossen&f!"
+						stop
+			if {locked.%player's uuid%::*} or {_b2} doesn't contain player's targeted block:
+				add player's targeted block to {locked.%player's uuid%::*}
+				add {_b2} to {locked.%player's uuid%::*}
+				send "{@p} This Door has been added!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop
+			else:
+				remove player's targeted block from {locked.%player's uuid%::*}
+				remove {_b2} from {locked.%player' uuid%::*}
+				send "{@p} This Door has been removed!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				stop			
+
+on rightclick:
+	set {_block} to player's targeted block
+	loop all players:
+		if {locked.%loop-player's uuid%::*} contains {_block}:
+			set {_owner} to loop-player
+	if {_owner} is set:
+		if player isn't {_owner}:
+			if {trusted.%{_owner}'s uuid%::*} doesn't contain player:
+				if lore of player's held item contains "&fTier: <##385466>Adept":
+					if name of player's held item contains "<##385466>Adept's Lockpick":
+						chance of {@lockpick_chance}%:
+							send action bar "&fLockpicking was &7successful&f!" to player
+							stop
+						remove 1 of player's held item from player's held item
+				play sound "minecraft:block.chest.locked" at player
+				send action bar "&fThis is &7locked&f!" to player
+				cancel event
+
+on block break:
+	loop all players:
+		if {locked.%loop-player's uuid%::*} contains event-block:
+			set {_yes} to true
+	if {_yes} is set:
+		play sound "minecraft:block.chest.locked" at player
+		send action bar "&fThis is &7locked&f!" to player
+		cancel event
+
+#Daytime System
+at 6:00am in "world":
+	add 1 to {day}
+	if {day} >= 31:
+		add 1 to {month}
+	if {month} >= 12:
+		add 1 to {year}
+	broadcast "&e---------------------------------------------"
+	broadcast "&fThe current &eDate&f is: &e%{day}%&f.&e%{month}%&f.&e%{@start_year} + {year}%&f."
+	broadcast "&e---------------------------------------------"
+
+
+command /ShowItem:
+	trigger:
+		if player's held item != air:
+			set {_name} to getname(player)
+			set {_c::1} to new text component from "&f<%{_name}%&f> I am holding right now %item amount of player's held item% of "
+			if name of player's held item is not set:
+				set {_c::2} to new text component from "&f[&d%type of player's held item%&f]"
+			else:
+				set {_c::2} to new text component from "&f[&d%name of player's held item%&f]"
+			set hover event of {_c::2} to new hover event showing the player's held item
+			set {_c} to merge components {_c::*}
+			loop all players in radius {@show_item_radius} around the player:
+				send component {_c} to loop-player

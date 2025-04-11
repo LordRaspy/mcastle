@@ -1,0 +1,175 @@
+options:
+	p: &bSystem&f|
+
+	mining_requirement_journeyman: 10
+	mining_requirement_adept: 30
+	mining_requirement_expert: 60
+	mining_requirement_master: 90
+
+
+#----Add Recipies----
+on load:
+	register shaped recipe:
+		id: "custom:repair_kit_novice"
+		result: flint named "<##6c594b>Novice's Repair-Kit" with lore "&fTier: <##6c594b>Novice" and "&fTag: &aConsumeable"
+		shape: "   ", " a ", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##6c594b>Minecart with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:repair_kit_journeyman"
+		result: flint named "<##475b37>Journeyman's Repair-Kit" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &aConsumeable"
+		shape: "   ", " a ", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##475b37>Minecart with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:repair_kit_adept"
+		result: flint named "<##385466>Adept's Repair-Kit" with lore "&fTier: <##385466>Adept" and "&fTag: &aConsumeable"
+		shape: "   ", " a ", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:repair_kit_expert"
+		result: flint named "<##77322c>Expert's Repair-Kit" with lore "&fTier: <##77322c>Expert" and "&fTag: &aConsumeable"
+		shape: "   ", " a ", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:repair_kit_master"
+		result: flint named "<##aa6837>Master's Repair-Kit" with lore "&fTier: <##aa6837>Master" and "&fTag: &aConsumeable"
+		shape: "   ", " a ", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+#----Remove Anvil Cost----
+on anvil prepare:
+	set anvil repair cost to 0
+
+
+#----Remove Repair----
+on inventory click:
+	event-inventory != player's inventory:
+		type of event-inventory is anvil inventory:
+			if event-slot is 2:
+				set {_item1} to slot 1 of event-inventory
+				if {_item1} is iron ingot, gold ingot, diamond or netherite ingot:
+					cancel event
+					send "{@p} You can't repair this item!" to player
+
+#----Remove Rename----
+
+on inventory click:
+	type of event-inventory is anvil inventory:
+		event-inventory != player's inventory:
+			if name of item in slot 0 of event-inventory is not set:
+				if event-inventory's anvil inventory rename input is not empty:
+					if event-slot is 2:
+						cancel event
+			else:
+				if name of item in slot 0 of event-inventory != name of item in slot 2 of event-inventory:
+					if event-slot is 2:
+						cancel event
+
+#----Add Repair Items----
+on rightclick:
+	if name of player's held item contains "Repair-Kit":
+		if player's offhand item != air:
+			if durability of player's offhand item != max durability of player's offhand item:
+				set {_lore.offhand::*} to lore of player's offhand item
+				set {_lore.item::*} to lore of player's held item
+
+				if {_lore.item::*} contains "&fTier: <##6c594b>Novice":
+					set {_level.tool} to 1
+				if {_lore.item::*} contains "&fTier: <##475b37>Journeyman":
+					set {_level.tool} to 2
+				if {_lore.item::*} contains "&fTier: <##385466>Adept":
+					set {_level.tool} to 3
+				if {_lore.item::*} contains "&fTier: <##77322c>Expert":
+					set {_level.tool} to 4
+				if {_lore.item::*} contains "&fTier: <##aa6837>Master":
+					set {_level.tool} to 5
+
+				if {_lore.offhand::*} contains "&fTier: <##6c594b>Novice":
+					if {_level.tool} is above 1 -1:
+						repair player's offhand item
+						remove 1 of player's held item from player's held item 
+						play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+						play 15 grey potion swirl with offset of 1, 1, 1 and speed 1 at player
+						stop
+					else:
+						send "{@p} You need a <##6c594b>Novice's Repair-Kit &for better!" to player
+						cancel event
+						stop
+				if {_lore.offhand::*} contains "&fTier: <##475b37>Journeyman":
+					if {_level.tool} is above 2 -1:
+						if {mining.skill.%player's uuid%} is above {@mining_requirement_journeyman} - 1:
+							repair player's offhand item
+							remove 1 of player's held item from player's held item 
+							play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+							play 15 green potion swirl with offset of 1, 1, 1 and speed 1 at player
+							stop
+						else:
+							send "{@p} You need to be a <##475b37>Journeyman Miner&f to use this!" to player
+							cancel event
+							stop
+					else:
+						send "{@p} You need a <##475b37>Journeyman's Repair-Kit &for better!" to player
+						cancel event
+						stop
+				if {_lore.offhand::*} contains "&fTier: <##385466>Adept":
+					if {_level.tool} is above 3 -1:
+						if {mining.skill.%player's uuid%} is above {@mining_requirement_adept} - 1:
+							repair player's offhand item
+							remove 1 of player's held item from player's held item 
+							play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+							play 15 blue potion swirl with offset of 1, 1, 1 and speed 1 at player
+							stop
+						else:
+							send "{@p} You need to be a <##385466>Adept Miner&f to use this!" to player
+							cancel event
+							stop
+					else:
+						send "{@p} You need an <##385466>Adept's Repair-Kit &for better!" to player
+						cancel event
+						stop
+				if {_lore.offhand::*} contains "&fTier: <##77322c>Expert":
+					if {_level.tool} is above 4 -1:
+						if {mining.skill.%player's uuid%} is above {@mining_requirement_expert} - 1:
+							repair player's offhand item
+							remove 1 of player's held item from player's held item 
+							play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+							play 15 red potion swirl with offset of 1, 1, 1 and speed 1 at player
+							stop
+						else:
+							send "{@p} You need to be a <##77322c>Expert Miner&f to use this!" to player
+							cancel event
+							stop
+					else:
+						send "{@p} You need a <##77322c>Expert's Repair-Kit &for better!" to player
+						cancel event
+						stop
+				if {_lore.offhand::*} contains "&fTier: <##aa6837>Master":
+					if {_level.tool} is 5:
+						if {mining.skill.%player's uuid%} is above {@mining_requirement_master} - 1:
+							repair player's offhand item
+							remove 1 of player's held item from player's held item 
+							play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+							play 15 orange potion swirl with offset of 1, 1, 1 and speed 1 at player
+							stop
+						else:
+							send "{@p} You need to be a <##aa6837>Master Miner&f to use this!" to player
+							cancel event
+							stop
+					else:
+						send "{@p} You need a <##aa6837>Master's Repair-Kit &for better!" to player
+						cancel event
+						stop
+				send "{@p} Du kannst dieses Item nicht reparieren!" to player
+			else:
+				send "{@p} Du brauchst dieses Item nicht zu reparieren!" to player
+		else:
+			send "{@p} Du brauchst ein Item in deiner Offhand!" to player

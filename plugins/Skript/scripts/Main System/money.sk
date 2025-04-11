@@ -1,0 +1,30 @@
+options:
+	p: &bSystem &f|
+	
+	pay_distance: 5
+
+command /Pay [<integer>] [<player>]:
+	trigger:
+		if arg 1 is set:
+			if arg 2 is set:
+				if arg 2 is not player:
+					if arg 1 is above 0:
+						if {gold.%player's uuid%} >= arg 1:
+							if distance between player and arg 2 is below {@pay_distance} +1:
+								remove arg 1 from {gold.%player's uuid%}
+								add arg 1 to {gold.%arg 2's uuid%}
+								send "{@p} Du hast &b%arg 2% &e%arg 1% &fGold gegeben!"
+								send "{@p} Du hast &e%arg 1% &fGold von &b%player% &fbekommen!" to arg 2
+								play sound "minecraft:entity.experience_orb.pickup" to player and arg 2
+							else:
+								send "{@p} Du musst in einem Radius von &b{@pay_distance} &fBlöcken sein, um mit diesem Spieler zu handeln!"
+						else:
+							send "{@p} Du hast nicht genug Gold um &b%arg 2% &e%arg 1% &fGold zu geben! (&e%{gold.%player's uuid%}%&f/&e%arg 1%&f)"
+					else:
+						send "{@p} Der Wert muss über 0 sein!"
+				else:
+					send "{@p} Du kannst nicht mit dir selbst handeln!"
+			else:
+				send "{@p} Du musst einen Spieler angeben!"
+		else:
+			send "{@p} Du musst einen Betrag angeben!"

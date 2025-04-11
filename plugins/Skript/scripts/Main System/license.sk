@@ -1,0 +1,84 @@
+options:
+	p: &bSystem &f|
+
+
+
+function licenses(p: player):
+	if {license.type.%{_p}'s uuid%} is not set:
+		set {license.type.%{_p}'s uuid%} to "Write the Type here!"
+	if {contract.type.%{_p}'s uuid%} is not set:
+		set {contract.type.%{_p}'s uuid%} to "Write the Type here!"
+	set {_gui} to a new chest inventory with 3 rows with name "&7System | Licenses"
+	set slot 26 of {_gui} to barrier named "&cGo Back" with lore "" and "&fClick to go back!"
+	set slot 11 of {_gui} to paper named "&bCreate License" with lore "", "&a----------------------", "&fType: &b%{license.type.%{_p}'s uuid%}%", "&a----------------------", "", "&dLeftclick &fto make the license!" and "&dRightclick &fto set the type!"
+	set slot 15 of {_gui} to book and quill named "&bCreate Contract" with lore "", "&a----------------------", "&fType: &b%{contract.type.%{_p}'s uuid%}%", "&a----------------------", "", "&dLeftclick &fto make the contract!" and "&dRightclick &fto set the type!"
+	open {_gui} to {_p}
+	play sound "minecraft:entity.experience_orb.pickup" to {_p}    
+
+on inventory click:
+	if name of event-inventory is "&7System | Licenses":
+		cancel event
+		if index of event-slot = 26:
+			if click type = left mouse button:
+				Menu(player)	
+		if index of event-slot = 11:
+			if click type = left mouse button:
+				createlicense(player)
+			if click type = right mouse button:
+				close player's inventory
+				set {chat.var.license.%player's uuid%} to true
+				send "{@p} Enter the name in the chat! (""exit"" to exit)"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+
+		if index of event-slot = 15:
+			if click type = left mouse button:
+				createcontract(player)
+			if click type = right mouse button:
+				close player's inventory
+				set {chat.var.contract.%player's uuid%} to true
+				send "{@p} Enter the name in the chat! (""exit"" to exit)"
+				play sound "minecraft:entity.experience_orb.pickup" to player	
+
+on chat:
+	if {chat.var.license.%player's uuid%} is set:
+		cancel event
+		clear {chat.var.license.%player's uuid%}
+		if message = "exit":
+			send "{@p} Stopped selection."
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			stop
+		set {license.type.%player's uuid%} to message
+		send "{@p} Set ""&b%message%&f"" as the new license type!"
+		play sound "minecraft:entity.experience_orb.pickup" to player
+		licenses(player)
+
+	if {chat.var.contract.%player's uuid%} is set:
+		cancel event
+		clear {chat.var.contract.%player's uuid%}
+		if message = "exit":
+			send "{@p} Stopped selection."
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			stop
+		set {contract.type.%player's uuid%} to message
+		send "{@p} Set ""&b%message%&f"" as the new contract type!"
+		play sound "minecraft:entity.experience_orb.pickup" to player
+		licenses(player)
+
+
+function createlicense(p: player):
+	if {license.type.%{_p}'s uuid%} is set:
+		close {_p}'s inventory
+		give {_p} paper named "&e%{license.type.%{_p}'s uuid%}%" with lore "", "&fDieses Papier berechtigt dich mit dem Recht ""&e%{license.type.%{_p}'s uuid%}%&f"".", "" and "&fAusgestellt und lizenziert von &e%{_p}%&f."
+		clear {license.type.%{_p}'s uuid%}
+		play sound "minecraft:entity.experience_orb.pickup" to {_p}
+	else:
+		send "{@p} Du musst einen Namen setzten!" to {_p}
+
+function createcontract(p: player):
+	if {contract.type.%{_p}'s uuid%} is set:
+		close {_p}'s inventory
+		give {_p} writable book named "&e%{contract.type.%{_p}'s uuid%}%" with lore "", "&fDurch das unterschreiben des Vertrages (~Name) wird dieses &centgültig&f.", "" and "&fAusgestellt und lizenziert von &e%{_p}%&f."
+		clear {contract.type.%{_p}'s uuid%}
+		play sound "minecraft:entity.experience_orb.pickup" to {_p}
+	else:
+		send "{@p} Du musst einen Namen setzten!" to {_p}

@@ -1,0 +1,2366 @@
+options:
+	p: &bSystem &f|
+
+	level_add: 15 #Level extra needed for next level
+
+	farming_requirement_journeyman: 10
+
+	trading_requirement_journeyman: 10
+	trading_requirement_adept: 30
+	trading_requirement_expert: 60
+	trading_requirement_master: 90
+
+	#Diese Werte sind kummulativ errechnet, um folgende Stundenanzahl für die Etappen zu gewährleisten
+	trading_skill_novice_add: 1.6500 #2h bis Journeyman
+	trading_skill_journeyman_add: 3.3333 #8h bis Adept
+	trading_skill_adept_add: 7.5000 #12h bis Expert
+	trading_skill_expert_add: 9.3750 #16h bis Master
+	trading_skill_master_add: 10.5000 #20h bis Level 120
+
+
+
+	guardian_helmet: 10
+	guardian_boots: 5
+	guardian_leggings: 66.6
+	guardian_leggings_timer: 10
+
+	knight_helmet_health_add: 2.5
+	knight_boots_health_add: 1.5
+	knight_leggings_seconds: 10
+	knight_chestplate_seconds: 25
+	knight_chestplate_reflect: 20
+
+	soldier_helmet_food_add: 1
+	soldier_boots_food_add: 0.5
+
+	hunter_helmet_crit: 10
+	hunter_boots_crit: 5
+	
+	mercenary_helmet_regeneration: 10
+	mercenary_boots_regeneration: 5
+
+	assassin_helmet_speed_add: 10
+	assassin_boots_speed_add: 5
+
+	royal_helmet_damage_buff: 10
+	royal_boots_damage_buff: 5
+
+	feyscale_helmet_reduce: 10
+	feyscale_boots_reduce: 5
+
+	cultist_helmet_bleed_build_up: 2
+	cultist_boots_bleed_build_up: 1
+
+
+on rightclick:
+	set {block.clicked.%player's uuid%} to clicked block
+
+on inventory close:
+	clear {block.clicked.%player's uuid%}
+
+
+#Farmer Brewing requirement
+
+on rightclick:
+	if {block.clicked.%player's uuid%} is a brewing stand:
+		if {farming.skill.%player's uuid%} is below {@farming_requirement_journeyman}:
+			cancel event
+			send "{@p} You have to be a <##475b37>Journeyman Farmer&f or better to start brewing!" to player
+
+
+#Calculate Amount of Craft
+#Add the experience and ask for the level
+on inventory click:
+	if {block.clicked.%player's uuid%} is a crafting table:
+		if event-inventory != player's inventory:
+			if index of event-slot = 0:
+				if item in event-slot != air:
+					if inventory action = shift move:
+						add item amount of slot 1 of event-inventory to {_amount::*}
+						add item amount of slot 2 of event-inventory to {_amount::*}
+						add item amount of slot 3 of event-inventory to {_amount::*}
+						add item amount of slot 4 of event-inventory to {_amount::*}
+						add item amount of slot 5 of event-inventory to {_amount::*}
+						add item amount of slot 6 of event-inventory to {_amount::*}
+						add item amount of slot 7 of event-inventory to {_amount::*}
+						add item amount of slot 8 of event-inventory to {_amount::*}
+						add item amount of slot 9 of event-inventory to {_amount::*}
+						loop {_amount::*}:
+							if loop-value is 0:
+								remove loop-value from {_amount::*}
+						set {_amount} to min({_amount::*})
+						set {_times.crafted} to {_amount}
+					if inventory action != shift move:
+						set {_times.crafted} to 1
+					if lore of item in event-slot contains "&fTier: <##475b37>Journeyman", "&fTier: <##385466>Adept", "&fTier: <##77322c>Expert" or "&fTier: <##aa6837>Master":
+					else:
+						if inventory action != shift move:
+							set {_item.with.same.amount} to event-item 
+							set item amount of {_item.with.same.amount} to item amount of player's cursor slot
+							if player's cursor slot = air or {_item.with.same.amount}:
+								add {@trading_skill_novice_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+								send action bar "&f+ &e%{@trading_skill_novice_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"
+						if inventory action = shift move:
+							loop {_times.crafted} times:
+								add event-item to {_items::*}
+							if player has space for {_items::*}:
+								add {@trading_skill_novice_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+								send action bar "&f+ &e%{@trading_skill_novice_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"	
+							else:
+								cancel event
+								send "{@p} Du hast nicht genug Platz in deinem Inventar!"
+
+					if lore of item in event-slot contains "&fTier: <##475b37>Journeyman":
+						if {trading.skill.%player's uuid%} is below {@trading_requirement_journeyman}:
+							cancel event
+							send "{@p} You have to be a <##475b37>Journeyman Crafter&f or better to craft this item!"
+						else:
+							if inventory action != shift move:
+								set {_item.with.same.amount} to event-item 
+								set item amount of {_item.with.same.amount} to item amount of player's cursor slot
+								if player's cursor slot = air or {_item.with.same.amount}:
+									add {@trading_skill_journeyman_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_journeyman_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"
+							if inventory action = shift move:
+								loop {_times.crafted} times:
+									add event-item to {_items::*}
+								if player has enough space for {_items::*}:
+									add {@trading_skill_journeyman_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_journeyman_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"	
+								else:
+									cancel event
+									send "{@p} Du hast nicht genug Platz in deinem Inventar!"
+
+					if lore of item in event-slot contains "&fTier: <##385466>Adept":
+						if {trading.skill.%player's uuid%} is below {@trading_requirement_adept}:
+							cancel event
+							send "{@p} You have to be an <##385466>Adept Crafter&f or better to craft this item!"
+						else:
+							if inventory action != shift move:
+								set {_item.with.same.amount} to event-item 
+								set item amount of {_item.with.same.amount} to item amount of player's cursor slot
+								if player's cursor slot = air or {_item.with.same.amount}:
+									add {@trading_skill_adept_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_adept_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"
+							if inventory action = shift move:
+								loop {_times.crafted} times:
+									add event-item to {_items::*}
+								if player has space for {_items::*}:
+									add {@trading_skill_adept_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_adept_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"	
+								else:
+									cancel event
+									send "{@p} Du hast nicht genug Platz in deinem Inventar!"
+
+					if lore of item in event-slot contains "&fTier: <##77322c>Expert":
+						if {trading.skill.%player's uuid%} is below {@trading_requirement_expert}:
+							cancel event
+							send "{@p} You have to be an <##77322c>Expert Crafter&f or better to craft this item!"
+						else:
+							if inventory action != shift move:
+								set {_item.with.same.amount} to event-item 
+								set item amount of {_item.with.same.amount} to item amount of player's cursor slot
+								if player's cursor slot = air or {_item.with.same.amount}:
+									add {@trading_skill_expert_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_expert_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"
+							if inventory action = shift move:
+								loop {_times.crafted} times:
+									add event-item to {_items::*}
+								if player has space for {_items::*}:
+									add {@trading_skill_expert_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_expert_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"	
+								else:
+									cancel event
+									send "{@p} Du hast nicht genug Platz in deinem Inventar!"
+
+					if lore of item in event-slot contains "&fTier: <##aa6837>Master":
+						if {trading.skill.%player's uuid%} is below {@trading_requirement_master}:
+							cancel event
+							send "{@p} You have to be a <##aa6837>Master Crafter&f or better to craft this item!"
+						else:
+							if inventory action != shift move:
+								set {_item.with.same.amount} to event-item 
+								set item amount of {_item.with.same.amount} to item amount of player's cursor slot
+								if player's cursor slot = air or {_item.with.same.amount}:
+									add {@trading_skill_master_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_master_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"
+							if inventory action = shift move:
+								loop {_times.crafted} times:
+									add event-item to {_items::*}
+								if player has space for {_items::*}:
+									add {@trading_skill_master_add} * {_times.crafted} to {trading.skill.current.%player's uuid%}
+									send action bar "&f+ &e%{@trading_skill_master_add} * {_times.crafted}%&f to &eCrafting &f| &e%{trading.skill.current.%player's uuid%} / {trading.skill.needed.%player's uuid%} * 100%%% &fFame"	
+								else:
+									cancel event
+									send "{@p} Du hast nicht genug Platz in deinem Inventar!"
+
+
+					if {trading.skill.current.%player's uuid%} is above {trading.skill.needed.%player's uuid%} -1:
+						add 1 to {trading.skill.%player's uuid%}
+						set {trading.skill.current.%player's uuid%} to 0
+						set {trading.skill.needed.%player's uuid%} to {trading.skill.needed.%player's uuid%} + {@level_add}
+						send action bar "&fLevel up in &eCrafting&f! | &eCrafting: &e%{trading.skill.%player's uuid%}%"
+						play sound "minecraft:entity.player.levelup" to player
+
+on load:
+
+	#Remove
+
+	remove minecraft recipe "iron_pickaxe"
+	remove minecraft recipe "diamond_pickaxe"
+	remove minecraft recipe "golden_pickaxe"
+	remove minecraft recipe "netherite_pickaxe"
+
+	remove minecraft recipe "iron_axe"
+	remove minecraft recipe "diamond_axe"
+	remove minecraft recipe "golden_axe"
+	remove minecraft recipe "netherite_axe"
+
+	remove minecraft recipe "iron_hoe"
+	remove minecraft recipe "diamond_hoe"
+	remove minecraft recipe "golden_hoe"
+	remove minecraft recipe "netherite_hoe"
+
+	remove minecraft recipe "iron_shovel"
+	remove minecraft recipe "diamond_shovel"
+	remove minecraft recipe "golden_shovel"
+	remove minecraft recipe "netherite_shovel"
+
+	remove minecraft recipe "iron_sword"
+	remove minecraft recipe "diamond_sword"
+	remove minecraft recipe "golden_sword"
+	remove minecraft recipe "netherite_sword"
+
+
+
+	remove minecraft recipe "leather_helmet"
+	remove minecraft recipe "leather_chestplate"
+	remove minecraft recipe "leather_leggings"
+	remove minecraft recipe "leather_boots"
+
+	remove minecraft recipe "chainmail_helmet"
+	remove minecraft recipe "chainmail_chestplate"
+	remove minecraft recipe "chainmail_leggings"
+	remove minecraft recipe "chainmail_boots"
+
+	remove minecraft recipe "iron_helmet"
+	remove minecraft recipe "iron_chestplate"
+	remove minecraft recipe "iron_leggings"
+	remove minecraft recipe "iron_boots"
+
+	remove minecraft recipe "golden_helmet"
+	remove minecraft recipe "golden_chestplate"
+	remove minecraft recipe "golden_leggings"
+	remove minecraft recipe "golden_boots"
+
+	remove minecraft recipe "diamond_helmet"
+	remove minecraft recipe "diamond_chestplate"
+	remove minecraft recipe "diamond_leggings"
+	remove minecraft recipe "diamond_boots"
+
+	remove minecraft recipe "netherite_helmet"
+	remove minecraft recipe "netherite_chestplate"
+	remove minecraft recipe "netherite_leggings"
+	remove minecraft recipe "netherite_boots"
+
+	remove minecraft recipe "fishing_rod"
+	remove minecraft recipe "shield"
+	remove minecraft recipe "crossbow"
+	remove minecraft recipe "bow"
+	remove minecraft recipe "arrow"
+	remove minecraft recipe "pumpkin_pie"
+
+	#Random
+
+	register shaped recipe:
+		id: "custom:lockpick_adept"
+		group: "lockpick"
+		result: tripwire hook named "<##385466>Adept's Lockpick" with lore "&fTier: <##385466>Adept" and "&fTag: &aConsumeable"
+		shape: "aaa", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to lapis lazuli named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to tripwire hook
+
+	register shaped recipe:
+		id: "custom:lockpick_adept_alternativ"
+		group: "lockpick"
+		result: tripwire hook named "<##385466>Adept's Lockpick" with lore "&fTier: <##385466>Adept" and "&fTag: &aConsumeable"
+		shape: "aaa", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to redstone named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to tripwire hook
+
+	register shaped recipe:
+		id: "custom:arrow"
+		result: arrow named "<##475b37>Journeyman's Arrow" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &aConsumeable"
+		shape: "   ", " a ", " b "
+		ingredients:
+			set ingredient of "a" to flint
+			set ingredient of "b" to stick
+
+	register shapeless recipe:
+		id: "custom:pumpkin_pie"
+		result: pumpkin pie
+		ingredients:
+			add pumpkin to ingredients
+			add sugar to ingredients
+
+	#Pickaxes
+
+	register shaped recipe:
+		id: "custom:pickaxe_journeyman"
+		group: "pickaxe_journeyman"
+		result: stone pickaxe named "<##475b37>Journeyman's Pickaxe" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &eTool"
+		shape: "aaa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to raw copper named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:pickaxe_journeyman_alternativ"
+		group: "pickaxe_journeyman"
+		result: stone pickaxe named "<##475b37>Journeyman's Pickaxe" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &eTool"
+		shape: "aaa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to coal named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:pickaxe_adept"
+		result: iron pickaxe named "<##385466>Adept's Pickaxe" with lore "&fTier: <##385466>Adept" and "&fTag: &eTool"
+		shape: "aaa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to raw iron named "<##475b37>Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:pickaxe_expert"
+		group: "pickaxe_expert"
+		result: diamond pickaxe named "<##77322c>Expert's Pickaxe" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: "aaa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to redstone named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:pickaxe_expert_alternativ"
+		group: "pickaxe_expert"
+		result: diamond pickaxe named "<##77322c>Expert's Pickaxe" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: "aaa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to lapis lazuli named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:pickaxe_master"
+		result: netherite pickaxe named "<##aa6837>Master's Pickaxe" with lore "&fTier: <##aa6837>Master" and "&fTag: &eTool"
+		shape: "aaa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to raw gold named "<##77322c>Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+
+	#Axes
+
+	register shaped recipe:
+		id: "custom:axe_journeyman"
+		group: "axe_journeyman"
+		result: stone axe named "<##475b37>Journeyman's Axe" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &eTool"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to raw copper named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:axe_journeyman_alternativ"
+		group: "axe_journeyman"
+		result: stone axe named "<##475b37>Journeyman's Axe" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &eTool"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to coal named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:axe_adept"
+		result: iron axe named "<##385466>Adept's Axe" with lore "&fTier: <##385466>Adept" and "&fTag: &eTool"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to raw iron named "<##475b37>Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:axe_expert"
+		group: "axe_expert"
+		result: diamond axe named "<##77322c>Expert's Axe" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to redstone named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:axe_expert_alternativ"
+		group: "axe_expert"
+		result: diamond axe named "<##77322c>Expert's Axe" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to lapis lazuli named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:axe_master"
+		result: netherite axe named "<##aa6837>Master's Axe" with lore "&fTier: <##aa6837>Master" and "&fTag: &eTool"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to raw gold named "<##77322c>Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+
+	#Hoes
+
+	register shaped recipe:
+		id: "custom:hoe_journeyman"
+		group: "hoe_journeyman"
+		result: stone hoe named "<##475b37>Journeyman's Hoe" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &eTool"
+		shape: " aa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to raw copper named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hoe_journeyman_alternativ"
+		group: "hoe_journeyman"
+		result: stone hoe named "<##475b37>Journeyman's Hoe" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &eTool"
+		shape: " aa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to coal named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:hoe_adept"
+		result: iron hoe named "<##385466>Adept's Hoe" with lore "&fTier: <##385466>Adept" and "&fTag: &eTool"
+		shape: " aa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to raw iron named "<##475b37>Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:hoe_expert"
+		group: "hoe_expert"
+		result: diamond hoe named "<##77322c>Expert's Hoe" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: " aa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to redstone named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hoe_expert_alternativ"
+		group: "hoe_expert"
+		result: diamond hoe named "<##77322c>Expert's Hoe" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: " aa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to lapis lazuli named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:hoe_master"
+		result: netherite hoe named "<##aa6837>Master's Hoe" with lore "&fTier: <##aa6837>Master" and "&fTag: &eTool"
+		shape: " aa", " b ", " b "
+		ingredients:
+			set ingredient of "a" to raw gold named "<##77322c>Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+
+
+
+	#Wert erhöhen
+
+
+	register shaped recipe:
+		id: "custom:coal_compressed"
+		result: chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to coal named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:coal_compressed_2"
+		result: minecart with chest named "<##6c594b>Minecart with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:copper_compressed"
+		result: chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to raw copper named "<##6c594b>Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:copper_compressed_2"
+		result: minecart with chest named "<##6c594b>Minecart with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+
+	register shaped recipe:
+		id: "custom:iron_compressed"
+		result: chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to raw iron named "<##475b37>Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:iron_compressed_2"
+		result: minecart with chest named "<##475b37>Minecart with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+
+	register shaped recipe:
+		id: "custom:redstone_compressed"
+		result: chest named "<##385466>Chest with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to redstone named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:redstone_compressed_2"
+		result: minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##385466>Chest with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:lapis_compressed"
+		result: chest named "<##385466>Chest with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to lapis lazuli named "<##385466>Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:lapis_compressed_2"
+		result: minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##385466>Chest with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+
+	register shaped recipe:
+		id: "custom:gold_compressed"
+		result: chest named "<##77322c>Chest with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to raw gold named "<##77322c>Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:gold_compressed_2"
+		result: minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##77322c>Chest with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+
+	register shaped recipe:
+		id: "custom:diamond_compressed"
+		result: chest named "<##aa6837>Chest with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to diamond named "<##aa6837>Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:diamond_compressed_2"
+		result: minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##aa6837>Chest with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+	#Holz
+
+
+	register shaped recipe:
+		id: "custom:oak_compressed"
+		result: chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to oak log named "<##6c594b>Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:oak_compressed_2"
+		result: minecart with chest named "<##6c594b>Minecart with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:birch_compressed"
+		result: chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:birch_compressed_2"
+		result: minecart with chest named "<##475b37>Minecart with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:spruce_compressed"
+		result: chest named "<##385466>Chest with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:spruce_compressed_2"
+		result: minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##385466>Chest with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:dark_oak_compressed"
+		result: chest named "<##77322c>Chest with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:dark_oak_compressed_2"
+		result: minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##77322c>Chest with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:acacia_compressed"
+		result: chest named "<##aa6837>Chest with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to acacia log named "<##aa6837>Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:acacia_compressed_2"
+		result: minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##aa6837>Chest with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	#Farming
+
+
+	register shaped recipe:
+		id: "custom:wheat_compressed"
+		result: chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to wheat named "<##6c594b>Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:wheat_compressed_2"
+		result: minecart with chest named "<##6c594b>Minecart with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:carrot_compressed"
+		result: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to carrot named "<##475b37>Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:carrot_compressed_2"
+		result: minecart with chest named "<##475b37>Minecart with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:potato_compressed"
+		result: chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to potato named "<##385466>Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:potato_compressed_2"
+		result: minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:beetroot_compressed"
+		result: chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to beetroot named "<##77322c>Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:beetroot_compressed_2"
+		result: minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:pumpkin_compressed"
+		result: chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to pumpkin named "<##aa6837>Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:pumpkin_compressed_2"
+		result: minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		shape: "aaa", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+	#Waffen (3 jeweils)
+
+	#Krieger
+
+	register shaped recipe:
+		id: "custom:sword_novice"
+		result: iron sword named "<##6c594b>Novice's Sword" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Wirbelattacke auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", " a ", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:sword_journeyman"
+		result: iron sword of unbreaking 1 named "<##475b37>Journeyman's Sword" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Wirbelattacke auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", " a ", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:sword_adept"
+		result: iron sword of unbreaking 2 named "<##385466>Adept's Sword" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Wirbelattacke auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", " a ", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:sword_expert"
+		result: iron sword of unbreaking 2 named "<##77322c>Expert's Sword" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Wirbelattacke auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", " a ", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:sword_master"
+		result: iron sword of unbreaking 3 named "<##aa6837>Master's Sword" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Wirbelattacke auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", " a ", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+	register shaped recipe:
+		id: "custom:fighting_axe_novice"
+		result: iron axe named "<##6c594b>Novice's Axe" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um einen Ground-Smash auszuführen!" and "&fTag: &cWeapon"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:fighting_axe_journeyman"
+		result: iron axe of unbreaking 1 named "<##475b37>Journeyman's Axe" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um einen Ground-Smash auszuführen!" and "&fTag: &cWeapon"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:fighting_axe_adept"
+		result: iron axe of unbreaking 2 named "<##385466>Adept's Axe" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um einen Ground-Smash auszuführen!" and "&fTag: &cWeapon"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:fighting_axe_expert"
+		result: iron axe of unbreaking 2 named "<##77322c>Expert's Axe" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um einen Ground-Smash auszuführen!" and "&fTag: &cWeapon"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:fighting_axe_master"
+		result: iron axe of unbreaking 3 named "<##aa6837>Master's Axe" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um einen Ground-Smash auszuführen!" and "&fTag: &cWeapon"
+		shape: " aa", " ba", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+	register shaped recipe:
+		id: "custom:claymore_novice"
+		result: iron sword named "<##6c594b>Novice's Claymore" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Attacken zu parieren!" and "&fTag: &cWeapon"
+		shape: " a ", "aaa", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:claymore_journeyman"
+		result: iron sword of unbreaking 1 named "<##475b37>Journeyman's Claymore" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Attacken zu parieren!" and "&fTag: &cWeapon"
+		shape: " a ", "aaa", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:claymore_adept"
+		result: iron sword of unbreaking 2 named "<##385466>Adept's Claymore" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Attacken zu parieren!" and "&fTag: &cWeapon"
+		shape: " a ", "aaa", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:claymore_expert"
+		result: iron sword of unbreaking 2 named "<##77322c>Expert's Claymore" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Attacken zu parieren!" and "&fTag: &cWeapon"
+		shape: " a ", "aaa", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:claymore_master"
+		result: iron sword of unbreaking 3 named "<##aa6837>Master's Claymore" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dRechtsklick&f um eine Attacken zu parieren!" and "&fTag: &cWeapon"
+		shape: " a ", "aaa", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+
+	#Bogenschütze
+
+	register shaped recipe:
+		id: "custom:bow_novice"
+		result: bow named "<##6c594b>Novice's Bow" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f um einen starken AOE-Schuss aufzuladen!" and "&fTag: &cWeapon"
+		shape: " ab", "a b", " ab"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to string
+	register shaped recipe:
+		id: "custom:bow_journeyman"
+		result: bow of unbreaking 1 named "<##475b37>Journeyman's Bow" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f um einen starken AOE-Schuss aufzuladen!" and "&fTag: &cWeapon"
+		shape: " ab", "a b", " ab"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to string
+	register shaped recipe:
+		id: "custom:bow_adept"
+		result: bow of unbreaking 2 named "<##385466>Adept's Bow" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f um einen starken AOE-Schuss aufzuladen!" and "&fTag: &cWeapon"
+		shape: " ab", "a b", " ab"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to string
+	register shaped recipe:
+		id: "custom:bow_expert"
+		result: bow of unbreaking 2 named "<##77322c>Expert's Bow" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f um einen starken AOE-Schuss aufzuladen!" and "&fTag: &cWeapon"
+		shape: " ab", "a b", " ab"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to string
+	register shaped recipe:
+		id: "custom:bow_master"
+		result: bow of unbreaking 3 named "<##aa6837>Master's Bow" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f um einen starken AOE-Schuss aufzuladen!" and "&fTag: &cWeapon"
+		shape: " ab", "a b", " ab"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to string
+
+
+	register shaped recipe:
+		id: "custom:crossbow_novice"
+		result: crossbow named "<##6c594b>Novice's Crossbow" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick &fum einen Knockback Schuss abzufeuern!" and "&fTag: &cWeapon"
+		shape: "aea", "bfb", " a "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "e" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to string
+			set ingredient of "f" to tripwire hook
+	register shaped recipe:
+		id: "custom:crossbow_journeyman"
+		result: crossbow of unbreaking 1 named "<##475b37>Journeyman's Crossbow" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick &fum einen Knockback Schuss abzufeuern!" and "&fTag: &cWeapon"
+		shape: "aea", "bfb", " a "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "e" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to string
+			set ingredient of "f" to tripwire hook
+	register shaped recipe:
+		id: "custom:crossbow_adept"
+		result: crossbow of unbreaking 2 named "<##385466>Adept's Crossbow" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick &fum einen Knockback Schuss abzufeuern!" and "&fTag: &cWeapon"
+		shape: "aea", "bfb", " a "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "e" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to string
+			set ingredient of "f" to tripwire hook
+	register shaped recipe:
+		id: "custom:crossbow_expert"
+		result: crossbow of unbreaking 2 named "<##77322c>Expert's Crossbow" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick &fum einen Knockback Schuss abzufeuern!" and "&fTag: &cWeapon"
+		shape: "aea", "bfb", " a "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "e" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to string
+			set ingredient of "f" to tripwire hook
+	register shaped recipe:
+		id: "custom:crossbow_master"
+		result: crossbow of unbreaking 3 named "<##aa6837>Master's Crossbow" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick &fum einen Knockback Schuss abzufeuern!" and "&fTag: &cWeapon"
+		shape: "aea", "bfb", " a "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "e" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to string
+			set ingredient of "f" to tripwire hook
+
+
+	register shaped recipe:
+		id: "custom:dagger_novice"
+		result: iron sword named "<##6c594b>Novice's Dagger" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dRechtsklick &fum einen Hinterhalt auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", "cac", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "c" to string
+	register shaped recipe:
+		id: "custom:dagger_journeyman"
+		result: iron sword of unbreaking 1 named "<##475b37>Journeyman's Dagger" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dRechtsklick &fum einen Hinterhalt auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", "cac", " b "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "c" to string
+	register shaped recipe:
+		id: "custom:dagger_adept"
+		result: iron sword of unbreaking 2 named "<##385466>Adept's Dagger" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dRechtsklick &fum einen Hinterhalt auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", "cac", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "c" to string
+	register shaped recipe:
+		id: "custom:dagger_expert"
+		result: iron sword of unbreaking 2 named "<##77322c>Expert's Dagger" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dRechtsklick &fum einen Hinterhalt auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", "cac", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "c" to string
+	register shaped recipe:
+		id: "custom:dagger_master"
+		result: iron sword of unbreaking 3 named "<##aa6837>Master's Dagger" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dRechtsklick &fum einen Hinterhalt auszuführen!" and "&fTag: &cWeapon"
+		shape: " a ", "cac", " b "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "c" to string
+
+
+	#Magier
+
+
+	register shaped recipe:
+		id: "custom:blazing_staff_novice"
+		result: stick named "<##6c594b>Novice's Blazing Staff" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum eine Feuerexplosion zu erzeugen!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "c" to flint and steel
+	register shaped recipe:
+		id: "custom:blazing_staff_journeyman"
+		result: stick of unbreaking 1 named "<##475b37>Journeyman's Blazing Staff" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum eine Feuerexplosion zu erzeugen!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "c" to flint and steel
+	register shaped recipe:
+		id: "custom:blazing_staff_adept"
+		result: stick of unbreaking 2 named "<##385466>Adept's Blazing Staff" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum eine Feuerexplosion zu erzeugen!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "c" to flint and steel
+	register shaped recipe:
+		id: "custom:blazing_staff_expert"
+		result: stick of unbreaking 2 named "<##77322c>Expert's Blazing Staff" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum eine Feuerexplosion zu erzeugen!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "c" to flint and steel
+	register shaped recipe:
+		id: "custom:blazing_staff_master"
+		result: stick of unbreaking 3 named "<##aa6837>Master's Blazing Staff" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum eine Feuerexplosion zu erzeugen!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "c" to flint and steel
+
+
+	register shaped recipe:
+		id: "custom:glacial_staff_novice"
+		result: stick named "<##6c594b>Novice's Glacial Staff" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum dein Target einzufrieren!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "c" to ice
+	register shaped recipe:
+		id: "custom:glacial_staff_journeyman"
+		result: stick of unbreaking 1 named "<##475b37>Journeyman's Glacial Staff" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum dein Target einzufrieren!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "c" to ice
+	register shaped recipe:
+		id: "custom:glacial_staff_adept"
+		result: stick of unbreaking 2 named "<##385466>Adept's Glacial Staff" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum dein Target einzufrieren!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "c" to ice
+	register shaped recipe:
+		id: "custom:glacial_staff_expert"
+		result: stick of unbreaking 2 named "<##77322c>Expert's Glacial Staff" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum dein Target einzufrieren!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "c" to ice
+	register shaped recipe:
+		id: "custom:glacial_staff_master"
+		result: stick of unbreaking 3 named "<##aa6837>Master's Glacial Staff" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum dein Target einzufrieren!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "c" to ice
+
+
+	register shaped recipe:
+		id: "custom:astral_staff_novice"
+		result: stick named "<##6c594b>Novice's Astral Staff" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum deine eigene Armee zu beschwören!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "c" to ender pearl
+	register shaped recipe:
+		id: "custom:astral_staff_journeyman"
+		result: stick of unbreaking 1 named "<##475b37>Journeyman's Astral Staff" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum deine eigene Armee zu beschwören!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "c" to ender pearl
+	register shaped recipe:
+		id: "custom:astral_staff_adept"
+		result: stick of unbreaking 2 named "<##385466>Adept's Astral Staff" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum deine eigene Armee zu beschwören!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "c" to ender pearl
+	register shaped recipe:
+		id: "custom:astral_staff_expert"
+		result: stick of unbreaking 2 named "<##77322c>Expert's Astral Staff" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum deine eigene Armee zu beschwören!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "c" to ender pearl
+	register shaped recipe:
+		id: "custom:astral_staff_master"
+		result: stick of unbreaking 3 named "<##aa6837>Master's Astral Staff" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dRechtsklick &fum deine eigene Armee zu beschwören!" and "&fTag: &cWeapon"
+		shape: " ca", " ac", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "c" to ender pearl
+
+
+	#Armor
+
+
+	#Warrior
+
+	register shaped recipe:
+		id: "custom:guardian_helmetnovice"
+		result: iron helmet of protection 1 named "<##6c594b>Novice's Guardian Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_helmet}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_helmetjourneyman"
+		result: iron helmet of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Guardian Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_helmet}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_helmetadept"
+		result: iron helmet of protection 1 and unbreaking 2 named "<##385466>Adept's Guardian Helmet" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_helmet}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_helmetexpert"
+		result: iron helmet of protection 1 and unbreaking 2 named "<##77322c>Expert's Guardian Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_helmet}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_helmetmaster"
+		result: iron helmet of protection 1 and unbreaking 3 named "<##aa6837>Master's Guardian Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_helmet}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:guardian_chestplate_novice"
+		result: iron chestplate of protection 1 named "<##6c594b>Novice's Guardian Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick&f für ein Force Field!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_chestplate_journeyman"
+		result: iron chestplate of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Guardian Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick&f für ein Force Field!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_chestplate_adept"
+		result: iron chestplate of protection 1 and unbreaking 2 named "<##385466>Adept's Guardian Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick&f für ein Force Field!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_chestplate_expert"
+		result: iron chestplate of protection 1 and unbreaking 2 named "<##77322c>Expert's Guardian Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick&f für ein Force Field!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_chestplate_master"
+		result: iron chestplate of protection 1 and unbreaking 3 named "<##aa6837>Master's Guardian Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick&f für ein Force Field!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:guardian_leggings_novice"
+		result: iron leggings of protection 1 named "<##6c594b>Novice's Guardian Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick&f um Schaden für &b{@guardian_leggings_timer} Sekunden &fum &b{@guardian_leggings}%% &fzu reduzieren!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_leggings_journeyman"
+		result: iron leggings of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Guardian Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick&f um Schaden für &b{@guardian_leggings_timer} Sekunden &fum &b{@guardian_leggings}%% &fzu reduzieren!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_leggings_adept"
+		result: iron leggings of protection 1 and unbreaking 2 named "<##385466>Adept's Guardian Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick&f um Schaden für &b{@guardian_leggings_timer} Sekunden &fum &b{@guardian_leggings}%% &fzu reduzieren!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_leggings_expert"
+		result: iron leggings of protection 1 and unbreaking 2 named "<##77322c>Expert's Guardian Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick&f um Schaden für &b{@guardian_leggings_timer} Sekunden &fum &b{@guardian_leggings}%% &fzu reduzieren!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_leggings_master"
+		result: iron leggings of protection 1 and unbreaking 3 named "<##aa6837>Master's Guardian Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick&f um Schaden für &b{@guardian_leggings_timer} Sekunden &fum &b{@guardian_leggings}%% &fzu reduzieren!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:guardian_boots_novice"
+		result: iron boots of protection 1 named "<##6c594b>Novice's Guardian Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_boots}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_boots_journeyman"
+		result: iron boots of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Guardian Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_boots}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_boots_adept"
+		result: iron boots of protection 1 and unbreaking 2 named "<##385466>Adept's Guardian Boots" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_boots}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_boots_expert"
+		result: iron boots of protection 1 and unbreaking 2 named "<##77322c>Expert's Guardian Boots" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_boots}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:guardian_boots_master"
+		result: iron boots of protection 1 and unbreaking 3 named "<##aa6837>Master's Guardian Boots" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: Reduziert den Schaden um &b{@guardian_boots}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+
+
+	register shaped recipe:
+		id: "custom:knight_helmet_novice"
+		result: iron helmet of protection 1 named "<##6c594b>Novice's Knight Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_helmet_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_helmet_journeyman"
+		result: iron helmet of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Knight Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_helmet_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_helmet_adept"
+		result: iron helmet of protection 1 and unbreaking 2 named "<##385466>Adept's Knight Helmet" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_helmet_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_helmet_expert"
+		result: iron helmet of protection 1 and unbreaking 2 named "<##77322c>Expert's Knight Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_helmet_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_helmet_master"
+		result: iron helmet of protection 1 and unbreaking 3 named "<##aa6837>Master's Knight Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_helmet_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+
+	register shaped recipe:
+		id: "custom:knight_chestplate_novice"
+		result: iron chestplate of protection 1 named "<##6c594b>Novice's Knight Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum &b{@knight_chestplate_reflect}%% &fSchaden für &b{@knight_chestplate_seconds} &fSekunden zu reflektieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_chestplate_journeyman"
+		result: iron chestplate of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Knight Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum &b{@knight_chestplate_reflect}%% &fSchaden für &b{@knight_chestplate_seconds} &fSekunden zu reflektieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_chestplate_adept"
+		result: iron chestplate of protection 1 and unbreaking 2 named "<##385466>Adept's Knight Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum &b{@knight_chestplate_reflect}%% &fSchaden für &b{@knight_chestplate_seconds} &fSekunden zu reflektieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_chestplate_expert"
+		result: iron chestplate of protection 1 and unbreaking 2 named "<##77322c>Expert's Knight Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum &b{@knight_chestplate_reflect}%% &fSchaden für &b{@knight_chestplate_seconds} &fSekunden zu reflektieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_chestplate_master"
+		result: iron chestplate of protection 1 and unbreaking 3 named "<##aa6837>Master's Knight Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum &b{@knight_chestplate_reflect}%% &fSchaden für &b{@knight_chestplate_seconds} &fSekunden zu reflektieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+
+	register shaped recipe:
+		id: "custom:knight_leggings_novice"
+		result: iron leggings of protection 1 named "<##6c594b>Novice's Knight Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum dich für &b{@knight_leggings_seconds} &fSekunden zu schützen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_leggings_journeyman"
+		result: iron leggings of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Knight Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum dich für &b{@knight_leggings_seconds} &fSekunden zu schützen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_leggings_adept"
+		result: iron leggings of protection 1 and unbreaking 2 named "<##385466>Adept's Knight Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum dich für &b{@knight_leggings_seconds} &fSekunden zu schützen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_leggings_expert"
+		result: iron leggings of protection 1 and unbreaking 2 named "<##77322c>Expert's Knight Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum dich für &b{@knight_leggings_seconds} &fSekunden zu schützen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_leggings_master"
+		result: iron leggings of protection 1 and unbreaking 3 named "<##aa6837>Master's Knight Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum dich für &b{@knight_leggings_seconds} &fSekunden zu schützen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+
+	register shaped recipe:
+		id: "custom:knight_boots_novice"
+		result: iron boots of protection 1 named "<##6c594b>Novice's Knight Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_boots_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_boots_journeyman"
+		result: iron boots of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Knight Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_boots_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_boots_adept"
+		result: iron boots of protection 1 and unbreaking 2 named "<##385466>Adept's Knight Boots" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_boots_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_boots_expert"
+		result: iron boots of protection 1 and unbreaking 2 named "<##77322c>Expert's Knight Boots" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_boots_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+	register shaped recipe:
+		id: "custom:knight_boots_master"
+		result: iron boots of protection 1 and unbreaking 3 named "<##aa6837>Master's Knight Boots" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: Fügt &c{@knight_boots_health_add} &fHerzen hinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!"
+
+
+
+
+
+	register shaped recipe:
+		id: "custom:soldier_helmet_novice"
+		result: iron helmet of protection 1 named "<##6c594b>Novice's Soldier Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_helmet_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_helmet_journeyman"
+		result: iron helmet of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Soldier Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_helmet_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_helmet_adept"
+		result: iron helmet of protection 1 and unbreaking 2 named "<##385466>Adept's Soldier Helmet" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_helmet_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_helmet_expert"
+		result: iron helmet of protection 1 and unbreaking 2 named "<##77322c>Expert's Soldier Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_helmet_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_helmet_master"
+		result: iron helmet of protection 1 and unbreaking 3 named "<##aa6837>Master's Soldier Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_helmet_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+
+	register shaped recipe:
+		id: "custom:soldier_chestplate_novice"
+		result: iron chestplate of protection 1 named "<##6c594b>Novice's Soldier Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum eine &cSchadens-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_chestplate_journeyman"
+		result: iron chestplate of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Soldier Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum eine &cSchadens-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_chestplate_adept"
+		result: iron chestplate of protection 1 and unbreaking 2 named "<##385466>Adept's Soldier Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum eine &cSchadens-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_chestplate_expert"
+		result: iron chestplate of protection 1 and unbreaking 2 named "<##77322c>Expert's Soldier Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum eine &cSchadens-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_chestplate_master"
+		result: iron chestplate of protection 1 and unbreaking 3 named "<##aa6837>Master's Soldier Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dLinksklick &fum eine &cSchadens-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+
+	register shaped recipe:
+		id: "custom:soldier_leggings_novice"
+		result: iron leggings of protection 1 named "<##6c594b>Novice's Soldier Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum eine &dSlowness-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_leggings_journeyman"
+		result: iron leggings of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Soldier Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum eine &dSlowness-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_leggings_adept"
+		result: iron leggings of protection 1 and unbreaking 2 named "<##385466>Adept's Soldier Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum eine &dSlowness-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_leggings_expert"
+		result: iron leggings of protection 1 and unbreaking 2 named "<##77322c>Expert's Soldier Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum eine &dSlowness-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_leggings_master"
+		result: iron leggings of protection 1 and unbreaking 3 named "<##aa6837>Master's Soldier Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: &aDrücke &dShift Linksklick &fum eine &dSlowness-Zone&f zu kreieren!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+
+	register shaped recipe:
+		id: "custom:soldier_boots_novice"
+		result: iron boots of protection 1 named "<##6c594b>Novice's Soldier Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_boots_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_boots_journeyman"
+		result: iron boots of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Soldier Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_boots_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_boots_adept"
+		result: iron boots of protection 1 and unbreaking 2 named "<##385466>Adept's Soldier Boots" with lore "&fTier: <##385466>Adept", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_boots_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_boots_expert"
+		result: iron boots of protection 1 and unbreaking 2 named "<##77322c>Expert's Soldier Boots" with lore "&fTier: <##77322c>Expert", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_boots_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+	register shaped recipe:
+		id: "custom:soldier_boots_master"
+		result: iron boots of protection 1 and unbreaking 3 named "<##aa6837>Master's Soldier Boots" with lore "&fTier: <##aa6837>Master", "&fType: &cWarrior", "&fAbility: Gibt dir bei jedem Essen zusätzlich &e{@soldier_boots_food_add} Hungerkeulen&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!"
+
+
+
+
+
+
+
+
+
+
+
+
+
+	#Wagebund
+
+
+
+	register shaped recipe:
+		id: "custom:hunter_helmet_novice"
+		result: chainmail helmet of protection 1 named "<##6c594b>Novice's Hunter Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_helmet_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_helmet_journeyman"
+		result: chainmail helmet of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Hunter Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_helmet_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_helmet_adept"
+		result: chainmail helmet of protection 1 and unbreaking 2 named "<##385466>Adept's Hunter Helmet" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_helmet_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_helmet_expert"
+		result: chainmail helmet of protection 1 and unbreaking 2 named "<##77322c>Expert's Hunter Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_helmet_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_helmet_master"
+		result: chainmail helmet of protection 1 and unbreaking 3 named "<##aa6837>Master's Hunter Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_helmet_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:hunter_chestplate_novice"
+		result: chainmail chestplate of protection 1 named "<##6c594b>Novice's Hunter Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für einen temporären, großen &bSpeed-Bonus&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_chestplate_journeyman"
+		result: chainmail chestplate of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Hunter Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für einen temporären, großen &bSpeed-Bonus&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_chestplate_adept"
+		result: chainmail chestplate of protection 1 and unbreaking 2 named "<##385466>Adept's Hunter Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für einen temporären, großen &bSpeed-Bonus&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_chestplate_expert"
+		result: chainmail chestplate of protection 1 and unbreaking 2 named "<##77322c>Expert's Hunter Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für einen temporären, großen &bSpeed-Bonus&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_chestplate_master"
+		result: chainmail chestplate of protection 1 and unbreaking 3 named "<##aa6837>Master's Hunter Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für einen temporären, großen &bSpeed-Bonus&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:hunter_leggings_novice"
+		result: chainmail leggings of protection 1 named "<##6c594b>Novice's Hunter Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f um deinem nächsten Projektil &averwurzeln&f hinzuzufügen!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_leggings_journeyman"
+		result: chainmail leggings of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Hunter Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f um deinem nächsten Projektil &averwurzeln&f hinzuzufügen!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_leggings_adept"
+		result: chainmail leggings of protection 1 and unbreaking 2 named "<##385466>Adept's Hunter Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f um deinem nächsten Projektil &averwurzeln&f hinzuzufügen!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_leggings_expert"
+		result: chainmail leggings of protection 1 and unbreaking 2 named "<##77322c>Expert's Hunter Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f um deinem nächsten Projektil &averwurzeln&f hinzuzufügen!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_leggings_master"
+		result: chainmail leggings of protection 1 and unbreaking 3 named "<##aa6837>Master's Hunter Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f um deinem nächsten Projektil &averwurzeln&f hinzuzufügen!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:hunter_boots_novice"
+		result: chainmail boots of protection 1 named "<##6c594b>Novice's Hunter Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_boots_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_boots_journeyman"
+		result: chainmail boots of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Hunter Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_boots_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_boots_adept"
+		result: chainmail boots of protection 1 and unbreaking 2 named "<##385466>Adept's Hunter Boots" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_boots_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_boots_expert"
+		result: chainmail boots of protection 1 and unbreaking 2 named "<##77322c>Expert's Hunter Boots" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_boots_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:hunter_boots_master"
+		result: chainmail boots of protection 1 and unbreaking 3 named "<##aa6837>Master's Hunter Boots" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: Verleiht dir &c{@hunter_boots_crit}%% Crit&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+
+
+	register shaped recipe:
+		id: "custom:mercenary_helmet_novice"
+		result: chainmail helmet of protection 1 named "<##6c594b>Novice's Mercenary Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_helmet_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_helmet_journeyman"
+		result: chainmail helmet of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Mercenary Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_helmet_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_helmet_adept"
+		result: chainmail helmet of protection 1 and unbreaking 2 named "<##385466>Adept's Mercenary Helmet" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_helmet_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_helmet_expert"
+		result: chainmail helmet of protection 1 and unbreaking 2 named "<##77322c>Expert's Mercenary Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_helmet_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_helmet_master"
+		result: chainmail helmet of protection 1 and unbreaking 3 named "<##aa6837>Master's Mercenary Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_helmet_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+
+	register shaped recipe:
+		id: "custom:mercenary_chestplate_novice"
+		result: chainmail chestplate of protection 1 named "<##6c594b>Novice's Mercenary Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für eine temporär, starke &cRegeneration&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_chestplate_journeyman"
+		result: chainmail chestplate of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Mercenary Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für eine temporär, starke &cRegeneration&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_chestplate_adept"
+		result: chainmail chestplate of protection 1 and unbreaking 2 named "<##385466>Adept's Mercenary Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für eine temporär, starke &cRegeneration&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_chestplate_expert"
+		result: chainmail chestplate of protection 1 and unbreaking 2 named "<##77322c>Expert's Mercenary Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für eine temporär, starke &cRegeneration&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_chestplate_master"
+		result: chainmail chestplate of protection 1 and unbreaking 3 named "<##aa6837>Master's Mercenary Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für eine temporär, starke &cRegeneration&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+
+	register shaped recipe:
+		id: "custom:mercenary_leggings_novice"
+		result: chainmail leggings of protection 1 named "<##6c594b>Novice's Mercenary Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f für einen &dGravity-Jump&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_leggings_journeyman"
+		result: chainmail leggings of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Mercenary Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f für einen &dGravity-Jump&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_leggings_adept"
+		result: chainmail leggings of protection 1 and unbreaking 2 named "<##385466>Adept's Mercenary Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f für einen &dGravity-Jump&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_leggings_expert"
+		result: chainmail leggings of protection 1 and unbreaking 2 named "<##77322c>Expert's Mercenary Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f für einen &dGravity-Jump&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_leggings_master"
+		result: chainmail leggings of protection 1 and unbreaking 3 named "<##aa6837>Master's Mercenary Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick&f für einen &dGravity-Jump&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+
+	register shaped recipe:
+		id: "custom:mercenary_boots_novice"
+		result: chainmail boots of protection 1 named "<##6c594b>Novice's Mercenary Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_boots_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_boots_journeyman"
+		result: chainmail boots of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Mercenary Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_boots_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_boots_adept"
+		result: chainmail boots of protection 1 and unbreaking 2 named "<##385466>Adept's Mercenary Boots" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_boots_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_boots_expert"
+		result: chainmail boots of protection 1 and unbreaking 2 named "<##77322c>Expert's Mercenary Boots" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_boots_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+	register shaped recipe:
+		id: "custom:mercenary_boots_master"
+		result: chainmail boots of protection 1 and unbreaking 3 named "<##aa6837>Master's Mercenary Boots" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: Erhöht deine &cLebensregeneration &fum &b{@mercenary_boots_regeneration}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!"
+
+
+
+
+
+	register shaped recipe:
+		id: "custom:assassin_helmet_novice"
+		result: chainmail helmet of protection 1 named "<##6c594b>Novice's Assassin Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_helmet_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_helmet_journeyman"
+		result: chainmail helmet of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Assassin Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_helmet_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_helmet_adept"
+		result: chainmail helmet of protection 1 and unbreaking 2 named "<##385466>Adept's Assassin Helmet" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_helmet_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_helmet_expert"
+		result: chainmail helmet of protection 1 and unbreaking 2 named "<##77322c>Expert's Assassin Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_helmet_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_helmet_master"
+		result: chainmail helmet of protection 1 and unbreaking 3 named "<##aa6837>Master's Assassin Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_helmet_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+
+	register shaped recipe:
+		id: "custom:assassin_chestplate_novice"
+		result: chainmail chestplate of protection 1 named "<##6c594b>Novice's Assassin Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für temporäre &bUnsichtbararkeit&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_chestplate_journeyman"
+		result: chainmail chestplate of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Assassin Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für temporäre &bUnsichtbararkeit&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_chestplate_adept"
+		result: chainmail chestplate of protection 1 and unbreaking 2 named "<##385466>Adept's Assassin Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für temporäre &bUnsichtbararkeit&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_chestplate_expert"
+		result: chainmail chestplate of protection 1 and unbreaking 2 named "<##77322c>Expert's Assassin Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für temporäre &bUnsichtbararkeit&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_chestplate_master"
+		result: chainmail chestplate of protection 1 and unbreaking 3 named "<##aa6837>Master's Assassin Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dLinksklick&f für temporäre &bUnsichtbararkeit&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+
+	register shaped recipe:
+		id: "custom:assassin_leggings_novice"
+		result: chainmail leggings of protection 1 named "<##6c594b>Novice's Assassin Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick &fum den nächsten &cSchlag-Damage&f gewaltig zu erhöhen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_leggings_journeyman"
+		result: chainmail leggings of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Assassin Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick &fum den nächsten &cSchlag-Damage&f gewaltig zu erhöhen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_leggings_adept"
+		result: chainmail leggings of protection 1 and unbreaking 2 named "<##385466>Adept's Assassin Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick &fum den nächsten &cSchlag-Damage&f gewaltig zu erhöhen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_leggings_expert"
+		result: chainmail leggings of protection 1 and unbreaking 2 named "<##77322c>Expert's Assassin Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick &fum den nächsten &cSchlag-Damage&f gewaltig zu erhöhen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_leggings_master"
+		result: chainmail leggings of protection 1 and unbreaking 3 named "<##aa6837>Master's Assassin Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: &aDrücke &dShift Linksklick &fum den nächsten &cSchlag-Damage&f gewaltig zu erhöhen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+
+	register shaped recipe:
+		id: "custom:assassin_boots_novice"
+		result: chainmail boots of protection 1 named "<##6c594b>Novice's Assassin Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_boots_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_boots_journeyman"
+		result: chainmail boots of protection 1 and unbreaking 1 named "<##475b37>Journeyman's Assassin Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_boots_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_boots_adept"
+		result: chainmail boots of protection 1 and unbreaking 2 named "<##385466>Adept's Assassin Boots" with lore "&fTier: <##385466>Adept", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_boots_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_boots_expert"
+		result: chainmail boots of protection 1 and unbreaking 2 named "<##77322c>Expert's Assassin Boots" with lore "&fTier: <##77322c>Expert", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_boots_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+	register shaped recipe:
+		id: "custom:assassin_boots_master"
+		result: chainmail boots of protection 1 and unbreaking 3 named "<##aa6837>Master's Assassin Boots" with lore "&fTier: <##aa6837>Master", "&fType: &2Vagabond", "&fAbility: Erhöht deine Geschwindigkeit um &b{@assassin_boots_speed_add}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!"
+
+
+
+
+
+
+
+
+	#Mage
+
+
+
+
+	register shaped recipe:
+		id: "custom:royal_helmet_novice"
+		result: chainmail helmet named "<##6c594b>Novice's Royal Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_helmet_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_helmet_journeyman"
+		result: chainmail helmet of unbreaking 1 named "<##475b37>Journeyman's Royal Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_helmet_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_helmet_adept"
+		result: chainmail helmet of unbreaking 2 named "<##385466>Adept's Royal Helmet" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_helmet_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_helmet_expert"
+		result: chainmail helmet of unbreaking 2 named "<##77322c>Expert's Royal Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_helmet_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_helmet_master"
+		result: chainmail helmet of unbreaking 3 named "<##aa6837>Master's Royal Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_helmet_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:royal_chestplate_novice"
+		result: chainmail chestplate named "<##6c594b>Novice's Royal Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &bKurzstrecken-Teleport&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_chestplate_journeyman"
+		result: chainmail chestplate of unbreaking 1 named "<##475b37>Journeyman's Royal Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &bKurzstrecken-Teleport&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_chestplate_adept"
+		result: chainmail chestplate of unbreaking 2 named "<##385466>Adept's Royal Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &bKurzstrecken-Teleport&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_chestplate_expert"
+		result: chainmail chestplate of unbreaking 2 named "<##77322c>Expert's Royal Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &bKurzstrecken-Teleport&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_chestplate_master"
+		result: chainmail chestplate of unbreaking 3 named "<##aa6837>Master's Royal Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &bKurzstrecken-Teleport&f!" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:royal_leggings_novice"
+		result: chainmail leggings named "<##6c594b>Novice's Royal Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aWaffen-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_leggings_journeyman"
+		result: chainmail leggings of unbreaking 1 named "<##475b37>Journeyman's Royal Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aWaffen-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_leggings_adept"
+		result: chainmail leggings of unbreaking 2 named "<##385466>Adept's Royal Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aWaffen-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_leggings_expert"
+		result: chainmail leggings of unbreaking 2 named "<##77322c>Expert's Royal Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aWaffen-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_leggings_master"
+		result: chainmail leggings of unbreaking 3 named "<##aa6837>Master's Royal Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aWaffen-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aaa", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:royal_boots_novice"
+		result: chainmail boots named "<##6c594b>Novice's Royal Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_boots_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_boots_journeyman"
+		result: chainmail boots of unbreaking 1 named "<##475b37>Journeyman's Royal Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_boots_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_boots_adept"
+		result: chainmail boots of unbreaking 2 named "<##385466>Adept's Royal Boots" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_boots_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_boots_expert"
+		result: chainmail boots of unbreaking 2 named "<##77322c>Expert's Royal Boots" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_boots_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+	register shaped recipe:
+		id: "custom:royal_boots_master"
+		result: chainmail boots of unbreaking 3 named "<##aa6837>Master's Royal Boots" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: Erhöht den Schaden um &c{@royal_boots_damage_buff}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
+
+
+	register shaped recipe:
+		id: "custom:feyscale_helmet_novice"
+		result: chainmail helmet named "<##6c594b>Novice's Feyscale Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_helmet_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_helmet_journeyman"
+		result: chainmail helmet of unbreaking 1 named "<##475b37>Journeyman's Feyscale Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_helmet_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_helmet_adept"
+		result: chainmail helmet of unbreaking 2 named "<##385466>Adept's Feyscale Helmet" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_helmet_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_helmet_expert"
+		result: chainmail helmet of unbreaking 2 named "<##77322c>Expert's Feyscale Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_helmet_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_helmet_master"
+		result: chainmail helmet of unbreaking 3 named "<##aa6837>Master's Feyscale Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_helmet_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+
+	register shaped recipe:
+		id: "custom:feyscale_chestplate_novice"
+		result: chainmail chestplate named "<##6c594b>Novice's Feyscale Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &aLeg-Armor-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_chestplate_journeyman"
+		result: chainmail chestplate of unbreaking 1 named "<##475b37>Journeyman's Feyscale Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &aLeg-Armor-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_chestplate_adept"
+		result: chainmail chestplate of unbreaking 2 named "<##385466>Adept's Feyscale Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &aLeg-Armor-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_chestplate_expert"
+		result: chainmail chestplate of unbreaking 2 named "<##77322c>Expert's Feyscale Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &aLeg-Armor-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_chestplate_master"
+		result: chainmail chestplate of unbreaking 3 named "<##aa6837>Master's Feyscale Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &ffür einen &aLeg-Armor-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+
+	register shaped recipe:
+		id: "custom:feyscale_leggings_novice"
+		result: chainmail leggings named "<##6c594b>Novice's Feyscale Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aChestplate-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_leggings_journeyman"
+		result: chainmail leggings of unbreaking 1 named "<##475b37>Journeyman's Feyscale Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aChestplate-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_leggings_adept"
+		result: chainmail leggings of unbreaking 2 named "<##385466>Adept's Feyscale Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aChestplate-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_leggings_expert"
+		result: chainmail leggings of unbreaking 2 named "<##77322c>Expert's Feyscale Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aChestplate-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_leggings_master"
+		result: chainmail leggings of unbreaking 3 named "<##aa6837>Master's Feyscale Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &ffür einen &aChestplate-Cooldown Reset&f!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+
+	register shaped recipe:
+		id: "custom:feyscale_boots_novice"
+		result: chainmail boots named "<##6c594b>Novice's Feyscale Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_boots_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_boots_journeyman"
+		result: chainmail boots of unbreaking 1 named "<##475b37>Journeyman's Feyscale Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_boots_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_boots_adept"
+		result: chainmail boots of unbreaking 2 named "<##385466>Adept's Feyscale Boots" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_boots_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_boots_expert"
+		result: chainmail boots of unbreaking 2 named "<##77322c>Expert's Feyscale Boots" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_boots_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+	register shaped recipe:
+		id: "custom:feyscale_boots_master"
+		result: chainmail boots of unbreaking 3 named "<##aa6837>Master's Feyscale Boots" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: Verringert deinen &aWaffen-Cooldown&f um &b{@feyscale_boots_reduce}%%&f!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!"
+
+
+
+
+
+	register shaped recipe:
+		id: "custom:cultist_helmet_novice"
+		result: chainmail helmet named "<##6c594b>Novice's Cultist Helmet" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_helmet_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_helmet_journeyman"
+		result: chainmail helmet of unbreaking 1 named "<##475b37>Journeyman's Cultist Helmet" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_helmet_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_helmet_adept"
+		result: chainmail helmet of unbreaking 2 named "<##385466>Adept's Cultist Helmet" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_helmet_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_helmet_expert"
+		result: chainmail helmet of unbreaking 2 named "<##77322c>Expert's Cultist Helmet" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_helmet_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_helmet_master"
+		result: chainmail helmet of unbreaking 3 named "<##aa6837>Master's Cultist Helmet" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_helmet_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+
+	register shaped recipe:
+		id: "custom:cultist_chestplate_novice"
+		result: chainmail chestplate named "<##6c594b>Novice's Cultist Chestplate" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &fum deinen Angriffen &cBleed Build Up &fhinzuzufügen!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_chestplate_journeyman"
+		result: chainmail chestplate of unbreaking 1 named "<##475b37>Journeyman's Cultist Chestplate" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &fum deinen Angriffen &cBleed Build Up &fhinzuzufügen!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_chestplate_adept"
+		result: chainmail chestplate of unbreaking 2 named "<##385466>Adept's Cultist Chestplate" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &fum deinen Angriffen &cBleed Build Up &fhinzuzufügen!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_chestplate_expert"
+		result: chainmail chestplate of unbreaking 2 named "<##77322c>Expert's Cultist Chestplate" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &fum deinen Angriffen &cBleed Build Up &fhinzuzufügen!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_chestplate_master"
+		result: chainmail chestplate of unbreaking 3 named "<##aa6837>Master's Cultist Chestplate" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dLinksklick &fum deinen Angriffen &cBleed Build Up &fhinzuzufügen!" and "&fTag: &bArmor"
+		shape: "a a", "aba", "aaa"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+
+	register shaped recipe:
+		id: "custom:cultist_leggings_novice"
+		result: chainmail leggings named "<##6c594b>Novice's Cultist Leg Armor" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &fum einen &cBloody-Slash &fauszuführen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_leggings_journeyman"
+		result: chainmail leggings of unbreaking 1 named "<##475b37>Journeyman's Cultist Leg Armor" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &fum einen &cBloody-Slash &fauszuführen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_leggings_adept"
+		result: chainmail leggings of unbreaking 2 named "<##385466>Adept's Cultist Leg Armor" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &fum einen &cBloody-Slash &fauszuführen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_leggings_expert"
+		result: chainmail leggings of unbreaking 2 named "<##77322c>Expert's Cultist Leg Armor" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &fum einen &cBloody-Slash &fauszuführen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_leggings_master"
+		result: chainmail leggings of unbreaking 3 named "<##aa6837>Master's Cultist Leg Armor" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: &aDrücke &dShift Linksklick &fum einen &cBloody-Slash &fauszuführen!" and "&fTag: &bArmor"
+		shape: "aba", "a a", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+
+	register shaped recipe:
+		id: "custom:cultist_boots_novice"
+		result: chainmail boots named "<##6c594b>Novice's Cultist Boots" with lore "&fTier: <##6c594b>Novice", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_boots_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_boots_journeyman"
+		result: chainmail boots of unbreaking 1 named "<##475b37>Journeyman's Cultist Boots" with lore "&fTier: <##475b37>Journeyman", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_boots_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_boots_adept"
+		result: chainmail boots of unbreaking 2 named "<##385466>Adept's Cultist Boots" with lore "&fTier: <##385466>Adept", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_boots_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_boots_expert"
+		result: chainmail boots of unbreaking 2 named "<##77322c>Expert's Cultist Boots" with lore "&fTier: <##77322c>Expert", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_boots_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"
+	register shaped recipe:
+		id: "custom:cultist_boots_master"
+		result: chainmail boots of unbreaking 3 named "<##aa6837>Master's Cultist Boots" with lore "&fTier: <##aa6837>Master", "&fType: &bMagic", "&fAbility: Fügt &c{@cultist_boots_bleed_build_up} Bleed Build Up &fhinzu!" and "&fTag: &bArmor"
+		shape: "   ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!"

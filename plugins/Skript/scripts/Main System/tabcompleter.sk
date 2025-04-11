@@ -1,0 +1,15 @@
+on tab complete:
+	event-string is "/AddCity":
+		set tab completions for position 1 to {cities::*}
+	event-string is "/RemoveCity":
+		set tab completions for position 1 to {cities::*}
+
+	event-string is "/SetMobSpawn":
+		set tab completions for position 1 to {mob.spawns::*}
+	event-string is "/RemoveMobSpawn":
+		set tab completions for position 1 to {mob.spawns::*}
+
+	event-string is "/SetPrayerPoint":
+		set tab completions for position 1 to {pray.points::*}
+	event-string is "/RemovePrayerPoint":
+		set tab completions for position 1 to {pray.points::*}

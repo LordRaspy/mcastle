@@ -1,0 +1,227 @@
+options:
+
+	#Weapons and Armor
+
+	#10 power = 1% mehr Schaden , 1% weniger Damage
+	power_divider: 1000
+
+	crit_multiplicator: 1.5 #Crit Multiplicator for the Damage (Custom)
+
+	bleed_needed: 50
+	bleed_damage_percent: 0.333
+
+
+	novice_damage_buff: 0.05
+	journeyman_damage_buff: 0.1
+	adept_damage_buff: 0.15
+	expert_damage_buff: 0.2
+	master_damage_buff: 0.25
+
+
+	#Durch 4, die gesamte Rüstung gibt 5% (bei Novice) damage Reduction
+	novice_damage_reduce: 0.05
+	journeyman_damage_reduce: 0.1
+	adept_damage_reduce: 0.15
+	expert_damage_reduce: 0.2
+	master_damage_reduce: 0.25
+
+	# Abilities
+	guardian_leggings_damage_reduce: 0.666
+
+	guardian_helmet_damage_reduce: 0.1
+
+	guardian_boots_damage_reduce: 0.05
+
+	knight_chestplate_damage_reflect: 0.25
+
+	hunter_helmet_crit: 10
+	hunter_boots_crit: 5
+
+	assassin_leg_armor_add: 0.25
+
+	royal_helmet_damage_add: 0.1
+	royal_boots_damage_add: 0.05
+
+	cultist_helmet_bleed_build_up: 2
+	cultist_chestplate_bleed_build_up: 2
+	cultist_boots_bleed_build_up: 1
+
+function calculateDamage(damage: number, entity: entity) :: number:
+    set {_armorValue} to generic armor total attribute value of {_entity}
+    set {_armorToughnessValue} to generic armor toughness total attribute value of {_entity}
+    set {_potionEffects::*} to active potion effects of {_entity}
+    set {_protection} to (level of protection of {_entity}'s helmet) + (level of protection of {_entity}'s chestplate) + (level of protection of {_entity}'s leggings) + (level of protection of {_entity}'s boots)
+
+    set {_resistanceLevel} to 0
+    loop {_potionEffects::*}:
+        loop-value's type is resistance
+        set {_resistanceLevel} to potion effect tier of loop-value
+
+    set {_newDamage} to {_damage} * (1 - min(20, max({_armorValue} / 5, {_armorValue} - {_damage} / (2+{_armorToughnessValue}/4)))/25) * (1 - min({_protection}, 20) / 25) * (1 - min({_resistanceLevel}, 5) / 5)
+    return {_newDamage}
+
+
+
+function getdamage(attacker: entity, victim: entity, damage: number) :: number:
+	set {_multiplicator} to 1
+	set {_crit} to 0
+
+	if lore of {_attacker}'s tool contains "&fTag: &cWeapon":
+		if lore of {_attacker}'s tool contains "&fTier: <##6c594b>Novice":
+			add {@novice_damage_buff} to {_multiplicator}
+		if lore of {_attacker}'s tool contains "&fTier: <##475b37>Journeyman":
+			add {@journeyman_damage_buff} to {_multiplicator}
+		if lore of {_attacker}'s tool contains "&fTier: <##385466>Adept":
+			add {@adept_damage_buff} to {_multiplicator}
+		if lore of {_attacker}'s tool contains "&fTier: <##77322c>Expert":
+			add {@expert_damage_buff} to {_multiplicator}
+		if lore of {_attacker}'s tool contains "&fTier: <##aa6837>Master":
+			add {@master_damage_buff} to {_multiplicator}
+
+	if lore of {_victim}'s helmet contains "&fTag: &bArmor":
+		if lore of {_victim}'s helmet contains "&fTier: <##6c594b>Novice":
+			remove {@novice_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s helmet contains "&fTier: <##475b37>Journeyman":
+			remove {@journeyman_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s helmet contains "&fTier: <##385466>Adept":
+			remove {@adept_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s helmet contains "&fTier: <##77322c>Expert":
+			remove {@expert_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s helmet contains "&fTier: <##aa6837>Master":
+			remove {@master_damage_reduce} / 4 from {_multiplicator}
+
+	if lore of {_victim}'s chestplate contains "&fTag: &bArmor":
+		if lore of {_victim}'s chestplate contains "&fTier: <##6c594b>Novice":
+			remove {@novice_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s chestplate contains "&fTier: <##475b37>Journeyman":
+			remove {@journeyman_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s chestplate contains "&fTier: <##385466>Adept":
+			remove {@adept_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s chestplate contains "&fTier: <##77322c>Expert":
+			remove {@expert_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s chestplate contains "&fTier: <##aa6837>Master":
+			remove {@master_damage_reduce} / 4 from {_multiplicator}
+
+	if lore of {_victim}'s leggings contains "&fTag: &bArmor":
+		if lore of {_victim}'s leggings contains "&fTier: <##6c594b>Novice":
+			remove {@novice_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s leggings contains "&fTier: <##475b37>Journeyman":
+			remove {@journeyman_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s leggings contains "&fTier: <##385466>Adept":
+			remove {@adept_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s leggings contains "&fTier: <##77322c>Expert":
+			remove {@expert_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s leggings contains "&fTier: <##aa6837>Master":
+			remove {@master_damage_reduce} / 4 from {_multiplicator}
+
+	if lore of {_victim}'s boots contains "&fTag: &bArmor":
+		if lore of {_victim}'s boots contains "&fTier: <##6c594b>Novice":
+			remove {@novice_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s boots contains "&fTier: <##475b37>Journeyman":
+			remove {@journeyman_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s boots contains "&fTier: <##385466>Adept":
+			remove {@adept_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s boots contains "&fTier: <##77322c>Expert":
+			remove {@expert_damage_reduce} / 4 from {_multiplicator}
+		if lore of {_victim}'s boots contains "&fTier: <##aa6837>Master":
+			remove {@master_damage_reduce} / 4 from {_multiplicator}
+
+	# Abilities
+
+	if lore of {_victim}'s helmet contains "&fTag: &bArmor":
+		if name of {_victim}'s helmet contains "Guardian Helmet":
+			remove {@guardian_helmet_damage_reduce} from {_multiplicator}
+
+	if lore of {_victim}'s leggings contains "&fTag: &bArmor":
+		if name of {_victim}'s leggings contains "Guardian Leg Armor":
+			if {guardian.leg.armor.timer.%{_victim}'s uuid%} is set:
+				remove {@guardian_leggings_damage_reduce} from {_multiplicator}
+
+	if lore of {_victim}'s boots contains "&fTag: &bArmor":
+		if name of {_victim}'s boots contains "Guardian Boots":
+			remove {@guardian_boots_damage_reduce} from {_multiplicator}
+
+	if lore of {_attacker}'s helmet contains "&fTag: &bArmor":
+		if name of {_attacker}'s helmet contains "Hunter Helmet":
+			add {@hunter_helmet_crit} to {_crit}
+	if lore of {_attacker}'s boots contains "&fTag: &bArmor":
+		if name of {_attacker}'s boots contains "Hunter Boots":
+			add {@hunter_boots_crit} to {_crit}
+
+	if {assassin.leg.armor.timer.%{_attacker}'s uuid%} is set:
+		clear {assassin.leg.armor.timer.%{_attacker}'s uuid%}
+		add {@assassin_leg_armor_add} to {_multiplicator}
+		play sound "minecraft:entity.warden.sonic_boom" with volume 0.5 and pitch 1.5 at {_victim}
+		play 100 witch spell with offset of 1, 1, 1 and speed 1 at {_victim}
+
+	if lore of {_attacker}'s helmet contains "&fTag: &bArmor":
+		if name of {_attacker}'s helmet contains "Royal Helmet":
+			add {@royal_helmet_damage_add} to {_multiplicator}
+
+	if lore of {_attacker}'s boots contains "&fTag: &bArmor":
+		if name of {_attacker}'s boots contains "Royal Boots":
+			add {@royal_boots_damage_add} to {_multiplicator}
+
+	if lore of {_attacker}'s helmet contains "&fTag: &bArmor":
+		if name of {_attacker}'s helmet contains "Cultist Helmet":
+			add {@cultist_helmet_bleed_build_up} to {bleed.%{_victim}'s uuid%}
+
+	if lore of {_attacker}'s boots contains "&fTag: &bArmor":
+		if name of {_attacker}'s boots contains "Cultist Boots":
+			add {@cultist_boots_bleed_build_up} to {bleed.%{_victim}'s uuid%}
+
+
+	#Damage Calculation with Power
+
+	set {_nbt} to nbt compound of {_attacker}
+	set {_power.attacker} to int tag "custom;power" of {_nbt}
+	set {_nbt} to nbt compound of {_victim}
+	set {_power.victim} to int tag "custom;power" of {_nbt}
+	set {_damage} to {_damage} * ({_multiplicator} + {_power.attacker} / {@power_divider} - {_power.victim} / {@power_divider})
+	if {_damage} is below 0:
+		set {_damage} to 0
+
+	chance of {_crit}%:
+		set {_damage} to {_damage} * {@crit_multiplicator}
+
+
+	# Abilities
+	if lore of {_victim}'s chestplate contains "&fTag: &bArmor":
+		if name of {_victim}'s chestplate contains "Knight Chestplate":
+			if {knight.chestplate.armor.timer.%{_victim}'s uuid%} is set:
+				damage {_attacker} by {_damage} * {@knight_chestplate_damage_reflect}
+
+	if lore of {_victim}'s leggings contains "&fTag: &bArmor":
+		if name of {_victim}'s leggings contains "Knight Leg Armor":
+			if {knight.leg.armor.timer.%{_victim}'s uuid%} is set:
+				set {_damage} to 0
+
+
+	if {cultist.chestplate.armor.timer.%{_attacker}'s uuid%} is set:
+		add {@cultist_chestplate_bleed_build_up} to {bleed.%{_victim}'s uuid%}
+
+	if {bleed.%{_victim}'s uuid%} is above {@bleed_needed} -1:
+		clear {bleed.%{_victim}'s uuid%}
+		damage {_victim} by {@bleed_damage_percent} * {_victim}'s max health
+		draw 100 of item using redstone at {_victim} with offset vector(1, 1, 1) with extra 0.15
+		play sound "minecraft:entity.player.attack.crit" with volume 1 and pitch 1.4 at {_victim}
+		stop
+
+	if {block.frame.%{_victim}'s uuid%} is set:
+		damage {_attacker} by {_damage}
+		push {_attacker} backwards with speed 1.5
+		play 50 wax off with offset of 1, 1, 1 and speed 1 at {_victim}
+		play sound "minecraft:entity.player.attack.sweep" with volume 1 and pitch 2 at {_victim}
+		stop
+	return {_damage}
+
+
+on damage:
+	#Abilites
+	if lore of attacker's leggings contains "&fTag: &bArmor":
+		if name of attacker's leggings contains "Knight Leg Armor":
+			if {knight.leg.armor.timer.%attacker's uuid%} is set:
+				cancel event
+
+	set {_dam} to getdamage(attacker, victim, final damage)
+	set damage to {_dam}

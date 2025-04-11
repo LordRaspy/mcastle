@@ -1,0 +1,722 @@
+options:
+	p: &bSystem &f|
+
+	target_range: 10
+
+	drop_chance_book: 1
+	items_exist_book_books: 6
+
+	drop_chance_normal_loot: 3
+	items_exist_normal_loot: 4
+
+	gold_drop_chance: 20
+	min_gold_drop: 1
+	max_gold_drop: 3
+
+	#Automatic System
+
+	automatic_waves_base_divider: 33.3 #Divider für die %-Anzahl an Steigerung der Chance auf eine Erhöhung der Stufe, basierend auf der Difficulty
+	automatic_waves_base_divider_troops: 20 #Divider für die %-Anzahl an Steigerung der Chance auf eine Erhöhung der Mobs, basierend auf der Difficulty
+	automatic_waves_base_chance_add_troop: 10 #Chance in % in Abhängigkeit zur Difficulty eine permanente Moberhöhung zu erhalten
+
+	automatic_waves_time_min: 2400 #40min
+	automatic_waves_time_max: 3600 #60min
+
+	automatic_waves_base_add: 1 #Base add an Mobs pro Wave, selbst ohne chance
+
+	automatic_waves_tier_2_min: 3 #Die niedrigste Runde, in der Tier X Mobs auftreten können
+	automatic_waves_tier_3_min: 5
+	automatic_waves_tier_4_min: 7
+
+	automatic_waves_base_chance_tier_2: 25 #Die Chance auf einen Mob der Stufe X nach Freischaltung und in Abhängigkeit zur difficulty und dem Base Divider
+	automatic_waves_base_chance_tier_3: 10
+	automatic_waves_base_chance_tier_4: 7.5
+
+	automatic_waves_player_count: 10 #Anzahl an Spielern, damit das System die volle Stärke verwendet. Über 10 wird ein Buff von automatic_waves_player_above_add hinzugefügt.
+	automatic_waves_player_above_add: 0.05 #Anzahl des addierten Multipliers pro Spieler in %, nachdem das cap erreicht wurde.
+
+	#Automatic Spawns outside
+
+	amount_spawns_per_player: 4 #Max Anzahl pro mal an Spawns pro Spieler draußen
+	amount_allowed_nearby: 15 #Max Anzahl an Mobs die in der nähe vom Spieler erlaubt sind (32Blöcke)
+
+	prevent_mob_spawns_radius: 60
+
+	mob_clear_timer: 3600
+
+	#Mobs
+
+	tier_1_warrior_max_health: 15
+	tier_1_warrior_power_min: 10 # Zombie
+	tier_1_warrior_power_max: 100
+
+	tier_1_archer_max_health: 10
+	tier_1_archer_power_min: 10 # Skeleton
+	tier_1_archer_power_max: 125
+
+	tier_1_horseman_max_health: 30
+	tier_1_horseman_power_min: 50 # Zombie & Skeleton Horse
+	tier_1_horseman_power_max: 150
+
+	tier_1_creature_max_health: 15
+	tier_1_creature_power_min: 150 # Zombie
+	tier_1_creature_power_max: 200
+
+
+	tier_2_warrior_max_health: 20
+	tier_2_warrior_power_min: 60 # Zombie
+	tier_2_warrior_power_max: 160
+	
+	tier_2_archer_max_health: 15
+	tier_2_archer_power_min: 70 # Skeleton
+	tier_2_archer_power_max: 185
+	
+	tier_2_horseman_max_health: 35
+	tier_2_horseman_power_min: 110 # Zombie & Skeleton Horse
+	tier_2_horseman_power_max: 210
+
+	tier_2_creature_max_health: 20
+	tier_2_creature_power_min: 210 # Zombie
+	tier_2_creature_power_max: 260
+
+	
+	tier_3_warrior_max_health: 30
+	tier_3_warrior_power_min: 120 # Vindicator (No Armor)
+	tier_3_warrior_power_max: 240
+	
+	tier_3_archer_max_health: 25
+	tier_3_archer_power_min: 130 # Pillager 
+	tier_3_archer_power_max: 245
+	
+	tier_3_horseman_max_health: 45
+	tier_3_horseman_power_min: 170 # Pillager & Revanger
+	tier_3_horseman_power_max: 270
+
+	tier_3_creature_max_health: 30
+	tier_3_creature_power_min: 270 # Vex (No Armor)
+	tier_3_creature_power_max: 340
+
+
+	tier_4_warrior_max_health: 50
+	tier_4_warrior_power_min: 180 # Wither Skeleton
+	tier_4_warrior_power_max: 300
+	
+	tier_4_archer_max_health: 45
+	tier_4_archer_power_min: 190 # Pillager
+	tier_4_archer_power_max: 305
+	
+	tier_4_horseman_max_health: 65
+	tier_4_horseman_power_min: 230 # Wither Skeleton & Revanger
+	tier_4_horseman_power_max: 330
+
+	tier_4_creature_max_health: 50
+	tier_4_creature_power_min: 330 # Illusioner (No Armor)
+	tier_4_creature_power_max: 400
+
+
+variables:
+	{wave.tier.1.mobs} = 5
+	{wave.tier.2.mobs} = 3
+	{wave.tier.3.mobs} = 0
+	{wave.tier.4.mobs} = 0
+	{automatic.wave.management.difficulty} = 1
+	{automatic.waves.management.count} = 0
+
+
+
+#----Mob Spawning & Power System----
+
+
+command /SetMobSpawn [<text>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if {mob.spawn.%arg 1%} is not set:
+				set {mob.spawn.%arg 1%} to player's location
+				add arg 1 to {mob.spawns::*}
+				send "{@p} Mob Spawn ""%arg 1%"" has been set!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+			else:
+				send "{@p} Es gibt diesesn Spawn bereits!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+command /RemoveMobSpawn [<text>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if {mob.spawn.%arg 1%} is set:
+				clear {mob.spawn.%arg 1%}
+				remove arg 1 from {mob.spawns::*}
+				send "{@p} Mob Spawn ""%arg 1%"" has been removed!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+			else:
+				send "{@p} Es gibt keinen Spawn namens ""%arg 1%""!"
+		else:
+			send "{@p} Du bist kein Admin!"
+		
+command /GetMobSpawns:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			loop {mob.spawns::*}:
+				send "{@p} Mob Spawn ""%loop-value%"" : %{mob.spawn.%loop-value%}%"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+#----Menu & Menu functions----
+
+command /Darkness:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if {automatic.wave.management.active} is not set:
+				set {_management.active} to "&cNo"
+			else:
+				set {_management.active} to "&aYes"
+			set {automatic.waves.management.count} to {wave.tier.1.mobs} + {wave.tier.2.mobs} + {wave.tier.3.mobs} + {wave.tier.4.mobs}
+			set {_multiplier} to calculateplayercount()
+			play sound "minecraft:entity.experience_orb.pickup" to player
+			set {_gui} to a new chest inventory with 2 rows with name "&7System | Army System"
+			set slot 1 of {_gui} to wooden sword named "&aTier 1 Troops" with lore "&fTier 1 Troops: &a%{wave.tier.1.mobs}%", "", "&fPress &dleftclick&f to add 1 Tier 1 mob!" and "&fPress &drightclick&f to remove 1 Tier 1 mob!"
+			set slot 3 of {_gui} to stone sword named "&bTier 2 Troops" with lore "&fTier 2 Troops: &b%{wave.tier.2.mobs}%", "", "&fPress &dleftclick&f to add 1 Tier 2 mob!" and "&fPress &drightclick&f to remove 1 Tier 2 mob!"
+			set slot 5 of {_gui} to iron sword named "&cTier 3 Troops" with lore "&fTier 3 Troops: &c%{wave.tier.3.mobs}%", "", "&fPress &dleftclick&f to add 1 Tier 3 mob!" and "&fPress &drightclick&f to remove 1 Tier 3 mob!"
+			set slot 7 of {_gui} to netherite sword named "&eTier 4 Troops" with lore "&fTier 4 Troops: &e%{wave.tier.4.mobs}%", "", "&fPress &dleftclick&f to add 1 Tier 4 mob!" and "&fPress &drightclick&f to remove 1 Tier 4 mob!"
+			set slot 13 of {_gui} to zombie skull named "&aStart Wave" with lore "&fTier 1 Troops: &a%{wave.tier.1.mobs}%", "&fTier 2 Troops: &b%{wave.tier.2.mobs}%", "&fTier 3 Troops: &c%{wave.tier.3.mobs}%", "&fTier 4 Troops: &e%{wave.tier.4.mobs}%", "", "&fPress &dleftclick&f to start the wave!" and "&fPress &drightclick&f to clear the wave!"
+			set slot 16 of {_gui} to brewing stand named "&bAutomatic Wave Management" with lore "&fActive: %{_management.active}%", "&fTimer: &b%{automatic.wave.management.timer} / 60%min", "&fDifficulty: &b%{automatic.wave.management.difficulty}%", "" and "&fPress &dleftclick&f to change the state!"
+			set slot 17 of {_gui} to leather horse armor named "&bEdit Wave Strength" with lore "&fDifficulty: &b%{automatic.wave.management.difficulty}%", "&fMobs: &c%{automatic.waves.management.count}%", "&fPlayers: &b%amount of players% &f/ &b{@automatic_waves_player_count}&f = &c%{_multiplier} * 100%%%", "&fBase-Add: &c{@automatic_waves_base_add}", "&fChance auf zusätzliche Mobs: &c%{@automatic_waves_base_chance_add_troop} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider_troops})%%% (%{automatic.wave.management.difficulty}%x)", "", "&fTier 2 Mob Chance: &c%{@automatic_waves_base_chance_tier_2} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider})% &f(ab Difficulty &b{@automatic_waves_tier_2_min}&f)", "&fTier 3 Mob Chance: &c%{@automatic_waves_base_chance_tier_3} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider})% &f(ab Difficulty &b{@automatic_waves_tier_3_min}&f)", "&fTier 4 Mob Chance: &c%{@automatic_waves_base_chance_tier_4} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider})% &f(ab Difficulty &b{@automatic_waves_tier_4_min}&f)", "", "&fPress &dleftclick&f to add 1 point!" and "&fPress &drightclick&f to remove 1 point!"
+			open {_gui} to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+on inventory click:
+	if name of event-inventory is "&7System | Army System":
+		cancel event
+		if index of event-slot = 1:
+			if click type = left mouse button:
+				add 1 to {wave.tier.1.mobs}
+				make player execute command "/Darkness"
+			if click type = right mouse button:
+				if {wave.tier.1.mobs} is not 0:
+					remove 1 from {wave.tier.1.mobs}
+					make player execute command "/Darkness"
+
+		if index of event-slot = 3:
+			if click type = left mouse button:
+				add 1 to {wave.tier.2.mobs}
+				make player execute command "/Darkness"
+			if click type = right mouse button:
+				if {wave.tier.2.mobs} is not 0:
+					remove 1 from {wave.tier.2.mobs}
+					make player execute command "/Darkness"
+
+		if index of event-slot = 5:
+			if click type = left mouse button:
+				add 1 to {wave.tier.3.mobs}
+				make player execute command "/Darkness"
+			if click type = right mouse button:
+				if {wave.tier.3.mobs} is not 0:
+					remove 1 from {wave.tier.3.mobs}
+					make player execute command "/Darkness"
+
+		if index of event-slot = 7:
+			if click type = left mouse button:
+				add 1 to {wave.tier.4.mobs}
+				make player execute command "/Darkness"
+			if click type = right mouse button:
+				if {wave.tier.4.mobs} is not 0:
+					remove 1 from {wave.tier.4.mobs}
+					make player execute command "/Darkness"
+
+		if index of event-slot = 13:
+
+			if click type = right mouse button:
+				set {wave.tier.1.mobs} to 0
+				set {wave.tier.2.mobs} to 0
+				set {wave.tier.3.mobs} to 0
+				set {wave.tier.4.mobs} to 0
+				make player execute command "/Darkness"
+
+			if click type = left mouse button:
+				close player's inventory
+				startwave(players)
+
+		if index of event-slot = 16:
+			if click type = left mouse button:
+				if {automatic.wave.management.active} is not set:
+					set {automatic.wave.management.active} to true
+					wait 1 second
+					make player execute command "/Darkness"
+				else:
+					clear {automatic.wave.management.active}
+					wait 1 second
+					make player execute command "/Darkness"
+
+		if index of event-slot = 17:
+			if click type = left mouse button:
+				add 1 to {automatic.wave.management.difficulty}
+				make player execute command "/Darkness"
+			if click type = right mouse button:
+				if {automatic.wave.management.difficulty} is not 0:
+					remove 1 from {automatic.wave.management.difficulty}
+					make player execute command "/Darkness"
+
+#Automatic Waves & Start Waves
+
+every second:
+	if {automatic.wave.management.active} is set:
+		if {automatic.wave.management.timer} is not set:
+			set {automatic.wave.management.timer} to random integer between {@automatic_waves_time_min} and {@automatic_waves_time_max}
+		else:
+			if amount of players >= 1:
+				remove 1 from {automatic.wave.management.timer}
+				if {automatic.wave.management.timer} is below 1:
+					startwave(players)
+	else:
+		clear {automatic.wave.management.timer}
+
+function calculateplayercount() :: number:
+	set {_multiplier} to amount of players / {@automatic_waves_player_count}
+	if {_multiplier} > 1:
+		set {_multiplier} to 1
+		add (amount of players - {@automatic_waves_player_count}) * {@automatic_waves_player_above_add} to {_multiplier}
+	return {_multiplier}
+
+function adjustdifficulty():
+	set {automatic.waves.management.count} to {wave.tier.1.mobs} + {wave.tier.2.mobs} + {wave.tier.3.mobs} + {wave.tier.4.mobs}
+	add {@automatic_waves_base_add} to {automatic.waves.management.count}
+	loop {automatic.wave.management.difficulty} times:
+		chance of {@automatic_waves_base_chance_add_troop} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider_troops})%:
+			add 1 to {automatic.waves.management.count}
+	set {wave.tier.1.mobs} to 0
+	set {wave.tier.2.mobs} to 0
+	set {wave.tier.3.mobs} to 0
+	set {wave.tier.4.mobs} to 0
+	loop {automatic.waves.management.count} times:
+		if {automatic.wave.management.difficulty} is above {@automatic_waves_tier_4_min} -1:
+			chance of {@automatic_waves_base_chance_tier_4} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider})%:
+				add 1 to {wave.tier.4.mobs}
+				continue
+		if {automatic.wave.management.difficulty} is above {@automatic_waves_tier_3_min} -1:
+			chance of {@automatic_waves_base_chance_tier_3} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider})%:
+				add 1 to {wave.tier.3.mobs}
+				continue
+		if {automatic.wave.management.difficulty} is above {@automatic_waves_tier_2_min} -1:
+			chance of {@automatic_waves_base_chance_tier_2} * (1 + {automatic.wave.management.difficulty} / {@automatic_waves_base_divider})%:
+				add 1 to {wave.tier.2.mobs}
+				continue
+		add 1 to {wave.tier.1.mobs}
+	add 1 to {automatic.wave.management.difficulty}
+
+
+function startwave(e: players):
+	clear {automatic.wave.management.timer}
+	set {_spawn} to random element out of {mob.spawns::*}
+	play sound "minecraft:entity.ender_dragon.ambient" to {_e::*}
+	send title "&cThe Darkness is approaching!" to {_e::*}
+	send subtitle "&4Defend the Bastion!" to {_e::*}
+	send "{@p} Die Mobs greifen von ""%{_spawn}%"" an!" to {_e::*}
+	set {_multiplier} to calculateplayercount()
+	set {_tier1} to ceil({wave.tier.1.mobs} * {_multiplier})
+	set {_tier2} to ceil({wave.tier.2.mobs} * {_multiplier})
+	set {_tier3} to ceil({wave.tier.3.mobs} * {_multiplier})
+	set {_tier4} to ceil({wave.tier.4.mobs} * {_multiplier})
+	loop {_tier1} times:
+		set {_mobtype} to random integer between 1 and 4
+		if {_mobtype} is 1:
+			spawn zombie at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_1_warrior_power_min} and {@tier_1_warrior_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dKnight's Subordinate | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_1_warrior_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable iron helmet
+			equip last spawned entity with unbreakable iron chestplate
+			set last spawned entity's held item to unbreakable iron sword
+		if {_mobtype} is 2:
+			spawn skeleton at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_1_archer_power_min} and {@tier_1_archer_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dProven Archer's Subordinate | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_1_archer_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable iron helmet
+			equip last spawned entity with unbreakable iron chestplate
+		if {_mobtype} is 3:
+			spawn zombie at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_mob} to last spawned entity
+			spawn skeleton horse at {mob.spawn.%{_spawn}%}
+			make {_mob} ride the last spawned skeleton horse
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_1_horseman_power_min} and {@tier_1_horseman_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of {_mob}
+			set int tag "power" of {_custom} to {_power}
+			set name of {_mob} to "&dMounted Knight's Subordinate | Power: &d%{_power}%"
+			set max health of {_mob} to {@tier_1_horseman_max_health}
+			heal {_mob}
+			equip {_mob} with unbreakable golden helmet
+			equip {_mob} with unbreakable iron chestplate
+			set {_mob}'s held item to unbreakable iron sword
+		if {_mobtype} is 4:
+			spawn zombie at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_1_creature_power_min} and {@tier_1_creature_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dCreature of the Dark | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_1_creature_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable leather helmet
+			set last spawned entity's held item to unbreakable iron sword
+	loop {_tier2} times:
+		set {_mobtype} to random integer between 1 and 4
+		if {_mobtype} is 1:
+			spawn zombie at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_2_warrior_power_min} and {@tier_2_warrior_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dKnight | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_2_warrior_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable iron helmet
+			equip last spawned entity with unbreakable iron chestplate
+			equip last spawned entity with unbreakable iron leggings
+			equip last spawned entity with unbreakable iron boots
+			set last spawned entity's held item to unbreakable iron sword
+			set last spawned entity's offhand item to unbreakable shield
+		if {_mobtype} is 2:
+			spawn skeleton at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_2_archer_power_min} and {@tier_2_archer_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dProven Archer | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_2_archer_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable iron helmet
+			equip last spawned entity with unbreakable iron chestplate
+			equip last spawned entity with unbreakable iron leggings
+			equip last spawned entity with unbreakable iron boots
+		if {_mobtype} is 3:
+			spawn zombie at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_mob} to last spawned entity
+			spawn skeleton horse at {mob.spawn.%{_spawn}%}
+			make {_mob} ride the last spawned skeleton horse
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_2_horseman_power_min} and {@tier_2_horseman_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of {_mob}
+			set int tag "power" of {_custom} to {_power}
+			set name of {_mob} to "&dMounted Knight | Power: &d%{_power}%"
+			set max health of {_mob} to {@tier_2_horseman_max_health}
+			heal {_mob}
+			equip {_mob} with unbreakable golden helmet
+			equip {_mob} with unbreakable iron chestplate
+			equip {_mob} with unbreakable iron leggings
+			equip {_mob} with unbreakable iron boots
+			set {_mob}'s held item to unbreakable iron sword
+		if {_mobtype} is 4:
+			spawn zombie at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_2_creature_power_min} and {@tier_2_creature_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dCreature of the Dark LvL. 2 | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_2_creature_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable leather helmet
+			set last spawned entity's held item to unbreakable iron sword
+	loop {_tier3} times:
+		set {_mobtype} to random integer between 1 and 4
+		if {_mobtype} is 1:
+			spawn vindicator at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_3_warrior_power_min} and {@tier_3_warrior_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dKing's Guardian | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_3_warrior_max_health}
+			heal last spawned entity
+		if {_mobtype} is 2:
+			spawn pillager at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_3_archer_power_min} and {@tier_3_archer_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dQueen's Guardian | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_3_archer_max_health}
+			heal last spawned entity
+			equip last spawned entity with unbreakable iron helmet of protection 2
+			equip last spawned entity with unbreakable diamond chestplate of protection 2
+			equip last spawned entity with unbreakable iron leggings of protection 2
+			equip last spawned entity with unbreakable iron boots of protection 2
+			set last spawned entity's held item to unbreakable crossbow of power 2
+		if {_mobtype} is 3:
+			spawn pillager at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_mob} to last spawned entity
+			spawn ravager at {mob.spawn.%{_spawn}%}
+			make {_mob} ride the last spawned ravager
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_3_horseman_power_min} and {@tier_3_horseman_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of {_mob}
+			set int tag "power" of {_custom} to {_power}
+			set name of {_mob} to "&dKnight Brigades Leader | Power: &d%{_power}%"
+			set max health of {_mob} to {@tier_3_horseman_max_health}
+			heal {_mob}
+			equip {_mob} with unbreakable iron helmet of protection 2
+			equip {_mob} with unbreakable diamond chestplate of protection 2
+			equip {_mob} with unbreakable iron leggings of protection 2
+			equip {_mob} with unbreakable iron boots of protection 2
+			set {_mob}'s held item to unbreakable crossbow of power 2
+		if {_mobtype} is 4:
+			spawn vex at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_3_creature_power_min} and {@tier_3_creature_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dFlying Death | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_3_creature_max_health}
+			heal last spawned entity
+	loop {_tier4} times:
+		set {_mobtype} to random integer between 1 and 4						
+		if {_mobtype} is 1:
+			spawn wither skeleton at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_4_warrior_power_min} and {@tier_4_warrior_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dKing's Servant | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_4_warrior_max_health}
+			heal last spawned entity
+			equip last spawned entity with netherite helmet
+			equip last spawned entity with netherite chestplate
+			equip last spawned entity with netherite leggings
+			equip last spawned entity with netherite boots
+			set last spawned entity's tool to netherite sword of sharpness 2
+		if {_mobtype} is 2:
+			spawn pillager at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_4_archer_power_min} and {@tier_4_archer_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&d Queen's Servant | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_4_archer_max_health}
+			heal last spawned entity						
+			equip last spawned entity with netherite helmet
+			equip last spawned entity with netherite chestplate
+			equip last spawned entity with netherite leggings
+			equip last spawned entity with netherite boots
+			set last spawned entity's tool to unbreakable crossbow of power 2
+		if {_mobtype} is 3:
+			spawn wither skeleton at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_mob} to last spawned entity
+			spawn ravager at {mob.spawn.%{_spawn}%}
+			make {_mob} ride the last spawned ravager
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_4_horseman_power_min} and {@tier_4_horseman_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of {_mob}
+			set int tag "power" of {_custom} to {_power}
+			set name of {_mob} to "&dRoyal Beast Rider | Power: &d%{_power}%"
+			set max health of {_mob} to {@tier_4_horseman_max_health}
+			heal {_mob}
+			equip {_mob} with netherite helmet
+			equip {_mob} with netherite chestplate
+			equip {_mob} with netherite leggings
+			equip {_mob} with netherite boots
+			set {_mob}'s tool to netherite sword of sharpness 2
+		if {_mobtype} is 4:
+			spawn illusioner at {mob.spawn.%{_spawn}%}
+			add last spawned entity to {enemy.list::*}
+			set {_power} to random integer between {@tier_4_creature_power_min} and {@tier_4_creature_power_max}
+			set {_custom} to compound tag "custom" of nbt compound of last spawned entity
+			set int tag "power" of {_custom} to {_power}
+			set name of last spawned entity to "&dRoyal Mage | Power: &d%{_power}%"
+			set max health of last spawned entity to {@tier_4_creature_max_health}
+			heal last spawned entity
+	if {automatic.wave.management.active} is set:
+		adjustdifficulty()
+
+#----Item Drops----
+
+on death:
+	if victim is a mob:
+		if {enemy.list::*} or {hostile.mob.aktive::*} contains victim:
+			chance of {@drop_chance_book}%:
+				set {_drop} to random integer between 1 and {@items_exist_book_books}
+				if {_drop} is 1:
+					drop 1 book named "&dKnight's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dKnight&f!" at victim
+					play 15 purple potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim
+				if {_drop} is 2:
+					drop 1 book named "&dSoldier's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dSoldier&f!" at victim
+					play 15 purple potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim			
+				if {_drop} is 3:
+					drop 1 book named "&dMercenary's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dMercenary&f!" at victim
+					play 15 purple potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim			
+				if {_drop} is 4:
+					drop 1 book named "&dAssassin's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dAssassin&f!" at victim
+					play 15 purple potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim			
+				if {_drop} is 5:
+					drop 1 book named "&dFeyscale's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dFeyscale&f!" at victim
+					play 15 purple potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim
+				if {_drop} is 6:
+					drop 1 book named "&dCultist's Knowledge" with lore "" and "&fA rare book that contains the knowledge of a &dCultist&f!" at victim
+					play 15 purple potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim
+			chance of {@drop_chance_normal_loot}%:
+				set {_drop} to random integer between 1 and {@items_exist_normal_loot}
+				if {_drop} is 1:
+					drop string at victim
+					play 15 blue potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim	
+				if {_drop} is 2:
+					drop ice at victim
+					play 15 blue potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim
+				if {_drop} is 3:
+					drop ender pearl at victim
+					play 15 blue potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim
+				if {_drop} is 4:
+					drop blaze rod at victim
+					play 15 blue potion swirl with offset of 1, 1, 1 and speed 1 at victim
+					play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at victim
+
+#----Pathfinding----
+
+
+command /ClearMobs:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if {enemy.list::*}  or {hostile.mob.aktive::*} is set:
+				loop {enemy.list::*}:
+					kill loop-value
+				clear {enemy.list::*}
+				loop {hostile.mob.aktive::*}:
+					kill loop-value
+				clear {hostile.mob.aktive::*}
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				send "{@p} Mobs has been cleared up!"
+			else:
+				send "{@p} Nothing to clear!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+on stop:
+	loop {enemy.list::*}:
+		kill loop-value
+	clear {enemy.list::*}
+	loop {hostile.mob.aktive::*}:
+		kill loop-value
+	clear {hostile.mob.aktive::*}
+
+on death:
+	if {enemy.list::*} contains victim:
+		remove victim from {enemy.list::*}
+	if {hostile.mob.aktive::*} contains victim:
+		remove victim from {hostile.mob.aktive::*}
+
+on entity target:
+	if {enemy.list::*} contains entity:
+		if entity's targeted entity is a player:
+			if {admin.%target's uuid%} is set:
+				cancel event
+			if distance between entity and entity's targeted entity is above {@target_range}:
+				cancel event
+		else:
+			cancel event
+
+every second:
+	loop {enemy.list::*}:
+		loop {cities::*}:
+			add distance between loop-value-1 and {city.block.%loop-value-2%} to {_distances::*}
+			add {city.block.%loop-value-2%} to {_end.locations::*}
+		set {_distance} to min({_distances::*})
+		loop {_end.locations::*}:
+			if distance between loop-value-1 and loop-value-2 is {_distance}:
+				set path target of loop-value-1 to location of loop-value-2
+		clear {_distances::*}
+		clear {_end.locations::*}
+		clear {_distance}
+
+
+
+#Beabsichtigt nicht in die Damage Calculation geschrieben, um Mob Farming via Stab zu verhindern.
+on death:
+	if victim is a mob:
+		if attacker is a player:
+			if {enemy.list::*} contains entity:
+				chance of {@gold_drop_chance}%:
+					set {_g} to random integer between {@min_gold_drop} and {@max_gold_drop}
+					add {_g} to {gold.%attacker's uuid%}
+					send action bar "&fYou have found &e%{_g}% &fGold!" to attacker
+
+#---Automatic Mob Spawns---
+
+every 60 seconds:
+	loop all players:
+		loop {cities::*}:
+			if distance between loop-value-1 and {city.block.%loop-value-2%} is below {@prevent_mob_spawns_radius} +1:
+				continue 1st loop
+		if {admin.%loop-value-1's uuid%} is not set:
+			if loop-value-1's world is "world":
+				set {_spawns} to 0
+				loop 30 times:
+					if {_spawns} >= {@amount_spawns_per_player}:
+						exit loop
+					set {_x} to x-coordinate of loop-value-1 + random integer between -24 and 24
+					set {_z} to z-coordinate of loop-value-1 + random integer between -24 and 24
+					set {_found} to false
+					loop 8 times:
+						set {_dy} to loop-number-2
+						set {_dy} to {_dy} - 4
+						set {_y} to y-coordinate of loop-value-1 + {_dy}
+						set {_loc} to location at {_x}, {_y}, {_z} in loop-value-1's world
+						set {_above} to {_loc}
+						add 1 to y-coordinate of {_above}
+						if block at {_loc} is solid:
+							if block at {_above} is air:
+								set {_found} to true
+								exit loop
+					set {_spawnloc} to {_above}
+					if {_found} is true:
+						if {_spawnloc} is not water or lava:
+							if number of living entities within 32 blocks of {_spawnloc} is less than {@amount_allowed_nearby}:
+								add 1 to {_spawns}
+								spawn random element out of {hostile_mobs::*} at {_spawnloc}
+								add last spawned entity to {hostile.mob.aktive::*}
+								equip last spawned entity with unbreakable iron helmet
+								set name of last spawned entity to "&dTransmuted"
+
+every second:
+	if {timer.until.mob.clear} is not set:
+		set {timer.until.mob.clear} to {@mob_clear_timer}
+	if {timer.until.mob.clear} is set:
+		remove 1 from {timer.until.mob.clear}
+	if {timer.until.mob.clear} is below 10 +1:
+		broadcast "{@p} Mob Clear in: &e%{timer.until.mob.clear}% Sekunden!"
+	if {timer.until.mob.clear} is below 1:
+		clear {timer.until.mob.clear}
+		loop {hostile.mob.aktive::*}:
+			kill loop-value
+		broadcast "&e---------------------------------------------"
+		broadcast "&fUm Server-Lag zu vermeiden wurden alle hostile Mobs außerhalb der Stadt getötet!"
+		broadcast "&e---------------------------------------------"
+
+on script load:
+	delete {hostile_mobs::*}
+
+	add a zombie to {hostile_mobs::*}
+	add a wither skeleton to {hostile_mobs::*}
+	add a skeleton to {hostile_mobs::*}
+	#add a pillager to {hostile_mobs::*}

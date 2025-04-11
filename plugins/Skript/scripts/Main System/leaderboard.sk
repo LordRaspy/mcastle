@@ -1,0 +1,106 @@
+options:
+	p: &bSystem &f|
+	leaderboard_amount: 5
+
+on join:
+	set {name.%uuid of player%} to name of player
+
+
+function returnleaderboard(type: text, number: integer=3) :: objects:
+	delete {_uuids::*}
+	delete {_scores::*}
+	delete {_final::*}
+
+	loop all offline players:
+		set {_uuid} to loop-value's uuid
+		if {%{_type}%.skill.%{_uuid}%} is set:
+			add {_uuid} to {_uuids::*}
+			set {_scores::%{_uuid}%} to {%{_type}%.skill.%{_uuid}%}
+	
+	# Bubble-Sort der UUIDs basierend auf Score
+	set {_size} to size of {_uuids::*}
+	loop {_size} times:
+		loop {_size} - 1 times:
+			set {_index} to loop-number-2
+			set {_next} to {_index} + 1
+
+			set {_uuid1} to {_uuids::%{_index}%}
+			set {_uuid2} to {_uuids::%{_next}%}
+
+			set {_score1} to {_scores::%{_uuid1}%}
+			set {_score2} to {_scores::%{_uuid2}%}
+
+			if {_score1} < {_score2}:
+				# Swap UUIDs
+				set {_uuids::%{_index}%} to {_uuid2}
+				set {_uuids::%{_next}%} to {_uuid1}
+
+	# Anzeige vorbereiten
+	loop {_uuids::*}:
+		set {_name} to {name.%loop-value%}
+		set {_score} to {_scores::%loop-value%}
+		add "&7%{_name}% &f- &e%{_score}%" to {_final::*}
+
+		if size of {_final::*} = {_number}:
+			stop loop
+	
+	return {_final::*}
+
+command /leaderboardStats <text> <integer=3>:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				if arg 2 is set:
+					set {_list::*} to returnleaderboard(arg 1, arg 2)
+					loop {_list::*}:
+						send loop-value
+			else:
+				send "{@p} Du musst einen Type angeben!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+function leaderboard(p: player):
+
+	set {_amount} to {@leaderboard_amount}
+	set {_mining::*} to returnleaderboard("mining", {@leaderboard_amount})
+	set {_wood.cutting::*} to returnleaderboard("wood.cutting", {@leaderboard_amount})
+	set {_farming::*} to returnleaderboard("farming", {@leaderboard_amount})
+	set {_trading::*} to returnleaderboard("trading", {@leaderboard_amount})
+
+	set {_gui} to a new chest inventory with 3 rows with name "&7System | Leaderboard"
+	set slot 10 of {_gui} to iron pickaxe named "&bMining Skill" with lore "&7-----------------"
+	set slot 12 of {_gui} to iron axe named "&2Wood Cutting Skill" with lore "&7-----------------"
+	set slot 14 of {_gui} to iron hoe named "&aFarming Skill" with lore "&7-----------------"
+	set slot 16 of {_gui} to name tag named "&eCrafting Skill" with lore "&7-----------------"
+	set slot 26 of {_gui} to barrier named "&cGo Back" with lore "" and "&fClick to go back!"
+	set {_item1} to item in slot 10 of {_gui}
+	set {_item2} to item in slot 12 of {_gui}
+	set {_item3} to item in slot 14 of {_gui}
+	set {_item4} to item in slot 16 of {_gui}
+	loop {@leaderboard_amount} times:
+		add "&fPlace &b%loop-number% &f: %{_mining::%loop-number%}%" to the lore of {_item1}
+
+		add "&fPlace &2%loop-number% &f: %{_wood.cutting::%loop-number%}%" to the lore of {_item2}
+
+		add "&fPlace &a%loop-number% &f: %{_farming::%loop-number%}%" to the lore of {_item3}
+
+		add "&fPlace &e%loop-number% &f: %{_trading::%loop-number%}%" to the lore of {_item4}
+	add "", "&7%{_p}% &f: &e%{mining.skill.%{_p}'s uuid%}%" and "&7-----------------" to the lore of {_item1}
+	add "", "&7%{_p}% &f: &e%{wood.cutting.skill.%{_p}'s uuid%}%" and "&7-----------------" to the lore of {_item2}
+	add "", "&7%{_p}% &f: &e%{farming.skill.%{_p}'s uuid%}%" and "&7-----------------" to the lore of {_item3}
+	add "", "&7%{_p}% &f: &e%{trading.skill.%{_p}'s uuid%}%" and "&7-----------------" to the lore of {_item4}
+	set slot 10 of {_gui} to {_item1}
+	set slot 12 of {_gui} to {_item2}
+	set slot 14 of {_gui} to {_item3}
+	set slot 16 of {_gui} to {_item4}
+
+
+	open {_gui} to {_p}
+	play sound "minecraft:entity.experience_orb.pickup" to {_p}
+
+on inventory click:
+	if name of event-inventory is "&7System | Leaderboard":
+		cancel event
+		if index of event-slot = 26:
+			if click type = left mouse button:
+				Menu(player)

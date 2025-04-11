@@ -1,0 +1,95 @@
+options:
+	p: &bSystem &f|
+	#Bei 0.0333 1 Punkt = 0.5min. -10 daher +5min Zeit
+	corruption_potion_remove_journeyman: 10 #+5min
+	corruption_potion_remove_adept: 20 #+10min
+	corruption_potion_remove_expert: 30 #+15min
+	corruption_potion_remove_master: 40 #+20min
+
+# #Crafting
+
+on load:
+	set {_holypotion_journeyman} to potion named "<##475b37>Journeyman's Holy Potion" with lore "&fTier: <##475b37>Journeyman", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
+	dye {_holypotion_journeyman} (175, 138, 0)
+	register brewing recipe:
+		id: "custom:holy_potion_journeyman"
+		result: {_holypotion_journeyman}
+		ingredient: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		input: potion
+
+	set {_holypotion_adept} to potion named "<##385466>Adept's Holy Potion" with lore "&fTier: <##385466>Adept", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
+	dye {_holypotion_adept} (201, 157, 0)
+	register brewing recipe:
+		id: "custom:holy_potion_adept"
+		result: {_holypotion_adept}
+		ingredient: chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		input: potion
+
+	set {_holypotion_expert} to potion named "<##77322c>Expert's Holy Potion" with lore "&fTier: <##77322c>Expert", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
+	dye {_holypotion_expert} (222, 173, 0)
+	register brewing recipe:
+		id: "custom:holy_potion_expert"
+		result: {_holypotion_expert}
+		ingredient: chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		input: potion
+
+	set {_holypotion_master} to potion named "<##aa6837>Master's Holy Potion" with lore "&fTier: <##aa6837>Master", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
+	dye {_holypotion_master} (255, 255, 0)
+	register brewing recipe:
+		id: "custom:holy_potion_master"
+		result: {_holypotion_master}
+		ingredient: chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		input: potion
+
+#Effects
+
+command /Test:
+	trigger:
+		send "%block break speed attribute of player%"
+
+
+on consume:
+
+	if name of player's held item contains "<##475b37>Journeyman's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@corruption_potion_remove_journeyman} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@corruption_potion_remove_journeyman} from bossbar progress of {bossbar.corruption.%player's uuid%}
+
+	if name of player's held item contains "<##385466>Adept's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@corruption_potion_remove_adept} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@corruption_potion_remove_adept} from bossbar progress of {bossbar.corruption.%player's uuid%}
+
+	if name of player's held item contains "<##77322c>Expert's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@corruption_potion_remove_expert} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@corruption_potion_remove_expert} from bossbar progress of {bossbar.corruption.%player's uuid%}
+
+	if name of player's held item contains "<##aa6837>Master's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@corruption_potion_remove_master} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@corruption_potion_remove_master} from bossbar progress of {bossbar.corruption.%player's uuid%}

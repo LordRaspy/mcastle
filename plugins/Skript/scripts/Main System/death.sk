@@ -1,0 +1,66 @@
+options:
+	p: &bSystem &f|
+	death_max: 1
+	respawn_blocks: 5
+
+command /RespawnPoint:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			set {respawn} to player's location
+			send "{@p} Respawn Point set!"
+			play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+		else:
+			send "{@p} Du bist kein Admin!"
+
+command /SetDeathCount [<player>] [<integer>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				if arg 2 is set:
+					set {death.counter.%arg 1's uuid%} to arg 2
+					send "{@p} %arg 1% hat nun &c%{death.counter.%arg 1's uuid%}%&f/&c{@death_max}&f Toden!"
+					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+				else:
+					send "{@p} Du musst einen Integer angeben!"
+			else:
+				broadcast "{@p} Du musst einen Spieler angeben!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+command /GetDeathCount [<player>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				send "{@p} %arg 1% hat &c%{death.counter.%arg 1's uuid%}%&f/&c{@death_max}&f Toden!"
+				play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+			else:
+				broadcast "{@p} Du musst einen Spieler angeben!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+every second:
+	loop all players:
+		if {death.counter.%loop-value's uuid%} is not set:
+			set {death.counter.%loop-value's uuid%} to 0
+on death:
+	if victim is a player:
+		if {death.counter.%victim's uuid%} is below {@death_max}:
+			add 1 to {death.counter.%victim's uuid%}
+			send "{@p} Du bist &c%{death.counter.%victim's uuid%}%&f/&c{@death_max}&fx &fgestorben!" to victim
+		else:
+			set {death.counter.%victim's uuid%} to 0
+			set {gold.%victim's uuid%} to 0
+			set the bed location of victim to spawn location of world("world")
+			set the safe bed location of victim to spawn location of world("world")
+			broadcast "{@p} %victim% ist &centgültig gestorben&f!"
+			broadcast "{@p} &eDie Götter &ferhörten eure &eGebete &fund brachten euch ein neues &aKind&f!"
+			wait 3 ticks
+			set {_loc} to {respawn}
+			add {@respawn_blocks} to the y-coords of {_loc}
+			loop {@respawn_blocks} * 10 times:
+				teleport victim to {_loc}
+				remove 0.1 from the y-coords of {_loc}
+				play sound "minecraft:block.beacon.ambient" with volume 1 and pitch 1 at victim
+				play 5 wax off with offset of 1, 1, 1 and speed 1 at victim
+				wait 2 ticks

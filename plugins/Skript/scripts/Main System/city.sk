@@ -1,0 +1,179 @@
+options:
+	p: &bSystem &f|
+
+	beacon_price: 1280 #4 Stacks Gold
+	bossbar_distance: 15
+	see_range_city: 50
+
+
+	mob_damage: 1 #Schaden pro Gegner in Range
+	base_regeneration: 0.1
+	mobs_damage_range: 10
+
+
+	corruption_build_up: 0.03333 #Bis 60 = 30min.
+
+	corruption_damage_needed: 60 #30min
+	corruption_damage: 0.25
+
+	corruption_damage_2_needed: 80 #40min
+	corruption_damage_2: 0.25
+
+	corruption_poison_needed: 100  #50min
+
+command /AddCity [<text>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				AddCity(player, arg 1)
+			else:
+				send "{@p} Du musst einen Namen angeben!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+on skript start:
+	loop {cities::*}:
+		set bossbar progress of {bossbar.city.%loop-value-1%} to 100
+
+function AddCity(p: player, name: text, life: integer=100):
+	if {_life} is between 1 and 100:
+		if {_name} matches "[A-Za-z0-9-_\s:]+":
+			if {cities::*} doesn't contain {_name}:
+				if {gold.%{_p}'s uuid%} is above {@beacon_price} - 1:
+					remove {@beacon_price} from {gold.%{_p}'s uuid%}
+					clear {outpost.name.%{_p}'s uuid%}
+					set {_location} to {_p}'s location
+					add {_name} to {cities::*}
+					set {bossbar.city.%{_name}%} to boss bar with id "city.bossbar.%{_name}%" with title "&f<| &b%{_name}% &f|>" with color blue with style segmented 10 with progress {_life}
+					set block at {_location} to beacon
+					set {city.block.%{_name}%} to block at {_location}
+					send "{@p} City ""%{_name}%"" added!" to {_p}
+					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to {_p}
+				else:
+					send "{@p} Du hast nicht genug &6Gold&f (%{gold.%{_p}'s uuid%}%/{@beacon_price})!" to {_p}
+			else:
+				send "{@p} Es gibt diese Stadt bereits!" to {_p}
+		else:
+			send "{@p} Nur Leerzeichen, Bindelstriche (-), Unterstriche (_) und alphanumerische Ausdrücke sind erlaubt!" to {_p}
+	else:
+		send "{@p} Der Wert muss zwischen 1 und 100 sein!" to {_p}
+
+
+command /RemoveCity [<text>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				if {cities::*} contains arg 1:
+					remove arg 1 from {cities::*}
+					set {_bossbarremove} to arg 1
+					replace all " " with "_" in {_bossbarremove}
+					delete bossbar named "city.bossbar.%{_bossbarremove}%"
+					set block at {city.block.%arg 1%} to air
+					clear {city.block.%arg 1%}
+					send "{@p} City ""%arg 1%"" removed!"
+					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+				else:
+					send "{@p} Es gibt diese Stadt nicht!"
+			else:
+				send "{@p} Gebe einen Namen an!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+command /Cities:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if {cities::*} is set:
+				play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+				send "{@p} All Cities:"
+				send "&f---------------------"
+				loop {cities::*}:
+					set {_locx} to x-coordinates of {city.block.%loop-value%}
+					set {_locy} to y-coordinates of {city.block.%loop-value%}
+					set {_locz} to z-coordinates of {city.block.%loop-value%}
+					set {_c::1} to a new text component from "{@p} %loop-value% - %bossbar progress of {bossbar.city.%loop-value-1%}% - x: %{_locx}% | y: %{_locy}% | z: %{_locz}%"
+					set {_c::2} to a new text component from " &f[&eTELEPORT&f]"
+					set click event of {_c::2} to click event to run command "/teleport %player% %{_locx}% %{_locy} + 1% %{_locz}%"
+					set {_c} to merge components {_c::*}
+					send component {_c} to player
+					send "&f---------------------"
+			else:
+				send "{@p} Es gibt keine Cities!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+
+on block break:
+	loop {cities::*}:
+		if {city.block.%loop-value-1%} contains event-block:
+			cancel event
+
+every second:
+	loop {cities::*}:
+		add {@base_regeneration} to bossbar progress of {bossbar.city.%loop-value-1%}
+		loop all players:
+			if distance between loop-value-2 and {city.block.%loop-value-1%} is below {@bossbar_distance} +1:
+				add loop-value-2 to {bossbar.city.%loop-value-1%}
+			else:
+				remove loop-value-2 from {bossbar.city.%loop-value-1%}
+
+		loop {enemy.list::*}:
+			if distance between {city.block.%loop-value-1%} and loop-value-2 is below {@mobs_damage_range} +1:
+				remove {@mob_damage} from bossbar progress of {bossbar.city.%loop-value-1%}
+				set {_d} to bossbar progress of {bossbar.city.%loop-value-1%}
+				if {_d} is below 1:
+					remove loop-value-1 from {cities::*}
+					set {_bossbarremove} to loop-value-1
+					replace all " " with "_" in {_bossbarremove}
+					delete bossbar named "city.bossbar.%{_bossbarremove}%"
+					play sound "minecraft:entity.warden.sonic_charge" with volume 1 and pitch 0.5 to players
+					wait 1 second
+					create safe explosion with force 2 at {city.block.%loop-value-1%}
+					wait 1 second
+					create safe explosion with force 2.5 at {city.block.%loop-value-1%}
+					wait 1 second
+					create safe explosion with force 3 at {city.block.%loop-value-1%}
+					play sound "minecraft:entity.warden.sonic_boom" with volume 1 and pitch 0.5 to players
+					broadcast "{@p} City ""%loop-value-1%"" is &clost&f!"
+					set block at {city.block.%loop-value-1%} to air
+					clear {city.block.%loop-value-1%}
+
+
+
+#-Darkness and Outside-
+
+every second:
+	loop all players:
+		if {bossbar.corruption.%loop-value's uuid%} is not set:
+			set {bossbar.corruption.%loop-value's uuid%} to boss bar with id "corruption.%loop-value's uuid%" with title "&dCorruption" with color purple with style segmented 10 with progress 0
+
+		set {_a} to bossbar progress of {bossbar.corruption.%loop-value-1's uuid%}
+		if {_a} is above 0:
+			add loop-value-1 to {bossbar.corruption.%loop-value-1's uuid%}
+		else:
+			remove loop-value-1 from {bossbar.corruption.%loop-value-1's uuid%}
+
+		loop {cities::*}:
+			if distance between loop-value-1 and {city.block.%loop-value-2%} is below {@see_range_city} +1:
+				remove 1 from bossbar progress of {bossbar.corruption.%loop-value-1's uuid%}
+				if {remove.was.applied.enter.%loop-value-1's uuid%} is not set:
+					remove darkness from loop-value-1
+					remove weakness from loop-value-1
+					remove poison from loop-value-1
+					set {remove.was.applied.enter.%loop-value-1's uuid%} to true
+				set {_listen.%loop-value-1's uuid%} to true
+		if {_listen.%loop-value-1's uuid%} is not set:
+			clear {remove.was.applied.enter.%loop-value-1's uuid%}
+			if {admin.%loop-value-1's uuid%} is not set:
+				apply darkness of tier 2 without any particles to loop-value-1 for 99 hours
+				apply weakness of tier 1 without any particles to loop-value-1 for 99 hours
+				add {@corruption_build_up} to bossbar progress of {bossbar.corruption.%loop-value-1's uuid%}
+				set {_d} to bossbar progress of {bossbar.corruption.%loop-value-1's uuid%}
+				if {_d} is above {@corruption_damage_needed} -1:
+					play 100 warped spore with offset of 1.5, 1.5, 1.5 and speed 1 at loop-value-1
+					damage loop-value-1 by {@corruption_damage} hearts
+				if {_d} is above {@corruption_damage_2_needed} -1:
+					play 100 warped spore with offset of 1.5, 1.5, 1.5 and speed 1 at loop-value-1
+					damage loop-value-1 by {@corruption_damage_2} hearts
+				if {_d} is above {@corruption_poison_needed} -1:
+					play 100 warped spore with offset of 1.5, 1.5, 1.5 and speed 1 at loop-value-1
+					apply poison of tier 1 without any particles to loop-value-1 for 99 hours
