@@ -1,14 +1,203 @@
 options:
 	p: &bSystem &f|
+	
+	#Potions
+	
 	#Bei 0.0333 1 Punkt = 0.5min. -10 daher +5min Zeit
-	corruption_potion_remove_journeyman: 10 #+5min
-	corruption_potion_remove_adept: 20 #+10min
-	corruption_potion_remove_expert: 30 #+15min
-	corruption_potion_remove_master: 40 #+20min
+	journeyman_corruption_potion_remove: 10 #+5min
+	adept_corruption_potion_remove: 20 #+10min
+	expert_corruption_potion_remove: 30 #+15min
+	master_corruption_potion_remove: 40 #+20min
 
-# #Crafting
+	novice_miner_brew_timer: 60 #Zeit in Sekunden
+	novice_miner_brew_add: 0.1 #Prozent der Abbaugeschwindigkeit
+	journeyman_miner_brew_timer: 120
+	journeyman_miner_brew_add: 0.2
+	adept_miner_brew_timer: 180
+	adept_miner_brew_add: 0.25
+	expert_miner_brew_timer: 210
+	expert_miner_brew_add: 0.3
+	master_miner_brew_timer: 240
+	master_miner_brew_add: 0.4
 
+
+
+
+
+
+on script load: #Mapping
+	set {tiers::*} to "novice", "journeyman", "adept", "expert" and "master"
+	set {colors::*} to "<##6c594b>", "<##475b37>", "<##385466>", "<##77322c>" and "<##aa6837>"
+
+	set {miner_brew.adds::novice} to {@novice_miner_brew_add}
+	set {miner_brew.adds::journeyman} to {@journeyman_miner_brew_add}
+	set {miner_brew.adds::adept} to {@adept_miner_brew_add}
+	set {miner_brew.adds::expert} to {@expert_miner_brew_add}
+	set {miner_brew.adds::master} to {@master_miner_brew_add}
+
+
+#Working Timers
+every second:
+	# Loop durch alle Spieler
+	loop all players:
+
+		#Miners Brew
+		if {miners.brew.aktive.%loop-value-1's uuid%} is set:
+			remove 1 from {miners.brew.aktive.%loop-value-1's uuid%}
+			if {miners.brew.aktive.%loop-value-1's uuid%} <= 0:
+				clear {miners.brew.aktive.%loop-value-1's uuid%}
+
+		loop {tiers::*}:
+
+			#Miners Brew (Haste Potion)
+			if {miners.brew.%loop-value-2%.%loop-value-1's uuid%} is set:
+				remove 1 from {miners.brew.%loop-value-2%.%loop-value-1's uuid%}
+				if {miners.brew.%loop-value-2%.%loop-value-1's uuid%} <= 0:
+					remove {miner_brew.adds::%loop-value-2%} from the block break speed attribute of loop-value-1
+					clear {miners.brew.%loop-value-2%.%loop-value-1's uuid%}
+					send action bar "&dEffects &fof &eMaster's Miner's Brew &fhas worn off" to loop-value-1
+					play 25 grey potion swirl with offset of 1, 1, 1 and speed 1 at loop-value-1
+					play sound "minecraft:entity.witch.drink" to loop-value-1
+
+#Effects. Instant & Lasting
+on consume:
+
+	#Instant Potions
+	#Holy Potion / Corruption Remover
+	if name of player's held item contains "<##475b37>Journeyman's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@journeyman_corruption_potion_remove} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@journeyman_corruption_potion_remove} from bossbar progress of {bossbar.corruption.%player's uuid%}
+		stop
+
+	if name of player's held item contains "<##385466>Adept's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@adept_corruption_potion_remove} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@adept_corruption_potion_remove} from bossbar progress of {bossbar.corruption.%player's uuid%}
+		stop
+
+	if name of player's held item contains "<##77322c>Expert's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@expert_corruption_potion_remove} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@expert_corruption_potion_remove} from bossbar progress of {bossbar.corruption.%player's uuid%}
+		stop
+
+	if name of player's held item contains "<##aa6837>Master's Holy Potion":
+		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
+		if {_p} is {@master_corruption_potion_remove} or below:
+			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
+			stop
+		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
+		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
+		remove {@master_corruption_potion_remove} from bossbar progress of {bossbar.corruption.%player's uuid%}
+		stop
+
+
+
+	#Lasting Potions
+	#Haste Potion
+
+	if name of player's held item contains "<##6c594b>Novice's Miner's Brew":
+		if {miners.brew.aktive.%player's uuid%} is not set:
+			set {miners.brew.aktive.%player's uuid%} to {@novice_miner_brew_timer}
+			set {miners.brew.novice.%player's uuid%} to {@novice_miner_brew_timer}
+			play 25 grey potion swirl with offset of 1, 1, 1 and speed 1 at player
+			send action bar "<##6c594b>Novice's Miner's Brew &f| %{@novice_miner_brew_timer} / 60%m" to player
+			add {@novice_miner_brew_add} to the block break speed attribute of player
+			stop
+		else:
+			cancel event
+			send action bar "&fYou don't want to drink &cthis &fanymore!" to player
+			stop
+
+	if name of player's held item contains "<##475b37>Journeyman's Miner's Brew":
+		if {miners.brew.aktive.%player's uuid%} is not set:
+			set {miners.brew.aktive.%player's uuid%} to {@journeyman_miner_brew_timer}
+			set {miners.brew.journeyman.%player's uuid%} to {@journeyman_miner_brew_timer}
+			play 25 green potion swirl with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:entity.witch.drink" with volume 1 and pitch 1 at player
+			send action bar "<##475b37>Journeyman's Miner's Brew &f| %{@journeyman_miner_brew_timer} / 60%m" to player
+			add {@journeyman_miner_brew_add} to the block break speed attribute of player
+			stop
+		else:
+			cancel event
+			send action bar "&fYou don't want to drink &cthis &fanymore!" to player
+			stop
+
+	if name of player's held item contains "<##385466>Adept's Miner's Brew":
+		if {miners.brew.aktive.%player's uuid%} is not set:
+			set {miners.brew.aktive.%player's uuid%} to {@adept_miner_brew_timer}
+			set {miners.brew.adept.%player's uuid%} to {@adept_miner_brew_timer}
+			play 25 blue potion swirl with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.grindstone.use" with volume 1 and pitch 1 at player
+			send action bar "<##385466>Adept's Miner's Brew &f| %{@adept_miner_brew_timer} / 60%m" to player
+			add {@adept_miner_brew_add} to the block break speed attribute of player
+			stop
+		else:
+			cancel event
+			send action bar "&fYou don't want to drink &cthis &fanymore!" to player
+			stop
+
+	if name of player's held item contains "<##77322c>Expert's Miner's Brew":
+		if {miners.brew.aktive.%player's uuid%} is not set:
+			set {miners.brew.aktive.%player's uuid%} to {@expert_miner_brew_timer}
+			set {miners.brew.expert.%player's uuid%} to {@expert_miner_brew_timer}
+			play 25 red potion swirl with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:block.anvil.use" with volume 1 and pitch 1 at player
+			send action bar "<##77322c>Expert's Miner's Brew &f| %{@expert_miner_brew_timer} / 60%m" to player
+			add {@expert_miner_brew_add} to the block break speed attribute of player
+			stop
+		else:
+			cancel event
+			send action bar "&fYou don't want to drink &cthis &fanymore!" to player
+			stop
+
+	if name of player's held item contains "<##aa6837>Master's Miner's Brew":
+		if {miners.brew.aktive.%player's uuid%} is not set:
+			set {miners.brew.aktive.%player's uuid%} to {@master_miner_brew_timer}
+			set {miners.brew.master.%player's uuid%} to {@master_miner_brew_timer}
+			play 25 orange potion swirl with offset of 1, 1, 1 and speed 1 at player
+			play sound "minecraft:entity.evoker.prepare_attack" with volume 1 and pitch 1 at player
+			send action bar "<##aa6837>Master's Miner's Brew &f| %{@master_miner_brew_timer} / 60%m" to player
+			add {@master_miner_brew_add} to the block break speed attribute of player
+			stop
+		else:
+			cancel event
+			send action bar "&fYou don't want to drink &cthis &fanymore!" to player
+			stop
+
+
+
+
+#Crafting
 on load:
+
+	#Ingredients
+	
+
+
+	#Instant
+	#Holy Potion
 	set {_holypotion_journeyman} to potion named "<##475b37>Journeyman's Holy Potion" with lore "&fTier: <##475b37>Journeyman", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
 	dye {_holypotion_journeyman} (175, 138, 0)
 	register brewing recipe:
@@ -40,56 +229,45 @@ on load:
 		result: {_holypotion_master}
 		ingredient: chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
 		input: potion
+	
+	#Lasting
+	#Miners Brew
+	set {_minerspotion_novice} to potion named "<##6c594b>Novice's Miner's Brew" with lore "&fTier: <##6c594b>Novice", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
+	dye {_minerspotion_novice} (16, 0, 54)
+	register brewing recipe:
+		id: "custom:miners_potion_novice"
+		result: {_minerspotion_novice}
+		ingredient: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		input: potion
 
-#Effects
+	set {_minerspotion_journeyman} to potion named "<##475b37>Journeyman's Miner's Brew" with lore "&fTier: <##475b37>Journeyman", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
+	dye {_minerspotion_journeyman} (26, 0, 89)
+	register brewing recipe:
+		id: "custom:miners_potion_journeyman"
+		result: {_minerspotion_journeyman}
+		ingredient: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		input: potion
 
-command /Test:
-	trigger:
-		send "%block break speed attribute of player%"
+	set {_minerspotion_adept} to potion named "<##385466>Adept's Miner's Brew" with lore "&fTier: <##385466>Adept", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
+	dye {_minerspotion_adept} (35, 0, 117)
+	register brewing recipe:
+		id: "custom:miners_potion_adept"
+		result: {_minerspotion_adept}
+		ingredient: chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		input: potion
 
+	set {_minerspotion_expert} to potion named "<##77322c>Expert's Miner's Brew" with lore "&fTier: <##77322c>Expert", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
+	dye {_minerspotion_expert} (46, 0, 153)
+	register brewing recipe:
+		id: "custom:miners_potion_expert"
+		result: {_minerspotion_expert}
+		ingredient: chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		input: potion
 
-on consume:
-
-	if name of player's held item contains "<##475b37>Journeyman's Holy Potion":
-		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
-		if {_p} is {@corruption_potion_remove_journeyman} or below:
-			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
-			stop
-		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-		remove {@corruption_potion_remove_journeyman} from bossbar progress of {bossbar.corruption.%player's uuid%}
-
-	if name of player's held item contains "<##385466>Adept's Holy Potion":
-		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
-		if {_p} is {@corruption_potion_remove_adept} or below:
-			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
-			stop
-		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-		remove {@corruption_potion_remove_adept} from bossbar progress of {bossbar.corruption.%player's uuid%}
-
-	if name of player's held item contains "<##77322c>Expert's Holy Potion":
-		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
-		if {_p} is {@corruption_potion_remove_expert} or below:
-			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
-			stop
-		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-		remove {@corruption_potion_remove_expert} from bossbar progress of {bossbar.corruption.%player's uuid%}
-
-	if name of player's held item contains "<##aa6837>Master's Holy Potion":
-		set {_p} to bossbar progress of {bossbar.corruption.%player's uuid%}
-		if {_p} is {@corruption_potion_remove_master} or below:
-			play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-			play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-			set bossbar progress of {bossbar.corruption.%player's uuid%} to 0
-			stop
-		play 25 wax on with offset of 1, 1, 1 and speed 1 at player
-		play sound "minecraft:block.beacon.power_select" with volume 1 and pitch 1 at player
-		remove {@corruption_potion_remove_master} from bossbar progress of {bossbar.corruption.%player's uuid%}
+	set {_minerspotion_master} to potion named "<##aa6837>Master's Miner's Brew" with lore "&fTier: <##aa6837>Master", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
+	dye {_minerspotion_master} (57, 0, 191)
+	register brewing recipe:
+		id: "custom:miners_potion_master"
+		result: {_minerspotion_master}
+		ingredient: chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		input: potion
