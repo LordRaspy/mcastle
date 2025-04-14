@@ -3,7 +3,7 @@ options:
 
 	level_add: 15 #Level extra needed for next level
 
-	farming_requirement_journeyman: 10
+	farming_requirement_journeyman: 15
 
 	trading_requirement_journeyman: 10
 	trading_requirement_adept: 30

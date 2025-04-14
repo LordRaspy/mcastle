@@ -192,9 +192,6 @@ on consume:
 #Crafting
 on load:
 
-	#Ingredients
-	
-
 
 	#Instant
 	#Holy Potion
@@ -204,7 +201,7 @@ on load:
 		id: "custom:holy_potion_journeyman"
 		result: {_holypotion_journeyman}
 		ingredient: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
-		input: potion
+		input: potion of water
 
 	set {_holypotion_adept} to potion named "<##385466>Adept's Holy Potion" with lore "&fTier: <##385466>Adept", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
 	dye {_holypotion_adept} (201, 157, 0)
@@ -212,7 +209,7 @@ on load:
 		id: "custom:holy_potion_adept"
 		result: {_holypotion_adept}
 		ingredient: chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
-		input: potion
+		input: potion of water
 
 	set {_holypotion_expert} to potion named "<##77322c>Expert's Holy Potion" with lore "&fTier: <##77322c>Expert", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
 	dye {_holypotion_expert} (222, 173, 0)
@@ -220,7 +217,7 @@ on load:
 		id: "custom:holy_potion_expert"
 		result: {_holypotion_expert}
 		ingredient: chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
-		input: potion
+		input: potion of water
 
 	set {_holypotion_master} to potion named "<##aa6837>Master's Holy Potion" with lore "&fTier: <##aa6837>Master", "&fAbility: Reduziert die &dCorruption &f!" and "&fTag: &aConsumeable"
 	dye {_holypotion_master} (255, 255, 0)
@@ -228,7 +225,7 @@ on load:
 		id: "custom:holy_potion_master"
 		result: {_holypotion_master}
 		ingredient: chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
-		input: potion
+		input: potion of water
 	
 	#Lasting
 	#Miners Brew
@@ -237,37 +234,175 @@ on load:
 	register brewing recipe:
 		id: "custom:miners_potion_novice"
 		result: {_minerspotion_novice}
-		ingredient: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
-		input: potion
+		ingredient: chest named "<##6c594b>Chest with Novice's Miner ingredients" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		input: potion of water
 
 	set {_minerspotion_journeyman} to potion named "<##475b37>Journeyman's Miner's Brew" with lore "&fTier: <##475b37>Journeyman", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
 	dye {_minerspotion_journeyman} (26, 0, 89)
 	register brewing recipe:
 		id: "custom:miners_potion_journeyman"
 		result: {_minerspotion_journeyman}
-		ingredient: chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
-		input: potion
+		ingredient: chest named "<##475b37>Chest with Journeyman's Miner ingredients" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		input: potion of water
 
 	set {_minerspotion_adept} to potion named "<##385466>Adept's Miner's Brew" with lore "&fTier: <##385466>Adept", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
 	dye {_minerspotion_adept} (35, 0, 117)
 	register brewing recipe:
 		id: "custom:miners_potion_adept"
 		result: {_minerspotion_adept}
-		ingredient: chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
-		input: potion
+		ingredient: chest named "<##385466>Chest with Adept's Miner ingredients" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		input: potion of water
 
 	set {_minerspotion_expert} to potion named "<##77322c>Expert's Miner's Brew" with lore "&fTier: <##77322c>Expert", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
 	dye {_minerspotion_expert} (46, 0, 153)
 	register brewing recipe:
 		id: "custom:miners_potion_expert"
 		result: {_minerspotion_expert}
-		ingredient: chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
-		input: potion
+		ingredient: chest named "<##77322c>Chest with Expert's Miner ingredients" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		input: potion of water
 
 	set {_minerspotion_master} to potion named "<##aa6837>Master's Miner's Brew" with lore "&fTier: <##aa6837>Master", "&fAbility: Erhöht die &eAbbaugeschwindigkeit&f!" and "&fTag: &aConsumeable"
 	dye {_minerspotion_master} (57, 0, 191)
 	register brewing recipe:
 		id: "custom:miners_potion_master"
 		result: {_minerspotion_master}
-		ingredient: chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
-		input: potion
+		ingredient: chest named "<##aa6837>Chest with Master's Miner ingredients" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		input: potion of water
+
+
+	#Ingredients Miner
+	register shapeless recipe:
+		id: "custom:novice_miner_ingredient"
+		result: chest named "<##6c594b>Chest with Novice's Miner ingredients" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##6c594b>Chest with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+			add chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+	register shapeless recipe:
+		id: "custom:novice_miner_ingredient_compressed"
+		result: minecart with chest named "<##6c594b>Minecart with Novice's Miner ingredients" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##6c594b>Minecart with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##6c594b>Minecart with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:journeyman_miner_ingredient"
+		result: chest named "<##475b37>Chest with Journeyman's Miner ingredients" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##475b37>Chest with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+			add chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:journeyman_miner_ingredient_compressed"
+		result: minecart with chest named "<##475b37>Minecart with Journeyman's Miner ingredients" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##475b37>Minecart with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##475b37>Minecart with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:adept_miner_ingredient"
+		result: chest named "<##385466>Chest with Adept's Miner ingredients" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##385466>Chest with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+			add chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:adept_miner_ingredient_compressed"
+		result: minecart with chest named "<##385466>Minecart with Adept's Miner ingredients" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:expert_miner_ingredient"
+		result: chest named "<##77322c>Chest with Expert's Miner ingredients" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##77322c>Chest with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+			add chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:expert_miner_ingredient_compressed"
+		result: minecart with chest named "<##77322c>Minecart with Expert's Miner ingredients" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:master_miner_ingredient"
+		result: chest named "<##aa6837>Chest with Master's Miner ingredients" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##aa6837>Chest with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+			add chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:master_miner_ingredient_compressed"
+		result: minecart with chest named "<##aa6837>Minecart with Master's Miner ingredients" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+
+
+	#Ingredients Log
+	register shapeless recipe:
+		id: "custom:novice_lumberjack_ingredient"
+		result: chest named "<##6c594b>Chest with Novice's Lumberjack ingredients" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##6c594b>Chest with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+			add chest named "<##6c594b>Chest with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+	register shapeless recipe:
+		id: "custom:novice_lumberjack_ingredient_compressed"
+		result: minecart with chest named "<##6c594b>Minecart with Novice's Lumberjack ingredients" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##6c594b>Minecart with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##6c594b>Minecart with Novice's Crop" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:journeyman_lumberjack_ingredient"
+		result: chest named "<##475b37>Chest with Journeyman's Lumberjack ingredients" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##475b37>Chest with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+			add chest named "<##475b37>Chest with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+	register shapeless recipe:
+		id: "custom:journeyman_lumberjack_ingredient_compressed"
+		result: minecart with chest named "<##475b37>Minecart with Journeyman's Lumberjack ingredients" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##475b37>Minecart with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##475b37>Minecart with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:adept_lumberjack_ingredient"
+		result: chest named "<##385466>Chest with Adept's Lumberjack ingredients" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##385466>Chest with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+			add chest named "<##385466>Chest with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+	register shapeless recipe:
+		id: "custom:adept_lumberjack_ingredient_compressed"
+		result: minecart with chest named "<##385466>Minecart with Adept's Lumberjack ingredients" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##385466>Minecart with Adept's Crop" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:expert_lumberjack_ingredient"
+		result: chest named "<##77322c>Chest with Expert's Lumberjack ingredients" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##77322c>Chest with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+			add chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+	register shapeless recipe:
+		id: "custom:expert_lumberjack_ingredient_compressed"
+		result: minecart with chest named "<##77322c>Minecart with Expert's Lumberjack ingredients" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##77322c>Minecart with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource" to ingredients
+
+	register shapeless recipe:
+		id: "custom:master_lumberjack_ingredient"
+		result: chest named "<##aa6837>Chest with Master's Lumberjack ingredients" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		ingredients:
+			add chest named "<##aa6837>Chest with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+			add chest named "<##aa6837>Chest with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+	register shapeless recipe:
+		id: "custom:master_lumberjack_ingredient_compressed"
+		result: minecart with chest named "<##aa6837>Minecart with Master's Lumberjack ingredients" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+		ingredients:
+			add minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
+			add minecart with chest named "<##aa6837>Minecart with Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" to ingredients
