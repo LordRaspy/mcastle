@@ -11,7 +11,7 @@ options:
 
 variables:
 	{day} = 1
-	{month} = 0
+	{month} = 1
 	{year} = 0
 
 #----Ingame Name & Roles----
@@ -230,8 +230,10 @@ at 6:00am in "world":
 	add 1 to {day}
 	if {day} >= 31:
 		add 1 to {month}
+		set {day} to 1
 	if {month} >= 12:
 		add 1 to {year}
+		set {month} to 1
 	broadcast "&e---------------------------------------------"
 	broadcast "&fThe current &eDate&f is: &e%{day}%&f.&e%{month}%&f.&e%{@start_year} + {year}%&f."
 	broadcast "&e---------------------------------------------"

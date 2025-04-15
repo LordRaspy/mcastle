@@ -21,3 +21,13 @@ command /Admin [<player>]:
 			else:
 				clear {admin.%arg 1's uuid%}
 				send "{@p} %arg 1% ist nun kein Admin mehr!"
+
+command /Report:
+	trigger:
+		send "{@p} Du hast ein Featurevorschlag oder einen Bug gefunden?"
+		set {_c::1} to a new text component from "{@p} Reporte ihn gerne hier: "
+		set {_c::2} to a new text component from "&f[&aCLICK HERE&f]"
+		set hover event of {_c::2} to a new hover event showing "https://github.com/LordRaspy/mcastle/issues"
+		set click event of {_c::2} to a new click event to open url "https://github.com/LordRaspy/mcastle/issues"
+		set {_c} to merge components {_c::*}
+		send component {_c} to player
