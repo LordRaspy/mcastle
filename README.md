@@ -11,7 +11,7 @@ https://docs.google.com/document/d/19ZFGHOuuU4u3BrTd6kHZU58jq3h8bUW-WB5MzEM1o5I/
 
 # Wiki
 
-The [Wiki](https://github.com/LordRaspy/mcastle/wiki) includes all relevant features from the base version of MCastle.
+The [Wiki](https://github.com/LordRaspy/mcastle/wiki) contains an introduction to the setup of MCastle.
 
 # Bugs and features
 
