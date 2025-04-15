@@ -1,8 +1,12 @@
 
 # MCastle by LordRaspy
 
-MCastle is an open-source Minecraft gamemode developed by a single person (me).
+MCastle is an open-source Minecraft gamemode that is based on Skript and SkBee. <br>
+It is also developed by a single person (me <3).
 
+# Wiki
+
+The [Wiki](https://github.com/LordRaspy/mcastle/wiki) includes all relevant features included in the base version of MCastle.
 
 # Bugs and features
 
