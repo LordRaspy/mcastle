@@ -155,10 +155,13 @@ on block break:
 #----Lock System----
 
 function getdoorblock(e: block) :: block:
-	if block above {_e} is any door:
-		return block above {_e}
+	set {_b} to "%block data of {_e}%"
+	if block above {_e} is any door: 
+		if {_b} contains "half=lower":
+			return block above {_e}
 	if block below {_e} is any door:
-		return block below {_e}
+		if {_b} contains "half=upper":
+			return block below {_e}
 
 command /Lock:
 	trigger:
@@ -180,6 +183,9 @@ command /Lock:
 				stop
 		if player's targeted block is any door:
 			set {_b2} to getdoorblock(player's targeted block)
+			if {_b2} is not set:
+				send "{@p} &cError&f: There has been a problem with the second door block!"
+				stop
 			loop all players:
 				if {locked.%loop-player's uuid%::*} or {_b2} contains player's targeted block:
 					if loop-player isn't player:
