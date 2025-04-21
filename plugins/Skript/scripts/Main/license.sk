@@ -68,7 +68,7 @@ on chat:
 function createlicense(p: player):
 	if {license.type.%{_p}'s uuid%} is set:
 		close {_p}'s inventory
-		give {_p} paper named "&e%{license.type.%{_p}'s uuid%}%" with lore "", "&fDieses Papier berechtigt dich mit dem Recht ""&e%{license.type.%{_p}'s uuid%}%&f"".", "" and "&fAusgestellt und lizenziert von &e%{_p}%&f."
+		give {_p} paper named "&e%{license.type.%{_p}'s uuid%}%" with lore "", "&fDieses Papier berechtigt dich mit dem Recht ""&e%{license.type.%{_p}'s uuid%}%&f"".", "" and "&fErstellt und auf Richtigkeit überprüft von &e%{_p}%&f."
 		clear {license.type.%{_p}'s uuid%}
 		play sound "minecraft:entity.experience_orb.pickup" to {_p}
 	else:
@@ -77,7 +77,7 @@ function createlicense(p: player):
 function createcontract(p: player):
 	if {contract.type.%{_p}'s uuid%} is set:
 		close {_p}'s inventory
-		give {_p} writable book named "&e%{contract.type.%{_p}'s uuid%}%" with lore "", "&fDurch das unterschreiben des Vertrages (~Name) wird dieses &centgültig&f.", "" and "&fAusgestellt und lizenziert von &e%{_p}%&f."
+		give {_p} writable book named "&e%{contract.type.%{_p}'s uuid%}%" with lore "", "&fDurch das unterschreiben des Vertrages wird dieses &centgültig&f.", "" and "&fErstellt und auf Richtigkeit überprüft von &e%{_p}%&f."
 		clear {contract.type.%{_p}'s uuid%}
 		play sound "minecraft:entity.experience_orb.pickup" to {_p}
 	else:

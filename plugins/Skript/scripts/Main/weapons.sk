@@ -85,50 +85,6 @@ on click:
 
 
 
-#-----------Fähigkeiten Scoreboard------------
-
-
-on join:
-	set title of player's scoreboard to "&aAbilities"
-	while player is online:
-
-
-		if {cooldown.weapon.%player's uuid%} is not set:
-			set {_weapon} to "&aReady"
-		else:
-			set {_weapon} to "&c%{cooldown.weapon.%player's uuid%}%s"
-
-		if {cooldown.helmet.%player's uuid%} is not set:
-			set {_helmet} to "&aReady"
-		else:
-			set {_helmet} to "&c%{cooldown.helmet.%player's uuid%}%s"
-
-		if {cooldown.chestplate.%player's uuid%} is not set:
-			set {_chestplate} to "&aReady"
-		else:
-			set {_chestplate} to "&c%{cooldown.chestplate.%player's uuid%}%s"
-
-		if {cooldown.leggings.%player's uuid%} is not set:
-			set {_leggings} to "&aReady"
-		else:
-			set {_leggings} to "&c%{cooldown.leggings.%player's uuid%}%s"
-
-		if {cooldown.boots.%player's uuid%} is not set:
-			set {_boots} to "&aReady"
-		else:
-			set {_boots} to "&c%{cooldown.boots.%player's uuid%}%s"
-
-
-
-		set line 3 of player's scoreboard to "&fWeapon Ability: &c%{_weapon}%"
-		set line 5 of player's scoreboard to "&fHelmet Ability: &c%{_helmet}%"
-		set line 7 of player's scoreboard to "&fChestplate Ability: &c%{_chestplate}%"
-		set line 9 of player's scoreboard to "&fLeg Armor Ability: &c%{_leggings}%"
-		set line 11 of player's scoreboard to "&fBoots Ability: &c%{_boots}%"
-		wait 1 second
-
-
-
 #---------------Fähigkeiten-------------
 
 every second:

@@ -1,0 +1,3 @@
+command /Test:
+    trigger:
+        drop 1 pumpkins named "<##aa6837>Master's Crop" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource" at player

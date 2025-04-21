@@ -309,6 +309,8 @@ function adjustdifficulty():
 
 function startwave(e: players):
 	clear {automatic.wave.management.timer}
+	if {community.time} is set:
+		stop
 	set {_spawn} to random element out of {mob.spawns::*}
 	play sound "minecraft:entity.ender_dragon.ambient" to {_e::*}
 	send title "&cThe Darkness is approaching!" to {_e::*}

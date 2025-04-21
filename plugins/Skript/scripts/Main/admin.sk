@@ -2,6 +2,7 @@ options:
 	p: &bSystem &f|
 
 
+#---Admin---
 command /Admin [<player>]:
 	permission: *
 	trigger:
@@ -22,6 +23,8 @@ command /Admin [<player>]:
 				clear {admin.%arg 1's uuid%}
 				send "{@p} %arg 1% ist nun kein Admin mehr!"
 
+#---Report---
+
 command /Report:
 	trigger:
 		send "{@p} Du hast ein Featurevorschlag oder einen Bug gefunden?"
@@ -31,3 +34,46 @@ command /Report:
 		set click event of {_c::2} to a new click event to open url "https://github.com/LordRaspy/mcastle/issues"
 		set {_c} to merge components {_c::*}
 		send component {_c} to player
+
+#---Ban System---
+
+command /Ban [<offline player>] [<timespan>] [<text>]:
+	permission: *
+	trigger:
+		if arg 1, arg 2 or arg 3 is not set:
+			send "{@p} Usage: /ban <Spieler> <Dauer> <Grund>"
+			stop
+		if {admin.%arg 1's uuid%} is set:
+			send "{@p} Du kannst keinen Admin bannen!"
+			stop
+		set {ban::%uuid of arg 1%} to now + arg 2
+		set {ban.reason::%arg 1's uuid%} to colored arg 3
+		set {_remaining} to difference between {ban::%uuid of arg 1%} and now
+		kick arg 1 due to "&cDu bist gebannt!%nl%&fGrund: %{ban.reason::%arg 1's uuid%}%%nl%&fVerbleibende Zeit: &b%{_remaining}%"
+		send "{@p} Spieler %arg 1% wurde für %arg 2% gebannt." to player
+		send "{@p} Grund: %{ban.reason::%arg 1's uuid%}%&f." to player
+		play sound "minecraft:entity.experience_orb.pickup" to player
+
+on join:
+	set {_uuid} to uuid of player
+	if {ban::%{_uuid}%} is set:
+		set {_end} to {ban::%{_uuid}%}
+		if {_end} > now:
+			set {_remaining} to difference between {_end} and now
+			kick player due to "&cDu bist gebannt!%nl%&fGrund: %{ban.reason::%{_uuid}%}%%nl%&fVerbleibende Zeit: &b%{_remaining}%"
+		else:
+			delete {ban::%{_uuid}%}
+			delete {ban.reason::%{_uuid}%}
+
+command /Pardon [<offline player>]:
+	trigger:
+		if arg 1 is set:
+			if {ban::%arg 1's uuid%} is set:
+				send "{@p} %arg 1% has been &bunbanned&f!"
+				play sound "minecraft:entity.experience_orb.pickup" to player
+				clear {ban::%arg 1's uuid%}
+				clear {ban.reason::%arg 1's uuid%}
+			else:
+				send "{@p} Dieser Spieler ist nicht gebannt!"
+		else:
+			send "{@p} Du musst einen Spieler angeben!"

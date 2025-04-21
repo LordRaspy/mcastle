@@ -54,7 +54,7 @@ on death:
 			set the bed location of victim to spawn location of world("world")
 			set the safe bed location of victim to spawn location of world("world")
 			broadcast "{@p} %victim% ist &centgültig gestorben&f!"
-			broadcast "{@p} &eDie Götter &ferhörten eure &eGebete &fund brachten euch ein neues &aKind&f!"
+			broadcast "{@p} &eDie Götter schenkten euch ein neues &aKind&f!"
 			wait 3 ticks
 			set {_loc} to {respawn}
 			add {@respawn_blocks} to the y-coords of {_loc}

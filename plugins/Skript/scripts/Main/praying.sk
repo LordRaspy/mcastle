@@ -8,7 +8,19 @@ options:
 	power_add_min: 3
 	power_add_max: 5
 
-	praying_restore_life: 15
+	praying_restore_life: 15 #%For life regain
+
+	needed_com_strength_min: 150
+	needed_com_strength_max: 200
+	com_add_min: 1
+	com_add_max: 2
+
+	estimated_waves_survive: 3
+	automatic_waves_time_min: 2400 #40min
+	automatic_waves_time_max: 3600 #60min
+
+variables:
+	{communitystrength} = 0
 
 command /SetPrayerPoint [<text>]:
 	trigger:
@@ -55,22 +67,59 @@ every second:
 			clear {pray.%loop-value's uuid%}
 			send "{@p} Du kannst wieder &ebeten&f!" to loop-value
 
-function pray(p: player):
+function pray(p: player, forcom: boolean=false):
 	loop {pray.points::*}:
 		if distance between {_p} and {pray.point.%loop-value%} is below {@praying_distance} +1:
 			if {pray.%{_p}'s uuid%} is not set:
-				set {pray.%{_p}'s uuid%} to {@pray_time}
-				set {_poweradd} to random integer between {@power_add_min} and {@power_add_max}
-				set {_nbt} to nbt compound of {_p}
-				add {_poweradd} to int tag "custom;power" of {_nbt}
-				send "{@p} Die &eGötter&f erhörten dich und erhöten deine Kraft um &e%{_poweradd}%&f!" to {_p}
-				if {death.counter.%{_p}'s uuid%} is above 0:
-					chance of {@praying_restore_life}%:
-						send "{@p} Die Götter finden deine &bTaten &fgut!" to {_p}
-						send "{@p} Sie gaben dir ein &cLeben &fzurück." to {_p}
-						remove 1 from {death.counter.%{_p}'s uuid%}
-				play sound "minecraft:block.beacon.ambient" with volume 1 and pitch 2 at {_p}
-				play 50 wax on with offset of 1, 1, 1 and speed 0 at {_p}
+				if {_forcom} = false:
+					set {pray.%{_p}'s uuid%} to {@pray_time}
+					set {_poweradd} to random integer between {@power_add_min} and {@power_add_max}
+					set {_nbt} to nbt compound of {_p}
+					add {_poweradd} to int tag "custom;power" of {_nbt}
+					send "{@p} Die &eGötter&f erhörten dich und erhöten deine &cKraft &fum &e%{_poweradd}%&f!" to {_p}
+					if {death.counter.%{_p}'s uuid%} is above 0:
+						chance of {@praying_restore_life}%:
+							send "{@p} Die Götter finden deine &bTaten &fgut!" to {_p}
+							send "{@p} Sie gaben dir ein &cLeben &fzurück." to {_p}
+							remove 1 from {death.counter.%{_p}'s uuid%}
+					play sound "minecraft:block.beacon.ambient" with volume 1 and pitch 2 at {_p}
+					play 50 wax off with offset of 1, 1, 1 and speed 0 at {_p}
+				if {_forcom} = true:
+					if {community.time} is not set:
+						set {pray.%{_p}'s uuid%} to {@pray_time}
+						set {_comadd} to random integer between {@com_add_min} and {@com_add_max}
+						add {_comadd} to {communitystrength}
+						send "{@p} Die &eGötter&f erhörten dich! Sie schenken euch nun mehr Aufmerksamkeit.." to {_p}
+						send "{@p} +&e%{_comadd}% Global Faith&f!" to {_p}
+						play sound "minecraft:block.beacon.ambient" with volume 1 and pitch 2 at {_p}
+						play 50 wax on with offset of 1, 1, 1 and speed 0 at {_p}
+						communitypraycheck()
+					else:
+						send "{@p} Die Götter helfen euch bereits!" to {_p}
 				close {_p}'s inventory
 			else:
 				send "{@p} Du musst noch &a%{pray.%{_p}'s uuid%}/ 60%&f Minuten warten, bis du wieder beten kannst!" to {_p}
+
+function communitypraycheck():
+	if {communitystrength} >= {community.strength.needed}:
+		set {communitystrength} to {community.strength.needed}
+		set {community.time} to true
+		play sound "minecraft:entity.wither.spawn" with volume 0.5 and pitch 1.25 to all players 
+		send "&e---------------------------------------------" to all players
+		send "&e&lCOMMUNITY EVENT" to all players
+		broadcast "Die &eGötter &ferhörten die Gebete!"
+		broadcast "Sie werden die &dDarkness &fmit ihrer &eKraft &fschwächen!"
+		send "&e---------------------------------------------" to all players
+
+every second in "world":
+	if {community.strength.needed} is not set:
+		set {community.strength.needed} to random integer between {@needed_com_strength_min} and {@needed_com_strength_max}
+	if {community.time} is set:
+		set {_base} to {community.strength.needed}
+		set {_mid} to ({@automatic_waves_time_min} + {@automatic_waves_time_max}) / 2
+		set {_time.to.survive} to {_mid} * {@estimated_waves_survive}
+		remove {_base} / {_time.to.survive} from {communitystrength}
+	if {communitystrength} < 0:
+		clear {community.time}
+		set {community.strength.needed} to random integer between {@needed_com_strength_min} and {@needed_com_strength_max}
+		set {communitystrength} to 0

@@ -17,6 +17,7 @@ options:
 	trading_skill_expert_add: 9.3750 #16h bis Master
 	trading_skill_master_add: 10.5000 #20h bis Level 120
 
+	trading_fortune_add: 1 #Anzahl an Fortune pro Levelauftieg
 
 
 	guardian_helmet: 10
@@ -65,7 +66,7 @@ on rightclick:
 	if {block.clicked.%player's uuid%} is a brewing stand:
 		if {farming.skill.%player's uuid%} is below {@farming_requirement_journeyman}:
 			cancel event
-			send "{@p} You have to be a <##475b37>Journeyman Farmer&f or better to start brewing!" to player
+			send "{@p} Requirement: You need Level &b{@farming_requirement_journeyman} &fin <##475b37>Farming &fto start brewing!" to player
 
 
 #Calculate Amount of Craft
@@ -197,9 +198,15 @@ on inventory click:
 
 					if {trading.skill.current.%player's uuid%} is above {trading.skill.needed.%player's uuid%} -1:
 						add 1 to {trading.skill.%player's uuid%}
+						add {@trading_fortune_add} to {trading.fortune.%player's uuid%}
 						set {trading.skill.current.%player's uuid%} to 0
 						set {trading.skill.needed.%player's uuid%} to {trading.skill.needed.%player's uuid%} + {@level_add}
-						send action bar "&fLevel up in &eCrafting&f! | &eCrafting: &e%{trading.skill.%player's uuid%}%"
+						send action bar "&fLevel up in &eCrafting&f! | &eCrafting&f: &e%{trading.skill.%player's uuid%}%"
+						send "&e---------------------------------------------" to player
+						send "&a&lLEVEL UP" to player
+						send "&fCrafting: &e%{trading.skill.%player's uuid%} -1 % &f-> &e%{trading.skill.%player's uuid%}%" to player
+						send "&fCrafting Furtune: &e%{trading.fortune.%player's uuid%} - {@trading_fortune_add}%%% -> &e%{trading.fortune.%player's uuid%}%%%" to player
+						send "&e---------------------------------------------" to player
 						play sound "minecraft:entity.player.levelup" to player
 
 on load:
