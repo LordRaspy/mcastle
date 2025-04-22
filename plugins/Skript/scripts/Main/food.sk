@@ -55,7 +55,7 @@ every second:
 				if {miners.brew.%loop-value-2%.%loop-value-1's uuid%} <= 0:
 					remove {miner_brew.adds::%loop-value-2%} from the block break speed attribute of loop-value-1
 					clear {miners.brew.%loop-value-2%.%loop-value-1's uuid%}
-					send action bar "&dEffects &fof &eMaster's Miner's Brew &fhas worn off" to loop-value-1
+					send action bar "&dEffects &fof &eMiner's Brew &fhas worn off" to loop-value-1
 					play 25 grey potion swirl with offset of 1, 1, 1 and speed 1 at loop-value-1
 					play sound "minecraft:entity.witch.drink" to loop-value-1
 

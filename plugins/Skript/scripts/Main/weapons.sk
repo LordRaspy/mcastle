@@ -454,18 +454,18 @@ on projectile hit:
 #----Extra------
 
 on leave:
-	loop all entities:
-		clear {freeze.%loop-value's uuid%}
-		clear {block.frame.%loop-value's uuid%}
-		clear {blazing.staff.cooldown.leftclick.%loop-value's uuid%}
-		clear {glacial.staff.cooldown.leftclick.%loop-value's uuid%}
+	clear {freeze.%player's uuid%}
+	clear {block.frame.%player's uuid%}
+	clear {blazing.staff.cooldown.leftclick.%player's uuid%}
+	clear {glacial.staff.cooldown.leftclick.%player's uuid%}
+	clear {astral.staff.cooldown.leftclick.%player's uuid%}
 
 on stop:
-	loop all entities:
-		clear {freeze.%loop-value's uuid%}
-		clear {block.frame.%loop-value's uuid%}
-		clear {blazing.staff.cooldown.leftclick.%loop-value's uuid%}
-		clear {glacial.staff.cooldown.leftclick.%loop-value's uuid%}
+	clear {freeze.%player's uuid%}
+	clear {block.frame.%player's uuid%}
+	clear {blazing.staff.cooldown.leftclick.%player's uuid%}
+	clear {glacial.staff.cooldown.leftclick.%player's uuid%}
+	clear {astral.staff.cooldown.leftclick.%player's uuid%}
 
 #Astral Stab
 

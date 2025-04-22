@@ -312,6 +312,50 @@ on load:
 			add pumpkin to ingredients
 			add sugar to ingredients
 
+
+	#Siege Weapons
+
+	register shaped recipe:
+		id: "custom:siege_hammer_novice"
+		result: stone axe named "<##6c594b>Novice's Siege Hammer" with lore "&fTier: <##6c594b>Novice", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
+		shape: " aa", " ba", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##6c594b>Minecart with Novice's Ore" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##6c594b>Minecart with Novice's Log" with lore "&fTier: <##6c594b>Novice" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:siege_hammer_journeyman"
+		result: stone axe named "<##475b37>Journeyman's Siege Hammer" with lore "&fTier: <##475b37>Journeyman", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
+		shape: " aa", " ba", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##475b37>Minecart with Journeyman's Ore" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##475b37>Minecart with Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:siege_hammer_adept"
+		result: stone axe named "<##385466>Adept's Siege Hammer" with lore "&fTier: <##385466>Adept", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
+		shape: " aa", " ba", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##385466>Minecart with Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:siege_hammer_expert"
+		result: stone axe named "<##77322c>Expert's Siege Hammer" with lore "&fTier: <##77322c>Expert", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
+		shape: " aa", " ba", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##77322c>Minecart with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:siege_hammer_master"
+		result: stone axe named "<##aa6837>Master's Siege Hammer" with lore "&fTier: <##aa6837>Master", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
+		shape: " aa", " ba", "b  "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to minecart with chest named "<##aa6837>Minecart with Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+
+
 	#Pickaxes
 
 	register shaped recipe:

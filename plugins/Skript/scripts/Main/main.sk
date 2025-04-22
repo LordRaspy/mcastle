@@ -97,12 +97,11 @@ options:
 
 
 
-every second:
-	loop all players:
-		if {unit.cap.%loop-player's uuid%} is not set:
-			set {unit.cap.%loop-player's uuid%} to 0
-		if {gold.%loop-player's uuid%} is not set:
-			set {gold.%loop-player's uuid%} to 0		
+on join:
+	if {unit.cap.%player's uuid%} is not set:
+		set {unit.cap.%player's uuid%} to 0
+	if {gold.%player's uuid%} is not set:
+		set {gold.%player's uuid%} to 0
 
 
 #-----------Scoreboard------------
@@ -211,10 +210,10 @@ function BuildandCraft(p: player):
 function SkillsandAbilities(p: player):
 	set {_gui} to a new chest inventory with 3 rows with name "&7System | Skills and Abilities"
 	open {_gui} to {_p}
-	set slot 10 of {_gui} to iron pickaxe named "&bMining Skill" with lore "&fLevel: &b%{mining.skill.%{_p}'s uuid%}%", "&fProgress: &b%{mining.skill.current.%{_p}'s uuid%} / {mining.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &b%{mining.skill.current.%{_p}'s uuid%}% &f/ &b%{mining.skill.needed.%{_p}'s uuid%}%", "&fFortune: &b%{mining.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &bMiners &fcan repair any item!", "", "&bRequirements", "&fJourneyman: <##475b37>{@mining_requirement_journeyman}", "&fAdept: <##385466>{@mining_requirement_adept}", "&fExpert: <##77322c>{@mining_requirement_expert}" and "&fMaster: <##aa6837>{@mining_requirement_master}"
+	set slot 10 of {_gui} to iron pickaxe named "&bMining Skill" with lore "&fLevel: &b%{mining.skill.%{_p}'s uuid%}%", "&fProgress: &b%{mining.skill.current.%{_p}'s uuid%} / {mining.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &b%{mining.skill.current.%{_p}'s uuid%}% &f/ &b%{mining.skill.needed.%{_p}'s uuid%}%", "&fFortune: &b%{mining.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &bMiner &fcan repair any item!", "", "&bRequirements", "&fJourneyman: <##475b37>{@mining_requirement_journeyman}", "&fAdept: <##385466>{@mining_requirement_adept}", "&fExpert: <##77322c>{@mining_requirement_expert}" and "&fMaster: <##aa6837>{@mining_requirement_master}"
 	set slot 12 of {_gui} to iron axe named "&2Wood Cutting Skill" with lore "&fLevel: &2%{wood.cutting.skill.%{_p}'s uuid%}%", "&fProgress: &2%{wood.cutting.skill.current.%{_p}'s uuid%} / {wood.cutting.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &2%{wood.cutting.skill.current.%{_p}'s uuid%}% &f/ &2%{wood.cutting.skill.needed.%{_p}'s uuid%}%", "&fFortune: &2%{wood.cutting.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &2Wood Cutter &fare able to tame pets!", "", "&bRequirements", "&fJourneyman: <##475b37>{@wood_cutting_requirement_journeyman}", "&fAdept: <##385466>{@wood_cutting_requirement_adept}", "&fExpert: <##77322c>{@wood_cutting_requirement_expert}" and "&fMaster: <##aa6837>{@wood_cutting_requirement_master}"
-	set slot 14 of {_gui} to iron hoe named "&aFarming Skill" with lore "&fLevel: &a%{farming.skill.%{_p}'s uuid%}%", "&fProgress: &a%{farming.skill.current.%{_p}'s uuid%} / {farming.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &a%{farming.skill.current.%{_p}'s uuid%}% &f/ &a%{farming.skill.needed.%{_p}'s uuid%}%", "&fFortune: &a%{farming.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &aFarmers &fare able to brew strong potions!", "", "&bRequirements", "&fJourneyman: <##475b37>{@farming_requirement_journeyman}", "&fAdept: <##385466>{@farming_requirement_adept}", "&fExpert: <##77322c>{@farming_requirement_expert}" and "&fMaster: <##aa6837>{@farming_requirement_master}"
-	set slot 16 of {_gui} to name tag named "&eCrafting Skill" with lore "&fLevel: &e%{trading.skill.%{_p}'s uuid%}%", "&fProgress: &e%{trading.skill.current.%{_p}'s uuid%} / {trading.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &e%{trading.skill.current.%{_p}'s uuid%}% &f/ &e%{trading.skill.needed.%{_p}'s uuid%}%", "&fFortune: &e%{trading.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &eCrafters &fcan craft any type of item!", "", "&bRequirements", "&fJourneyman: <##475b37>{@trading_requirement_journeyman}", "&fAdept: <##385466>{@trading_requirement_adept}", "&fExpert: <##77322c>{@trading_requirement_expert}" and "&fMaster: <##aa6837>{@trading_requirement_master}"
+	set slot 14 of {_gui} to iron hoe named "&aFarming Skill" with lore "&fLevel: &a%{farming.skill.%{_p}'s uuid%}%", "&fProgress: &a%{farming.skill.current.%{_p}'s uuid%} / {farming.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &a%{farming.skill.current.%{_p}'s uuid%}% &f/ &a%{farming.skill.needed.%{_p}'s uuid%}%", "&fFortune: &a%{farming.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &aFarmer &fare able to brew strong potions!", "", "&bRequirements", "&fJourneyman: <##475b37>{@farming_requirement_journeyman}", "&fAdept: <##385466>{@farming_requirement_adept}", "&fExpert: <##77322c>{@farming_requirement_expert}" and "&fMaster: <##aa6837>{@farming_requirement_master}"
+	set slot 16 of {_gui} to name tag named "&eCrafting Skill" with lore "&fLevel: &e%{trading.skill.%{_p}'s uuid%}%", "&fProgress: &e%{trading.skill.current.%{_p}'s uuid%} / {trading.skill.needed.%{_p}'s uuid%} * 100%%% &fFame | &e%{trading.skill.current.%{_p}'s uuid%}% &f/ &e%{trading.skill.needed.%{_p}'s uuid%}%", "&fFortune: &e%{trading.fortune.%{_p}'s uuid%}%&f%%", "&fAbility: &eCrafter &fcan craft any type of item!", "", "&bRequirements", "&fJourneyman: <##475b37>{@trading_requirement_journeyman}", "&fAdept: <##385466>{@trading_requirement_adept}", "&fExpert: <##77322c>{@trading_requirement_expert}" and "&fMaster: <##aa6837>{@trading_requirement_master}"
 	set slot 26 of {_gui} to barrier named "&cGo Back" with lore "" and "&fClick to go back!"
 	play sound "minecraft:entity.experience_orb.pickup" to {_p}
 
@@ -901,7 +900,6 @@ command /NoCombat:
 				else:
 					send "{@p} No-Combat : Der Timer wurde &cunterbrochen&f!"
 					stop
-			send "{@p} No-Combat : &c0"
 			play sound "minecraft:entity.experience_orb.pickup" to player
 			send action bar "You are no longer in &cCombat&f!" to player
 			clear {ability.%player's uuid%}

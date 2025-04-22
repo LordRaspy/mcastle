@@ -21,6 +21,14 @@ options:
 
 	corruption_poison_needed: 100  #50min
 
+	damage_siege_hammer_novice: 10
+	damage_siege_hammer_journeyman: 15
+	damage_siege_hammer_adept: 20
+	damage_siege_hammer_expert: 35
+	damage_siege_hammer_master: 50
+
+	max_siege_weapons_per_inventory: 2
+
 command /AddCity [<text>]:
 	trigger:
 		if {admin.%player's uuid%} is set:
@@ -119,23 +127,24 @@ every second:
 		loop {enemy.list::*}:
 			if distance between {city.block.%loop-value-1%} and loop-value-2 is below {@mobs_damage_range} +1:
 				remove {@mob_damage} from bossbar progress of {bossbar.city.%loop-value-1%}
-				set {_d} to bossbar progress of {bossbar.city.%loop-value-1%}
-				if {_d} is below 1:
-					remove loop-value-1 from {cities::*}
-					set {_bossbarremove} to loop-value-1
-					replace all " " with "_" in {_bossbarremove}
-					delete bossbar named "city.bossbar.%{_bossbarremove}%"
-					play sound "minecraft:entity.warden.sonic_charge" with volume 1 and pitch 0.5 to players
-					wait 1 second
-					create safe explosion with force 2 at {city.block.%loop-value-1%}
-					wait 1 second
-					create safe explosion with force 2.5 at {city.block.%loop-value-1%}
-					wait 1 second
-					create safe explosion with force 3 at {city.block.%loop-value-1%}
-					play sound "minecraft:entity.warden.sonic_boom" with volume 1 and pitch 0.5 to players
-					broadcast "{@p} City ""%loop-value-1%"" is &clost&f!"
-					set block at {city.block.%loop-value-1%} to air
-					clear {city.block.%loop-value-1%}
+
+		set {_d} to bossbar progress of {bossbar.city.%loop-value-1%}
+		if {_d} is below 1:
+			remove loop-value-1 from {cities::*}
+			set {_bossbarremove} to loop-value-1
+			replace all " " with "_" in {_bossbarremove}
+			delete bossbar named "city.bossbar.%{_bossbarremove}%"
+			play sound "minecraft:entity.warden.sonic_charge" with volume 1 and pitch 0.5 to players
+			wait 1 second
+			create safe explosion with force 2 at {city.block.%loop-value-1%}
+			wait 1 second
+			create safe explosion with force 2.5 at {city.block.%loop-value-1%}
+			wait 1 second
+			create safe explosion with force 3 at {city.block.%loop-value-1%}
+			play sound "minecraft:entity.warden.sonic_boom" with volume 1 and pitch 0.5 to players
+			broadcast "{@p} City ""%loop-value-1%"" is &clost&f!"
+			set block at {city.block.%loop-value-1%} to air
+			clear {city.block.%loop-value-1%}
 
 
 
@@ -177,3 +186,80 @@ every second:
 				if {_d} is above {@corruption_poison_needed} -1:
 					play 100 warped spore with offset of 1.5, 1.5, 1.5 and speed 1 at loop-value-1
 					apply poison of tier 1 without any particles to loop-value-1 for 99 hours
+
+#-Siege Hammers-
+
+on rightclick:
+	if distance between player and player's targeted block is below 6:
+		set {_block} to player's targeted block
+	if {_block} is set:
+		loop {cities::*}:
+			if {city.block.%loop-value%} is {_block}:
+				set {_is.beacon} to true
+				set {_name} to loop-value
+		if {_is.beacon} is set:
+			if lore of player's held item contains "&fTag: &eSiege Weapon":
+				if name of player's held item contains "<##6c594b>Novice's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_novice} from bossbar progress of {bossbar.city.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {city.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {city.block.%{_name}%}
+				if name of player's held item contains "<##475b37>Journeyman's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_journeyman} from bossbar progress of {bossbar.city.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {city.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {city.block.%{_name}%}
+				if name of player's held item contains "<##385466>Adept's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_adept} from bossbar progress of {bossbar.city.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {city.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {city.block.%{_name}%}
+				if name of player's held item contains "<##77322c>Expert's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_expert} from bossbar progress of {bossbar.city.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {city.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {city.block.%{_name}%}
+				if name of player's held item contains "<##aa6837>Master's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_master} from bossbar progress of {bossbar.city.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {city.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {city.block.%{_name}%}
+
+
+#---Cap of Siege Weapons---
+every 5 seconds:
+	loop all players:
+		loop all items in inventory of loop-value-1:
+			if lore of loop-value-2 contains "&fTag: &eSiege Weapon":
+				add 1 to {_amount}
+				add loop-value-2 to {_hammer.%loop-value-1's uuid%::*}
+		if {_amount} is above {@max_siege_weapons_per_inventory}:
+			set {_times} to {_amount} - {@max_siege_weapons_per_inventory}
+			loop {_times} times:
+				set {_item} to random element out of {_hammer.%loop-value-1's uuid%::*}
+				remove 1 of {_item} from loop-value-1's inventory
+				drop {_item} at loop-value-1
+				remove {_item} from {_hammer.%loop-value-1's uuid%::*}
+			send "{@p} Du hälst zu viele &eSiege Weapons&f!" to loop-value-1
+
+on pickup:
+	loop all items in inventory of player:
+		if lore of event-item contains "&fTag: &eSiege Weapon":
+			add 1 to {_amount}
+	if {_amount} is above {@max_siege_weapons_per_inventory} -1:
+		cancel event

@@ -39,10 +39,10 @@ command /GetDeathCount [<player>]:
 			send "{@p} Du bist kein Admin!"
 
 
-every second:
-	loop all players:
-		if {death.counter.%loop-value's uuid%} is not set:
-			set {death.counter.%loop-value's uuid%} to 0
+on join:
+	if {death.counter.%player's uuid%} is not set:
+		set {death.counter.%player's uuid%} to 0
+
 on death:
 	if victim is a player:
 		if {death.counter.%victim's uuid%} is below {@death_max}:
@@ -54,7 +54,7 @@ on death:
 			set the bed location of victim to spawn location of world("world")
 			set the safe bed location of victim to spawn location of world("world")
 			broadcast "{@p} %victim% ist &centgültig gestorben&f!"
-			broadcast "{@p} &eDie Götter schenkten euch ein neues &aKind&f!"
+			broadcast "{@p} &eDie Götter &fschenkten euch ein neuen &eBewohner&f!"
 			wait 3 ticks
 			set {_loc} to {respawn}
 			add {@respawn_blocks} to the y-coords of {_loc}
