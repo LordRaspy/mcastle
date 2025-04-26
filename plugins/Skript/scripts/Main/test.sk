@@ -1,4 +1,4 @@
 command /TestFeature:
-    permission: *
-    trigger:
-        give player stone axe named "<##aa6837>Master's Siege Hammer" with lore "&fTier: <##6c594b>Novice" and "&fTag: &eSiege Weapon"
+	permission: *
+	trigger:
+		give player stone axe named "<##aa6837>Master's Siege Hammer" with lore "&fTier: <##6c594b>Novice" and "&fTag: &eSiege Weapon"

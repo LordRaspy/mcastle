@@ -643,9 +643,16 @@ every second:
 		loop {cities::*}:
 			add distance between loop-value-1 and {city.block.%loop-value-2%} to {_distances::*}
 			add {city.block.%loop-value-2%} to {_end.locations::*}
+		loop {gates::*}:
+			if {gate.destroyed.timer.%loop-value-2%} is set:
+				continue
+			add distance between loop-value-1 and {gate.block.%loop-value-2%} to {_distances::*}
+			add {gate.block.%loop-value-2%} to {_end.locations::*}
 		set {_distance} to min({_distances::*})
 		loop {_end.locations::*}:
 			if distance between loop-value-1 and loop-value-2 is {_distance}:
+				# if loop-value-1's targeted entity is a player:
+				# 	continue
 				set path target of loop-value-1 to location of loop-value-2
 		clear {_distances::*}
 		clear {_end.locations::*}

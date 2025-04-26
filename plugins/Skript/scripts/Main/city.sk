@@ -1,14 +1,28 @@
 options:
 	p: &bSystem &f|
-
-	beacon_price: 1280 #4 Stacks Gold
-	bossbar_distance: 15
-	see_range_city: 50
-
-
+	
+	bossbar_distance: 15 #Distance bis die Bossbar angezeigt wird
+	see_range_city: 50 #Distance bis der Spieler in der Darkness ist
+	mobs_damage_range: 10 #Range in der die Mobs um einen Beacon herum Schaden machen
 	mob_damage: 1 #Schaden pro Gegner in Range
-	base_regeneration: 0.1
-	mobs_damage_range: 10
+
+	city_price: 1280 #4 Stacks Gold
+	base_regeneration_city: 0.1
+
+	gate_price: 960 # 3 Stacks Gold
+	base_regeneration_gate: 0.1 #Regeneration von einem Gate pro Sekunde
+	gate_destruction_timer: 750 #10min
+
+
+	max_siege_weapons_per_inventory: 1 #Max. items mit Tag Siege Weapon pro inventory
+
+	damage_siege_hammer_novice: 10 #An der Bossbar. Eine Bossbar hat 100 Leben
+	damage_siege_hammer_journeyman: 15
+	damage_siege_hammer_adept: 20
+	damage_siege_hammer_expert: 35
+	damage_siege_hammer_master: 50
+
+
 
 
 	corruption_build_up: 0.03333 #Bis 60 = 30min.
@@ -21,13 +35,6 @@ options:
 
 	corruption_poison_needed: 100  #50min
 
-	damage_siege_hammer_novice: 10
-	damage_siege_hammer_journeyman: 15
-	damage_siege_hammer_adept: 20
-	damage_siege_hammer_expert: 35
-	damage_siege_hammer_master: 50
-
-	max_siege_weapons_per_inventory: 2
 
 command /AddCity [<text>]:
 	trigger:
@@ -39,16 +46,28 @@ command /AddCity [<text>]:
 		else:
 			send "{@p} Du bist kein Admin!"
 
+command /AddGate [<text>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				AddGate(player, arg 1)
+			else:
+				send "{@p} Du musst einen Namen angeben!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
 on skript start:
 	loop {cities::*}:
 		set bossbar progress of {bossbar.city.%loop-value-1%} to 100
+	loop {gates::*}:
+		set bossbar progress of {bossbar.gate.%loop-value-1%} to 100
 
 function AddCity(p: player, name: text, life: integer=100):
 	if {_life} is between 1 and 100:
 		if {_name} matches "[A-Za-z0-9-_\s:]+":
 			if {cities::*} doesn't contain {_name}:
-				if {gold.%{_p}'s uuid%} is above {@beacon_price} - 1:
-					remove {@beacon_price} from {gold.%{_p}'s uuid%}
+				if {gold.%{_p}'s uuid%} is above {@city_price} - 1:
+					remove {@city_price} from {gold.%{_p}'s uuid%}
 					clear {outpost.name.%{_p}'s uuid%}
 					set {_location} to {_p}'s location
 					add {_name} to {cities::*}
@@ -58,7 +77,7 @@ function AddCity(p: player, name: text, life: integer=100):
 					send "{@p} City ""%{_name}%"" added!" to {_p}
 					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to {_p}
 				else:
-					send "{@p} Du hast nicht genug &6Gold&f (%{gold.%{_p}'s uuid%}%/{@beacon_price})!" to {_p}
+					send "{@p} Du hast nicht genug &6Gold&f (%{gold.%{_p}'s uuid%}%/{@city_price})!" to {_p}
 			else:
 				send "{@p} Es gibt diese Stadt bereits!" to {_p}
 		else:
@@ -66,6 +85,28 @@ function AddCity(p: player, name: text, life: integer=100):
 	else:
 		send "{@p} Der Wert muss zwischen 1 und 100 sein!" to {_p}
 
+function AddGate(p: player, name: text, life: integer=100):
+	if {_life} is between 1 and 100:
+		if {_name} matches "[A-Za-z0-9-_\s:]+":
+			if {gates::*} doesn't contain {_name}:
+				if {gold.%{_p}'s uuid%} is above {@gate_price} - 1:
+					remove {@gate_price} from {gold.%{_p}'s uuid%}
+					clear {outpost.name.%{_p}'s uuid%}
+					set {_location} to {_p}'s location
+					add {_name} to {gates::*}
+					set {bossbar.gate.%{_name}%} to boss bar with id "gate.bossbar.%{_name}%" with title "&f<| &a%{_name}% &f|>" with color green with style segmented 10 with progress {_life}
+					set block at {_location} to beacon
+					set {gate.block.%{_name}%} to block at {_location}
+					send "{@p} Gate ""%{_name}%"" added!" to {_p}
+					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to {_p}
+				else:
+					send "{@p} Du hast nicht genug &6Gold&f (%{gold.%{_p}'s uuid%}%/{@gate_price})!" to {_p}
+			else:
+				send "{@p} Es gibt dieses Tor bereits!" to {_p}
+		else:
+			send "{@p} Nur Leerzeichen, Bindelstriche (-), Unterstriche (_) und alphanumerische Ausdrücke sind erlaubt!" to {_p}
+	else:
+		send "{@p} Der Wert muss zwischen 1 und 100 sein!" to {_p}
 
 command /RemoveCity [<text>]:
 	trigger:
@@ -76,12 +117,35 @@ command /RemoveCity [<text>]:
 					set {_bossbarremove} to arg 1
 					replace all " " with "_" in {_bossbarremove}
 					delete bossbar named "city.bossbar.%{_bossbarremove}%"
+					clear {bossbar.city.%arg 1%}
 					set block at {city.block.%arg 1%} to air
 					clear {city.block.%arg 1%}
 					send "{@p} City ""%arg 1%"" removed!"
 					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
 				else:
 					send "{@p} Es gibt diese Stadt nicht!"
+			else:
+				send "{@p} Gebe einen Namen an!"
+		else:
+			send "{@p} Du bist kein Admin!"
+
+command /RemoveGate [<text>]:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if arg 1 is set:
+				if {gates::*} contains arg 1:
+					remove arg 1 from {gates::*}
+					set {_bossbarremove} to arg 1
+					replace all " " with "_" in {_bossbarremove}
+					delete bossbar named "gate.bossbar.%{_bossbarremove}%"
+					clear {bossbar.gate.%arg 1%}
+					clear {gate.destroyed.timer.%arg 1%}
+					set block at {gate.block.%arg 1%} to air
+					clear {gate.block.%arg 1%}
+					send "{@p} Gate ""%arg 1%"" removed!"
+					play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+				else:
+					send "{@p} Es gibt dieses Gate nicht!"
 			else:
 				send "{@p} Gebe einen Namen an!"
 		else:
@@ -109,43 +173,117 @@ command /Cities:
 		else:
 			send "{@p} Du bist kein Admin!"
 
+command /Gates:
+	trigger:
+		if {admin.%player's uuid%} is set:
+			if {gates::*} is set:
+				play sound "minecraft:entity.experience_orb.pickup" with volume 1 and pitch 1 to player
+				send "{@p} All Gates:"
+				send "&f---------------------"
+				loop {gates::*}:
+					set {_locx} to x-coordinates of {gate.block.%loop-value%}
+					set {_locy} to y-coordinates of {gate.block.%loop-value%}
+					set {_locz} to z-coordinates of {gate.block.%loop-value%}
+					set {_c::1} to a new text component from "{@p} %loop-value% - %bossbar progress of {bossbar.gate.%loop-value-1%}% - x: %{_locx}% | y: %{_locy}% | z: %{_locz}%"
+					set {_c::2} to a new text component from " &f[&eTELEPORT&f]"
+					set click event of {_c::2} to click event to run command "/teleport %player% %{_locx}% %{_locy} + 1% %{_locz}%"
+					set {_c} to merge components {_c::*}
+					send component {_c} to player
+					send "&f---------------------"
+			else:
+				send "{@p} Es gibt keine Gates!"
+		else:
+			send "{@p} Du bist kein Admin!"
 
 on block break:
 	loop {cities::*}:
 		if {city.block.%loop-value-1%} contains event-block:
 			cancel event
+	loop {gates::*}:
+		if {gate.block.%loop-value-1%} contains event-block:
+			cancel event
 
 every second:
 	loop {cities::*}:
-		add {@base_regeneration} to bossbar progress of {bossbar.city.%loop-value-1%}
+		add {@base_regeneration_city} to bossbar progress of {bossbar.city.%loop-value-1%}
 		loop all players:
 			if distance between loop-value-2 and {city.block.%loop-value-1%} is below {@bossbar_distance} +1:
 				add loop-value-2 to {bossbar.city.%loop-value-1%}
 			else:
 				remove loop-value-2 from {bossbar.city.%loop-value-1%}
 
-		loop {enemy.list::*}:
-			if distance between {city.block.%loop-value-1%} and loop-value-2 is below {@mobs_damage_range} +1:
-				remove {@mob_damage} from bossbar progress of {bossbar.city.%loop-value-1%}
 
 		set {_d} to bossbar progress of {bossbar.city.%loop-value-1%}
-		if {_d} is below 1:
-			remove loop-value-1 from {cities::*}
-			set {_bossbarremove} to loop-value-1
-			replace all " " with "_" in {_bossbarremove}
-			delete bossbar named "city.bossbar.%{_bossbarremove}%"
-			play sound "minecraft:entity.warden.sonic_charge" with volume 1 and pitch 0.5 to players
-			wait 1 second
-			create safe explosion with force 2 at {city.block.%loop-value-1%}
-			wait 1 second
-			create safe explosion with force 2.5 at {city.block.%loop-value-1%}
-			wait 1 second
-			create safe explosion with force 3 at {city.block.%loop-value-1%}
-			play sound "minecraft:entity.warden.sonic_boom" with volume 1 and pitch 0.5 to players
-			broadcast "{@p} City ""%loop-value-1%"" is &clost&f!"
-			set block at {city.block.%loop-value-1%} to air
-			clear {city.block.%loop-value-1%}
+		if {_d} is set:
 
+			loop {enemy.list::*}:
+				if distance between {city.block.%loop-value-1%} and loop-value-2 is below {@mobs_damage_range} +1:
+					remove {@mob_damage} from bossbar progress of {bossbar.city.%loop-value-1%}
+
+			if {_d} is below 1:
+				remove loop-value-1 from {cities::*}
+				set {_bossbarremove} to loop-value-1
+				replace all " " with "_" in {_bossbarremove}
+				delete bossbar named "city.bossbar.%{_bossbarremove}%"
+				clear {bossbar.city.%loop-value-1%}
+				play sound "minecraft:entity.warden.sonic_charge" with volume 1 and pitch 0.5 to players
+				wait 1 second
+				create safe explosion with force 2 at {city.block.%loop-value-1%}
+				wait 1 second
+				create safe explosion with force 2.5 at {city.block.%loop-value-1%}
+				wait 1 second
+				create safe explosion with force 3 at {city.block.%loop-value-1%}
+				play sound "minecraft:entity.warden.sonic_boom" with volume 1 and pitch 0.5 to players
+				broadcast "{@p} City ""%loop-value-1%"" is &clost&f!"
+				set block at {city.block.%loop-value-1%} to air
+				clear {city.block.%loop-value-1%}
+
+	loop {gates::*}:
+		add {@base_regeneration_gate} to bossbar progress of {bossbar.gate.%loop-value-1%}
+		loop all players:
+			if distance between loop-value-2 and {gate.block.%loop-value-1%} is below {@bossbar_distance} +1:
+				if {gate.destroyed.timer.%loop-value-1%} is set:
+					remove loop-value-2 from {bossbar.gate.%loop-value-1%}
+					continue
+				add loop-value-2 to {bossbar.gate.%loop-value-1%}
+			else:
+				remove loop-value-2 from {bossbar.gate.%loop-value-1%}
+
+		set {_d} to bossbar progress of {bossbar.gate.%loop-value-1%}
+		if {_d} is set:
+
+			loop {enemy.list::*}:
+				if distance between {gate.block.%loop-value-1%} and loop-value-2 is below {@mobs_damage_range} +1:
+					remove {@mob_damage} from bossbar progress of {bossbar.gate.%loop-value-1%}
+
+
+			if {gate.destroyed.timer.%loop-value-1%} is not set:
+				if {_d} is below 1:
+					set {gate.destroyed.timer.%loop-value-1%} to {@gate_destruction_timer}
+					set {_bossbarremove} to loop-value-1
+					replace all " " with "_" in {_bossbarremove}
+					delete bossbar named "gate.bossbar.%{_bossbarremove}%"
+					clear {bossbar.gate.%loop-value-1%}
+					play sound "minecraft:entity.warden.sonic_charge" with volume 1 and pitch 0.5 to players
+					wait 1 second
+					create safe explosion with force 2 at {gate.block.%loop-value-1%}
+					wait 1 second
+					create safe explosion with force 2.5 at {gate.block.%loop-value-1%}
+					wait 1 second
+					create safe explosion with force 3 at {gate.block.%loop-value-1%}
+					play sound "minecraft:entity.warden.sonic_boom" with volume 1 and pitch 0.5 to players
+					broadcast "{@p} Gate ""%loop-value-1%"" is &clost&f!"
+					set block at {gate.block.%loop-value-1%} to bedrock
+
+		if {gate.destroyed.timer.%loop-value-1%} is set:
+			remove 1 from {gate.destroyed.timer.%loop-value-1%}
+			if {gate.destroyed.timer.%loop-value-1%} is below 1:
+				clear {gate.destroyed.timer.%loop-value-1%}
+				set {bossbar.gate.%loop-value-1%} to boss bar with id "gate.bossbar.%loop-value-1%" with title "&f<| &a%loop-value-1% &f|>" with color green with style segmented 10 with progress 50
+				set block at {gate.block.%loop-value-1%} to beacon
+				play 100 scrape with offset of 1, 1, 1 and speed 0.2 at {gate.block.%loop-value-1%}
+				play sound "minecraft:block.beacon.activate" with volume 1 and pitch 1 to players
+				broadcast "{@p} Gate ""%loop-value-1%"" &arecovered&f!"
 
 
 #-Darkness and Outside-
@@ -195,9 +333,13 @@ on rightclick:
 	if {_block} is set:
 		loop {cities::*}:
 			if {city.block.%loop-value%} is {_block}:
-				set {_is.beacon} to true
+				set {_is.city} to true
 				set {_name} to loop-value
-		if {_is.beacon} is set:
+		loop {gates::*}:
+			if {gate.block.%loop-value%} is {_block}:
+				set {_is.gate} to true
+				set {_name} to loop-value
+		if {_is.city} is set: #Mapping needed
 			if lore of player's held item contains "&fTag: &eSiege Weapon":
 				if name of player's held item contains "<##6c594b>Novice's Siege Hammer":
 					cancel event
@@ -239,6 +381,48 @@ on rightclick:
 					set {_v} to vector between {city.block.%{_name}%} and player
 					push player {_v} with speed 1
 					create safe explosion of force 1 at {city.block.%{_name}%}
+		if {_is.gate} is set:
+			if lore of player's held item contains "&fTag: &eSiege Weapon":
+				if name of player's held item contains "<##6c594b>Novice's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_novice} from bossbar progress of {bossbar.gate.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {gate.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {gate.block.%{_name}%}
+				if name of player's held item contains "<##475b37>Journeyman's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_journeyman} from bossbar progress of {bossbar.gate.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {gate.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {gate.block.%{_name}%}
+				if name of player's held item contains "<##385466>Adept's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_adept} from bossbar progress of {bossbar.gate.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {gate.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {gate.block.%{_name}%}
+				if name of player's held item contains "<##77322c>Expert's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_expert} from bossbar progress of {bossbar.gate.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {gate.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {gate.block.%{_name}%}
+				if name of player's held item contains "<##aa6837>Master's Siege Hammer":
+					cancel event
+					remove 1 of player's held item from player's held item
+					remove {@damage_siege_hammer_master} from bossbar progress of {bossbar.gate.%{_name}%}
+					push player upwards with speed 1.25
+					set {_v} to vector between {gate.block.%{_name}%} and player
+					push player {_v} with speed 1
+					create safe explosion of force 1 at {gate.block.%{_name}%}
 
 
 #---Cap of Siege Weapons---

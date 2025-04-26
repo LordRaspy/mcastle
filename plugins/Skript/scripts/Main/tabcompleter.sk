@@ -4,6 +4,11 @@ on tab complete:
 	event-string is "/RemoveCity":
 		set tab completions for position 1 to {cities::*}
 
+	event-string is "/AddGate":
+		set tab completions for position 1 to {gates::*}
+	event-string is "/RemoveGate":
+		set tab completions for position 1 to {gates::*}
+
 	event-string is "/SetMobSpawn":
 		set tab completions for position 1 to {mob.spawns::*}
 	event-string is "/RemoveMobSpawn":
