@@ -9,6 +9,9 @@ options:
 
 	show_item_radius: 5
 
+	cat_repo: 7
+	dog_repo: 10
+
 variables:
 	{day} = 1
 	{month} = 1
@@ -216,6 +219,19 @@ on rightclick:
 					if name of player's held item contains "<##385466>Adept's Lockpick":
 						chance of {@lockpick_chance}%:
 							send action bar "&fLockpicking was &7successful&f!" to player
+							loop {pets::*}:
+								if loop-value's owner = player:
+									continue
+								if loop-value is a cat:
+									if distance between loop-value and {_block} is below {@cat_repo} +1:
+										send "&f&lCat &f: &lMiau!" to loop-value's owner
+										play sound "minecraft:entity.cat.ambient" with volume 1 and pitch 1 to loop-value's owner
+										play sound "minecraft:entity.cat.hiss" with volume 2 and pitch 1 at loop-value
+								if loop-value is a wolf:
+									if distance between loop-value and {_block} is below {@dog_repo} +1:
+										send "&f&lDog &f: &lWoof!" to loop-value's owner
+										play sound "minecraft:entity.wolf.ambient" with volume 1 and pitch 1 to loop-value's owner
+										play sound "minecraft:entity.wolf.growl" with volume 2 and pitch 1 at loop-value
 							stop
 						remove 1 of player's held item from player's held item
 				play sound "minecraft:block.chest.locked" at player

@@ -26,9 +26,6 @@ options:
 
 
 on script load: #Mapping
-	set {tiers::*} to "novice", "journeyman", "adept", "expert" and "master"
-	set {colors::*} to "<##6c594b>", "<##475b37>", "<##385466>", "<##77322c>" and "<##aa6837>"
-
 	set {miner_brew.adds::novice} to {@novice_miner_brew_add}
 	set {miner_brew.adds::journeyman} to {@journeyman_miner_brew_add}
 	set {miner_brew.adds::adept} to {@adept_miner_brew_add}

@@ -304,6 +304,14 @@ on load:
 		ingredients:
 			set ingredient of "a" to flint
 			set ingredient of "b" to stick
+	
+	register shaped recipe:
+		id: "custom:saddle"
+		result: saddle named "<##77322c>Expert's Saddle" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: " a ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##77322c>Chest with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
 
 	register shapeless recipe:
 		id: "custom:pumpkin_pie"

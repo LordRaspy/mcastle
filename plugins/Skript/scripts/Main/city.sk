@@ -337,6 +337,8 @@ on rightclick:
 				set {_name} to loop-value
 		loop {gates::*}:
 			if {gate.block.%loop-value%} is {_block}:
+				if {gate.destroyed.timer.%loop-value%} is set:
+					continue
 				set {_is.gate} to true
 				set {_name} to loop-value
 		if {_is.city} is set: #Mapping needed
@@ -431,19 +433,22 @@ every 5 seconds:
 		loop all items in inventory of loop-value-1:
 			if lore of loop-value-2 contains "&fTag: &eSiege Weapon":
 				add 1 to {_amount}
-				add loop-value-2 to {_hammer.%loop-value-1's uuid%::*}
+				add loop-value-2 to {_hammer::*}
 		if {_amount} is above {@max_siege_weapons_per_inventory}:
 			set {_times} to {_amount} - {@max_siege_weapons_per_inventory}
 			loop {_times} times:
-				set {_item} to random element out of {_hammer.%loop-value-1's uuid%::*}
+				set {_item} to random element out of {_hammer::*}
 				remove 1 of {_item} from loop-value-1's inventory
 				drop {_item} at loop-value-1
-				remove {_item} from {_hammer.%loop-value-1's uuid%::*}
+				remove {_item} from {_hammer::*}
 			send "{@p} Du hälst zu viele &eSiege Weapons&f!" to loop-value-1
+		clear {_amount}
+		clear {_times}
+		clear {_hammer::*}
 
 on pickup:
 	loop all items in inventory of player:
-		if lore of event-item contains "&fTag: &eSiege Weapon":
+		if lore of loop-value contains "&fTag: &eSiege Weapon":
 			add 1 to {_amount}
 	if {_amount} is above {@max_siege_weapons_per_inventory} -1:
 		cancel event

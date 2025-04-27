@@ -1,0 +1,74 @@
+options:
+	p: &bSystem &f|
+
+	base_regeneration: 0.5
+
+	pet_life_journeyman: 10
+	pet_life_adept: 15
+	pet_life_expert: 20
+	pet_life_master: 25
+
+	max_pet_amount: 2
+
+on skript load:
+	set {pet.type::journeyman} to a cat
+	set {pet.type::adept} to a wolf
+	set {pet.type::expert} to a donkey
+	set {pet.type::master} to a horse
+
+	set {pet.life::journeyman} to {@pet_life_journeyman}
+	set {pet.life::adept} to {@pet_life_adept}
+	set {pet.life::expert} to {@pet_life_expert}
+	set {pet.life::master} to {@pet_life_master}
+
+function getpetamount(p: player) :: integer:
+	loop {pets::*}:
+		if loop-value's owner is {_p}:
+			add 1 to {_amount}
+	if {_amount} is not set:
+		set {_amount} to 0
+	return {_amount}
+
+on rightclick:
+	if name of player's held item contains "Pet":
+		if lore of player's held item contains "&fTag: &aConsumeable":
+			cancel event
+			loop {tiers::*}:
+				if loop-counter is 1:
+					continue
+				set {_proper.text} to loop-value in proper case
+				if lore of player's held item contains "&fTier: %{color::%loop-value%}%%{_proper.text}%":
+					set {_amount} to getpetamount(player)
+					if {_amount} is below {@max_pet_amount}:
+						remove 1 of player's held item from player's held item
+						spawn {pet.type::%loop-value%} at player
+						add last spawned entity to {pets::*}
+						set max health of last spawned entity to {pet.life::%loop-value%}
+						heal last spawned entity
+						set name of last spawned entity to "%{color::%loop-value%}%%player%'s Pet"
+						set owner of last spawned entity to player
+						play 30 purple potion swirl with offset of 1, 1, 1 and speed 1 at player
+						play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at player
+					else:
+						send "{@p} Du kannst nur &b{@max_pet_amount}&f Pets haben!" to player
+
+on death:
+	if {pets::*} contains victim:
+		remove victim from {pets::*}
+
+on rightclick:
+	if player's targeted entity is a entity:
+		if {pets::*} contains player's targeted entity:
+			if player's targeted entity's owner is player:
+				stop
+			if {trusted.%uuid of player's targeted entity's owner%::*} contains player:
+				stop
+			cancel event
+			
+every second:
+	loop {pets::*}:
+		add {@base_regeneration} to loop-value's health
+
+on spawn: # Genereller Breed cancel
+	spawn reason is breed or breeding:
+		cancel event

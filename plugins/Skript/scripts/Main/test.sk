@@ -1,4 +1,13 @@
 command /TestFeature:
 	permission: *
 	trigger:
-		give player stone axe named "<##aa6837>Master's Siege Hammer" with lore "&fTier: <##6c594b>Novice" and "&fTag: &eSiege Weapon"
+		give player cat spawn egg named "<##475b37>Journeyman's Pet" with lore "&fTier: <##475b37>Journeyman", "&fAbility: Drücke &dRechtsclick &fum eine Katze zu beschwören!", "&fCat: &aKatzen&f alamieren bei Einbrüchen!" and "&fTag: &aConsumeable"
+		give player wolf spawn egg named "<##385466>Adept's Pet" with lore "&fTier: <##385466>Adept", "&fAbility: Drücke &dRechtsclick &fum einen Hund zu beschwören!", "&fDog: &aHunden &falamieren bei Einbrüchen und können angreifen!" and "&fTag: &aConsumeable"
+		give player donkey spawn egg named "<##77322c>Expert's Pet" with lore "&fTier: <##77322c>Expert", "&fAbility: Drücke &dRechtsclick &fum einen Esel zu beschwören!", "&fDonkey: Mit einer &eTruhe &fausgerüstet, helfen dir &aEsel &fObjekte zu transportieren!" and "&fTag: &aConsumeable"
+		give player horse spawn egg named "<##aa6837>Master's Pet" with lore "&fTier: <##aa6837>Master", "&fAbility: Drücke &dRechtsclick &fum ein Pferd zu beschwören!", "&fHorse: Mit einem &eSattel &fausgerüstet, helfen dir &aPferde &fschneller von A nach B zu kommen!" and "&fTag: &aConsumeable"
+
+command /TestFeature2:
+	permission: *
+	trigger:
+		give player stone axe named "<##aa6837>Master's Siege Hammer" with lore "&fTier: <##aa6837>Master", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
+		give player tripwire hook named "<##385466>Adept's Lockpick" with lore "&fTier: <##385466>Adept" and "&fTag: &aConsumeable"

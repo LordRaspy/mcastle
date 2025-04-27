@@ -96,7 +96,19 @@ options:
 
 	trading_fortune_add: 1 #Anzahl an Fortune pro Levelauftieg
 
+	max_pet_amount: 2
+	drop_pet_journeyman: 100
+	drop_pet_adept: 0.5
+	drop_pet_expert: 0.5
+	drop_pet_master: 0.5
 
+on skript load:
+	set {tiers::*} to "novice", "journeyman", "adept", "expert" and "master"
+	set {color::novice} to "<##6c594b>"
+	set {color::journeyman} to "<##475b37>"
+	set {color::adept} to "<##385466>"
+	set {color::expert} to "<##77322c>"
+	set {color::master} to "<##aa6837>"
 
 on join:
 	if {unit.cap.%player's uuid%} is not set:
@@ -110,9 +122,11 @@ on join:
 
 on join:
 	set title of player's scoreboard to "&blordraspy.duckdns.org"
-	set line 1 of player's scoreboard to "&f&lReligion"
-	set line 4 of player's scoreboard to ""
-	set line 5 of player's scoreboard to "&f&lAbilities"
+	set line 1 of player's scoreboard to "&f&lPlayer"
+	set line 3 of player's scoreboard to ""
+	set line 4 of player's scoreboard to "&f&lReligion"
+	set line 7 of player's scoreboard to ""
+	set line 8 of player's scoreboard to "&f&lAbilities"
 	while player is online:
 
 		if {cooldown.weapon.%player's uuid%} is not set:
@@ -141,17 +155,18 @@ on join:
 			set {_boots} to "&c%{cooldown.boots.%player's uuid%}%s"
 		set {_faith} to {communitystrength} / {community.strength.needed} * 100
 		if {_faith} < {@faith_censored_amount}:
-			set line 2 of player's scoreboard to "&fGlobal Faith: &e%{_faith}%&f%%"
+			set line 5 of player's scoreboard to "&fGlobal Faith: &e%{_faith}%&f%%"
 		else:
 			if {community.time} is not set:
-				set line 2 of player's scoreboard to "&fGlobal Faith: &e&k%{_faith}%&f%%"
+				set line 5 of player's scoreboard to "&fGlobal Faith: &e&k%{_faith}%&f%%"
 			else:
-				set line 2 of player's scoreboard to "&fGlobal Faith: &e%{_faith}%&f%%"
-		set line 6 of player's scoreboard to "&fWeapon Ability: &c%{_weapon}%"
-		set line 7 of player's scoreboard to "&fHelmet Ability: &c%{_helmet}%"
-		set line 8 of player's scoreboard to "&fChestplate Ability: &c%{_chestplate}%"
-		set line 9 of player's scoreboard to "&fLeg Armor Ability: &c%{_leggings}%"
-		set line 10 of player's scoreboard to "&fBoots Ability: &c%{_boots}%"
+				set line 5 of player's scoreboard to "&fGlobal Faith: &e%{_faith}%&f%%"
+		set line 2 of player's scoreboard to "&fGold: &6%{gold.%player's uuid%}%"
+		set line 9 of player's scoreboard to "&fWeapon Ability: &c%{_weapon}%"
+		set line 10 of player's scoreboard to "&fHelmet Ability: &c%{_helmet}%"
+		set line 11 of player's scoreboard to "&fChestplate Ability: &c%{_chestplate}%"
+		set line 12 of player's scoreboard to "&fLeg Armor Ability: &c%{_leggings}%"
+		set line 13 of player's scoreboard to "&fBoots Ability: &c%{_boots}%"
 		wait 1 second
 
 
@@ -171,12 +186,12 @@ function Menu(p: player):
 		set {_pray} to "&aDone!"
 	else:
 		set {_pray} to "%{pray.%{_p}'s uuid%} / 60% &fMinutes"
-
+	set {_pets} to getpetamount({_p})
 	set {_gui} to a new chest inventory with 3 rows with name "&7System | Menu"
 	set slot 4 of {_gui} to clock named "&e---Time---" with lore "&fThe current &eDate &fis: &e%{day}%&f.&e%{month}%&f.&e%{@start_year} + {year}%&f.", "&fThe current &eTime &fis: &e%time of "world"% &fUhr", "" and "&dRightclick &fto update the timer!"
 	set slot 9 of {_gui} to chest named "&bBuild and Craft" with lore "" and "&fClick to open the Build and Craft Menu!"
 	set slot 11 of {_gui} to gold block named "&bReligions" with lore "", "&a----------------------", "&fTime remaining: &e%{_pray}%", "&a----------------------", "" and "&dLeftclick &fto open the Religion Menu!"
-	set slot 13 of {_gui} to {_p}'s skull named "&b%{_p}%'s Stats" with lore "", "&a----------------------", "&fGold: &6%{gold.%{_p}'s uuid%}%", "&fExact Life: %{_p}'s health% &cHearts", "&fPower: &c%{_power}%", "&8Power increases your defense and damage output!", "&fDeaths: &c%{death.counter.%{_p}'s uuid%}%&f/&c{@death_max}", "&a----------------------", "", "&a----------------------", "&fMining Level: &b%{mining.skill.%{_p}'s uuid%}%", "&fWoodcutting Level: &2%{wood.cutting.skill.%{_p}'s uuid%}%", "&fFarming / Leatherworking Level: &a%{farming.skill.%{_p}'s uuid%}%", "&fCrafting / Trading Level: &e%{trading.skill.%{_p}'s uuid%}%", "&a----------------------", "" and "&fClick to open the Leaderboard!"
+	set slot 13 of {_gui} to {_p}'s skull named "&b%{_p}%'s Stats" with lore "", "&a----------------------", "&fGold: &6%{gold.%{_p}'s uuid%}%", "&fExact Life: %{_p}'s health% &cHearts", "&fPower: &c%{_power}%", "&8Power increases your defense and damage output!", "&fDeaths: &c%{death.counter.%{_p}'s uuid%}%&f/&c{@death_max}", "&fPets: &b%{_pets}%&f/&b{@max_pet_amount}", "&a----------------------", "", "&a----------------------", "&fMining Level: &b%{mining.skill.%{_p}'s uuid%}%", "&fWoodcutting Level: &2%{wood.cutting.skill.%{_p}'s uuid%}%", "&fFarming / Leatherworking Level: &a%{farming.skill.%{_p}'s uuid%}%", "&fCrafting / Trading Level: &e%{trading.skill.%{_p}'s uuid%}%", "&a----------------------", "" and "&fClick to open the Leaderboard!"
 	set slot 15 of {_gui} to book and quill named "&bLicenses" with lore "" and "&fClick to open the License Menu!"
 	set slot 17 of {_gui} to iron pickaxe named "&bSkills and Abilities" with lore "" and "&fClick to open the Skills and Abilities Menu!"
 	open {_gui} to {_p}
@@ -645,6 +660,10 @@ on block break:
 						drop birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
 						chance of {wood.cutting.fortune.%player's uuid%}%:
 							drop birch log named "<##475b37>Journeyman's Log" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+						chance of {@drop_pet_journeyman}%:
+							drop cat spawn egg named "<##475b37>Journeyman's Pet" with lore "&fTier: <##475b37>Journeyman", "&fAbility: Drücke &dRechtsclick &fum eine Katze zu beschwören!", "&fCat: &aKatzen&f alamieren bei Einbrüchen!" and "&fTag: &aConsumeable"
+							play 15 green potion swirl with offset of 1, 1, 1 and speed 1 at event-block
+							play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at event-block
 					else:
 						send "{@p} You need a <##475b37>Journeyman's Axe &for better!" to player
 						cancel event
@@ -663,6 +682,10 @@ on block break:
 						drop spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
 						chance of {wood.cutting.fortune.%player's uuid%}%:
 							drop spruce log named "<##385466>Adept's Log" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+						chance of {@drop_pet_adept}%:
+							drop wolf spawn egg named "<##385466>Adept's Pet" with lore "&fTier: <##385466>Adept", "&fAbility: Drücke &dRechtsclick &fum einen Hund zu beschwören!", "&fDog: &aHunden &falamieren bei Einbrüchen und können angreifen!" and "&fTag: &aConsumeable"
+							play 15 blue potion swirl with offset of 1, 1, 1 and speed 1 at event-block
+							play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at event-block
 					else:
 						send "{@p} You need a <##385466>Adept's Axe &for better!" to player
 						cancel event
@@ -681,6 +704,10 @@ on block break:
 						drop dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
 						chance of {wood.cutting.fortune.%player's uuid%}%:
 							drop dark oak log named "<##77322c>Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+						chance of {@drop_pet_expert}%:
+							drop donkey spawn egg named "<##77322c>Expert's Pet" with lore "&fTier: <##77322c>Expert", "&fAbility: Drücke &dRechtsclick &fum einen Esel zu beschwören!", "&fDonkey: Mit einer &eTruhe &fausgerüstet, helfen dir &aEsel &fObjekte zu transportieren!" and "&fTag: &aConsumeable"
+							play 15 red potion swirl with offset of 1, 1, 1 and speed 1 at event-block
+							play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at event-block					
 					else:
 						send "{@p} You need a <##77322c>Expert's Axe &for better!" to player
 						cancel event
@@ -699,6 +726,10 @@ on block break:
 						drop acacia log named "<##aa6837>Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
 						chance of {wood.cutting.fortune.%player's uuid%}%:
 							drop acacia log named "<##aa6837>Master's Log" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+						chance of {@drop_pet_master}%:
+							drop horse spawn egg named "<##aa6837>Master's Pet" with lore "&fTier: <##aa6837>Master", "&fAbility: Drücke &dRechtsclick &fum ein Pferd zu beschwören!", "&fHorse: Mit einem &eSattel &fausgerüstet, helfen dir &aPferde &fschneller von A nach B zu kommen!" and "&fTag: &aConsumeable"
+							play 15 orange potion swirl with offset of 1, 1, 1 and speed 1 at event-block
+							play sound "minecraft:entity.illusioner.cast_spell" with volume 1 and pitch 1 at event-block					
 					else:
 						send "{@p} You need a <##aa6837>Master's Axe &for better!" to player
 						cancel event
