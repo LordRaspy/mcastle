@@ -276,6 +276,7 @@ on load:
 	remove minecraft recipe "bow"
 	remove minecraft recipe "arrow"
 	remove minecraft recipe "pumpkin_pie"
+	remove minecraft recipe "leather_horse_armor"
 
 	#Random
 
@@ -304,14 +305,6 @@ on load:
 		ingredients:
 			set ingredient of "a" to flint
 			set ingredient of "b" to stick
-	
-	register shaped recipe:
-		id: "custom:saddle"
-		result: saddle named "<##77322c>Expert's Saddle" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
-		shape: " a ", "aba", "a a"
-		ingredients:
-			set ingredient of "a" to chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
-			set ingredient of "b" to chest named "<##77322c>Chest with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
 
 	register shapeless recipe:
 		id: "custom:pumpkin_pie"
@@ -320,6 +313,47 @@ on load:
 			add pumpkin to ingredients
 			add sugar to ingredients
 
+
+	#Pets
+
+	register shaped recipe:
+		id: "custom:saddle"
+		result: saddle named "<##77322c>Expert's Saddle" with lore "&fTier: <##77322c>Expert" and "&fTag: &eTool"
+		shape: " a ", "aba", "a a"
+		ingredients:
+			set ingredient of "a" to chest named "<##77322c>Chest with Expert's Crop" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to chest named "<##77322c>Chest with Expert's Log" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:horse_armor_journeyman"
+		result: leather horse armor named "<##475b37>Journeyman's Horse Armor" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bArmor"
+		shape: "a a", "aaa", "a a"
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##475b37>Minecart with Journeyman's Crop" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bResource"
+
+	register shaped recipe:
+		id: "custom:horse_armor_adept"
+		result: iron horse armor named "<##385466>Adept's Horse Armor" with lore "&fTier: <##385466>Adept" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##385466>Minecart with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to leather horse armor named "<##475b37>Journeyman's Horse Armor" with lore "&fTier: <##475b37>Journeyman" and "&fTag: &bArmor"
+
+	register shaped recipe:
+		id: "custom:horse_armor_expert"
+		result: gold horse armor named "<##77322c>Expert's Horse Armor" with lore "&fTier: <##77322c>Expert" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##77322c>Minecart with Expert's Ore" with lore "&fTier: <##77322c>Expert" and "&fTag: &bResource"
+			set ingredient of "b" to iron horse armor named "<##385466>Adept's Horse Armor" with lore "&fTier: <##385466>Adept" and "&fTag: &bArmor"
+
+	register shaped recipe:
+		id: "custom:horse_armor_master"
+		result: diamond horse armor named "<##aa6837>Master's Horse Armor" with lore "&fTier: <##aa6837>Master" and "&fTag: &bArmor"
+		shape: "aaa", "aba", "   "
+		ingredients:
+			set ingredient of "a" to minecart with chest named "<##aa6837>Minecart with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to gold horse armor named "<##77322c>Expert's Horse Armor" with lore "&fTier: <##77322c>Expert" and "&fTag: &bArmor"
 
 	#Siege Weapons
 
