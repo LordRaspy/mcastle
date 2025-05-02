@@ -11,7 +11,7 @@ options:
 
 	gate_price: 960 # 3 Stacks Gold
 	base_regeneration_gate: 0.1 #Regeneration von einem Gate pro Sekunde
-	gate_destruction_timer: 750 #10min
+	gate_destruction_timer: 750 #12,5min
 
 
 	max_siege_weapons_per_inventory: 1 #Max. items mit Tag Siege Weapon pro inventory
