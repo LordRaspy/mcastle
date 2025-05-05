@@ -1,0 +1,166 @@
+options:
+	p: &bSystem &f|
+	spyglass_adept_range: 25
+	spyglass_adept_break: 10
+
+
+	spyglass_master_range: 50
+	spyglass_master_break: 5
+
+on load:
+
+	register shaped recipe:
+		id: "custom:spyglass_adept"
+		result: spyglass named "<##385466>Adept's Spyglass" with lore "&fTier: <##385466>Adept", "&fAbility: &aDrücke &dRechtsklick &fum einen &bSpieler &fauszuspähen!" and "&fTag: &aConsumeable"
+		shape: " b ", " a ", " a "
+		ingredients:
+			set ingredient of "a" to chest named "<##385466>Chest with Adept's Ore" with lore "&fTier: <##385466>Adept" and "&fTag: &bResource"
+			set ingredient of "b" to glass
+
+	register shaped recipe:
+		id: "custom:spyglass_master"
+		result: spyglass named "<##aa6837>Master's Spyglass" with lore "&fTier: <##aa6837>Master", "&fAbility: &aDrücke &dRechtsklick &fum einen &bSpieler &fauszuspähen!" and "&fTag: &aConsumeable"
+		shape: " b ", " a ", " a "
+		ingredients:
+			set ingredient of "a" to chest named "<##aa6837>Chest with Master's Ore" with lore "&fTier: <##aa6837>Master" and "&fTag: &bResource"
+			set ingredient of "b" to glass
+
+on rightclick:
+	if name of player's held item contains "<##aa6837>Master's Spyglass":
+		if player's targeted entity is a player:
+			if distance between player's targeted entity and player is above {@spyglass_master_range}:
+				stop
+			chance of {@spyglass_master_break}%:
+				remove 1 of player's held item from player's held item
+				play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+				play 15 grey potion swirl with offset of 1, 1, 1 and speed 1 at player
+				stop
+			set {_target} to player's targeted entity
+			set {_name} to getname({_target})
+			send "&f----| %{_name}%'s |----" to player
+
+			set {_c::1} to new text component from "&f%{_name}%&f's Held Item : "
+			if name of {_target}'s held item is not set:
+				set {_c::2} to new text component from "&f[&d%type of the held item of {_target}%&f]"
+			else:
+				set {_c::2} to new text component from "&f[&d%name of the held item of {_target}%&f]"
+			if {_target}'s held item is empty:
+				set {_c::2} to new text component from "&f[&dEmpty&f]"
+			else:
+				set hover event of {_c::2} to new hover event showing the held item of {_target}
+
+			set {_h::1} to new text component from "&f%{_name}%&f's Helmet : "
+			if name of {_target}'s helmet is not set:
+				set {_h::2} to new text component from "&f[&d%type of the helmet of {_target}%&f]"
+			else:
+				set {_h::2} to new text component from "&f[&d%name of the helmet of {_target}%&f]"
+			if {_target}'s helmet is empty:
+				set {_c::2} to new text component from "&f[&dEmpty&f]"
+			else:
+				set hover event of {_h::2} to new hover event showing the helmet of {_target}
+
+			set {_ch::1} to new text component from "&f%{_name}%&f's Chestplate : "
+			if name of {_target}'s chestplate is not set:
+				set {_ch::2} to new text component from "&f[&d%type of the chestplate of {_target}%&f]"
+			else:
+				set {_ch::2} to new text component from "&f[&d%name of the chestplate of {_target}%&f]"
+			if {_target}'s chestplate is empty:
+				set {_ch::2} to new text component from "&f[&dEmpty&f]"
+			else:
+				set hover event of {_ch::2} to new hover event showing the chestplate of {_target}
+
+			set {_l::1} to new text component from "&f%{_name}%&f's Leggings : "
+			if name of {_target}'s leggings is not set:
+				set {_l::2} to new text component from "&f[&d%type of the leggings of {_target}%&f]"
+			else:
+				set {_l::2} to new text component from "&f[&d%name of the leggings of {_target}%&f]"
+			if {_target}'s leggings is empty:
+				set {_l::2} to new text component from "&f[&dEmpty&f]"
+			else:
+				set hover event of {_l::2} to new hover event showing the leggings of {_target}
+
+			set {_b::1} to new text component from "&f%{_name}%&f's Boots : "
+			if name of {_target}'s boots is not set:
+				set {_b::2} to new text component from "&f[&d%type of the boots of {_target}%&f]"
+			else:
+				set {_b::2} to new text component from "&f[&d%name of the boots of {_target}%&f]"
+			if {_target}'s boots is empty:
+				set {_b::2} to new text component from "&f[&dEmpty&f]"
+			else:
+				set hover event of {_b::2} to new hover event showing the boots of {_target}
+
+			set {_c} to merge components {_c::*}
+			set {_h} to merge components {_h::*}
+			set {_ch} to merge components {_ch::*}
+			set {_l} to merge components {_l::*}
+			set {_b} to merge components {_b::*}
+			send component {_c} to player
+			send component {_h} to player
+			send component {_ch} to player
+			send component {_l} to player
+			send component {_b} to player
+			send "&f--------------------" to player
+
+	if name of player's held item contains "<##385466>Adept's Spyglass":
+		if player's targeted entity is a player:
+			if distance between player's targeted entity and player is above {@spyglass_adept_range}:
+				stop
+			chance of {@spyglass_adept_break}%:
+				remove 1 of player's held item from player's held item
+				play sound "minecraft:block.anvil.destroy" with volume 1 and pitch 1 at player
+				play 15 grey potion swirl with offset of 1, 1, 1 and speed 1 at player
+			set {_target} to player's targeted entity
+			set {_name} to getname({_target})
+			send "&f----| %{_name}%'s |----" to player
+
+			set {_c::1} to new text component from "&f%{_name}%&f's Held Item : "
+			if name of {_target}'s held item is not set:
+				set {_c::2} to new text component from "&f[&d%type of the held item of {_target}%&f]"
+			else:
+				set {_c::2} to new text component from "&f[&d%name of the held item of {_target}%&f]"
+			if {_target}'s held item is empty:
+				set {_c::2} to new text component from "&f[&dEmpty&f]"
+
+			set {_h::1} to new text component from "&f%{_name}%&f's Helmet : "
+			if name of {_target}'s helmet is not set:
+				set {_h::2} to new text component from "&f[&d%type of the helmet of {_target}%&f]"
+			else:
+				set {_h::2} to new text component from "&f[&d%name of the helmet of {_target}%&f]"
+			if {_target}'s helmet is empty:
+				set {_c::2} to new text component from "&f[&dEmpty&f]"
+
+			set {_ch::1} to new text component from "&f%{_name}%&f's Chestplate : "
+			if name of {_target}'s chestplate is not set:
+				set {_ch::2} to new text component from "&f[&d%type of the chestplate of {_target}%&f]"
+			else:
+				set {_ch::2} to new text component from "&f[&d%name of the chestplate of {_target}%&f]"
+			if {_target}'s chestplate is empty:
+				set {_ch::2} to new text component from "&f[&dEmpty&f]"
+
+			set {_l::1} to new text component from "&f%{_name}%&f's Leggings : "
+			if name of {_target}'s leggings is not set:
+				set {_l::2} to new text component from "&f[&d%type of the leggings of {_target}%&f]"
+			else:
+				set {_l::2} to new text component from "&f[&d%name of the leggings of {_target}%&f]"
+			if {_target}'s leggings is empty:
+				set {_l::2} to new text component from "&f[&dEmpty&f]"
+
+			set {_b::1} to new text component from "&f%{_name}%&f's Boots : "
+			if name of {_target}'s boots is not set:
+				set {_b::2} to new text component from "&f[&d%type of the boots of {_target}%&f]"
+			else:
+				set {_b::2} to new text component from "&f[&d%name of the boots of {_target}%&f]"
+			if {_target}'s boots is empty:
+				set {_b::2} to new text component from "&f[&dEmpty&f]"
+
+			set {_c} to merge components {_c::*}
+			set {_h} to merge components {_h::*}
+			set {_ch} to merge components {_ch::*}
+			set {_l} to merge components {_l::*}
+			set {_b} to merge components {_b::*}
+			send component {_c} to player
+			send component {_h} to player
+			send component {_ch} to player
+			send component {_l} to player
+			send component {_b} to player
+			send "&f--------------------" to player

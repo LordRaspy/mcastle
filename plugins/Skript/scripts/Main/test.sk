@@ -9,5 +9,5 @@ command /TestFeature:
 command /TestFeature2:
 	permission: *
 	trigger:
-		give player stone axe named "<##aa6837>Master's Siege Hammer" with lore "&fTier: <##aa6837>Master", "&fAbility: &aDrücke &dRechtsklick &fum einen &dBeacon &fzu beschädigen!" and "&fTag: &eSiege Weapon"
-		give player tripwire hook named "<##385466>Adept's Lockpick" with lore "&fTier: <##385466>Adept" and "&fTag: &aConsumeable"
+		give player spyglass named "<##385466>Adept's Spyglass" with lore "&fTier: <##385466>Adept", "&fAbility: &aDrücke &dRechtsklick &fum einen &bSpieler &fauszuspähen!" and "&fTag: &aConsumeable"
+		give player spyglass named "<##aa6837>Master's Spyglass" with lore "&fTier: <##aa6837>Master", "&fAbility: &aDrücke &dRechtsklick &fum einen &bSpieler &fauszuspähen!" and "&fTag: &aConsumeable"
