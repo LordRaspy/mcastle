@@ -121,7 +121,7 @@ on join:
 
 
 on join:
-	set title of player's scoreboard to "&blordraspy.duckdns.org"
+	set title of player's scoreboard to "&b-- MCastle --"
 	set line 1 of player's scoreboard to "&f&lPlayer"
 	set line 3 of player's scoreboard to ""
 	set line 4 of player's scoreboard to "&f&lReligion"

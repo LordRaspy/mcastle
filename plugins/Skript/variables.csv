@@ -123,7 +123,7 @@ damage.no.combat.e70d550b-a864-4ece-ba1d-bb0a93d59808, boolean, 01
 damage.no.combat.e752d147-c34b-4e39-8c3d-59ed9ccc30bb, boolean, 01
 damage.no.combat.f7af70db-f4e2-4a24-a5eb-fa3e3b8ddc76, boolean, 01
 damage.no.combat.f92374fd-b30c-40a8-b405-8678f9d4db0b, boolean, 01
-day, long, 0000000000000014
+day, long, 0000000000000015
 death.counter.2c1d5a47-76c5-4009-85ec-0638c5f39bc3, long, 0000000000000000
 death.counter.35306442-f2fe-4f61-98e4-5cbd5f4e3d54, long, 0000000000000000
 death.counter.c8d75526-227b-421b-919f-badc242e4660, long, 0000000000000000
@@ -370,7 +370,7 @@ tiers::2, string, 800A6A6F75726E65796D616E
 tiers::3, string, 80056164657074
 tiers::4, string, 8006657870657274
 tiers::5, string, 80066D6173746572
-timer.until.mob.clear, long, 00000000000009DF
+timer.until.mob.clear, long, 0000000000000471
 times.crafted.35306442-f2fe-4f61-98e4-5cbd5f4e3d54, double, 4014000000000000
 title.2c1d5a47-76c5-4009-85ec-0638c5f39bc3, string, 8009C2A7364BC3B66E6967
 title.35306442-f2fe-4f61-98e4-5cbd5f4e3d54, string, 800EC2A7645265636874652048616E64

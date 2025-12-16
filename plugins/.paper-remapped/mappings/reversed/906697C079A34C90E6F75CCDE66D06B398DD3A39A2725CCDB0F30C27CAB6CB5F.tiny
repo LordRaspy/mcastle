@@ -19221,20 +19221,10 @@ c	net/minecraft/server/commands/CommandTrigger	net/minecraft/server/commands/Tri
 c	net/minecraft/server/commands/CommandWeather	net/minecraft/server/commands/WeatherCommand
 	f	I	a	DEFAULT_TIME
 	m	(Lcom/mojang/brigadier/CommandDispatcher;)V	a	register
-	m	(Lnet/minecraft/commands/CommandListenerWrapper;I)I	a	setClear
-	m	(Lnet/minecraft/commands/CommandListenerWrapper;)Z	a	lambda$register$0
 	m	(Lnet/minecraft/commands/CommandListenerWrapper;ILnet/minecraft/util/valueproviders/IntProvider;)I	a	getDuration
-	m	(Lcom/mojang/brigadier/context/CommandContext;)I	a	lambda$register$6
-	m	()Lnet/minecraft/network/chat/IChatBaseComponent;	a	lambda$setThunder$9
-	m	(Lcom/mojang/brigadier/context/CommandContext;)I	b	lambda$register$5
+	m	(Lnet/minecraft/commands/CommandListenerWrapper;I)I	a	setClear
 	m	(Lnet/minecraft/commands/CommandListenerWrapper;I)I	b	setRain
-	m	()Lnet/minecraft/network/chat/IChatBaseComponent;	b	lambda$setRain$8
-	m	()Lnet/minecraft/network/chat/IChatBaseComponent;	c	lambda$setClear$7
-	m	(Lcom/mojang/brigadier/context/CommandContext;)I	c	lambda$register$4
 	m	(Lnet/minecraft/commands/CommandListenerWrapper;I)I	c	setThunder
-	m	(Lcom/mojang/brigadier/context/CommandContext;)I	d	lambda$register$3
-	m	(Lcom/mojang/brigadier/context/CommandContext;)I	e	lambda$register$2
-	m	(Lcom/mojang/brigadier/context/CommandContext;)I	f	lambda$register$1
 c	net/minecraft/server/commands/CommandWhitelist	net/minecraft/server/commands/WhitelistCommand
 	f	Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;	a	ERROR_ALREADY_ENABLED
 	f	Lcom/mojang/brigadier/exceptions/SimpleCommandExceptionType;	b	ERROR_ALREADY_DISABLED
@@ -68146,7 +68136,6 @@ c	net/minecraft/world/level/levelgen/structure/structures/ShipwreckPieces$a	net/
 	m	(Lnet/minecraft/world/level/GeneratorAccessSeed;Lnet/minecraft/world/level/StructureManager;Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/levelgen/structure/StructureBoundingBox;Lnet/minecraft/world/level/ChunkCoordIntPair;Lnet/minecraft/core/BlockPosition;)V	a	postProcess
 	m	(Lnet/minecraft/world/level/levelgen/structure/pieces/StructurePieceSerializationContext;Lnet/minecraft/nbt/NBTTagCompound;)V	a	addAdditionalSaveData
 	m	(ILnet/minecraft/util/RandomSource;)I	a	calculateBeachedPosition
-	m	(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/resources/MinecraftKey;)Lnet/minecraft/world/level/levelgen/structure/templatesystem/DefinedStructureInfo;	a	lambda$new$0
 	m	(Ljava/lang/String;Lnet/minecraft/core/BlockPosition;Lnet/minecraft/world/level/WorldAccess;Lnet/minecraft/util/RandomSource;Lnet/minecraft/world/level/levelgen/structure/StructureBoundingBox;)V	a	handleDataMarker
 	m	(I)V	c	adjustPositionHeight
 	m	()Z	l	isTooBigToFitInWorldGenRegion
@@ -74317,6 +74306,8 @@ c	org/bukkit/craftbukkit/v1_20_R4/inventory/RecipeIterator	org/bukkit/craftbukki
 c	org/bukkit/craftbukkit/v1_20_R4/inventory/SerializableMeta	org/bukkit/craftbukkit/inventory/SerializableMeta
 c	org/bukkit/craftbukkit/v1_20_R4/inventory/components/CraftFoodComponent	org/bukkit/craftbukkit/inventory/components/CraftFoodComponent
 c	org/bukkit/craftbukkit/v1_20_R4/inventory/components/CraftFoodComponent$CraftFoodEffect	org/bukkit/craftbukkit/inventory/components/CraftFoodComponent$CraftFoodEffect
+c	org/bukkit/craftbukkit/v1_20_R4/inventory/components/CraftToolComponent	org/bukkit/craftbukkit/inventory/components/CraftToolComponent
+c	org/bukkit/craftbukkit/v1_20_R4/inventory/components/CraftToolComponent$CraftToolRule	org/bukkit/craftbukkit/inventory/components/CraftToolComponent$CraftToolRule
 c	org/bukkit/craftbukkit/v1_20_R4/inventory/tags/DeprecatedContainerTagType	org/bukkit/craftbukkit/inventory/tags/DeprecatedContainerTagType
 c	org/bukkit/craftbukkit/v1_20_R4/inventory/tags/DeprecatedCustomTagContainer	org/bukkit/craftbukkit/inventory/tags/DeprecatedCustomTagContainer
 c	org/bukkit/craftbukkit/v1_20_R4/inventory/tags/DeprecatedItemAdapterContext	org/bukkit/craftbukkit/inventory/tags/DeprecatedItemAdapterContext
@@ -74340,6 +74331,7 @@ c	org/bukkit/craftbukkit/v1_20_R4/inventory/util/CraftTileInventoryConverter$Smo
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/CraftEvil	org/bukkit/craftbukkit/legacy/CraftEvil
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/CraftLegacy	org/bukkit/craftbukkit/legacy/CraftLegacy
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/FieldRename	org/bukkit/craftbukkit/legacy/FieldRename
+c	org/bukkit/craftbukkit/v1_20_R4/legacy/MaterialRerouting	org/bukkit/craftbukkit/legacy/MaterialRerouting
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/fieldrename/FieldRenameData	org/bukkit/craftbukkit/legacy/fieldrename/FieldRenameData
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/fieldrename/FieldRenameData$Builder	org/bukkit/craftbukkit/legacy/fieldrename/FieldRenameData$Builder
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/fieldrename/FieldRenameData$RenameData	org/bukkit/craftbukkit/legacy/fieldrename/FieldRenameData$RenameData
@@ -74347,6 +74339,7 @@ c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/DoNotReroute	org/bukkit/craftbu
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/InjectPluginName	org/bukkit/craftbukkit/legacy/reroute/InjectPluginName
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/InjectPluginVersion	org/bukkit/craftbukkit/legacy/reroute/InjectPluginVersion
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/NotInBukkit	org/bukkit/craftbukkit/legacy/reroute/NotInBukkit
+c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/RequireCompatibility	org/bukkit/craftbukkit/legacy/reroute/RequireCompatibility
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/RerouteArgument	org/bukkit/craftbukkit/legacy/reroute/RerouteArgument
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/RerouteBuilder	org/bukkit/craftbukkit/legacy/reroute/RerouteBuilder
 c	org/bukkit/craftbukkit/v1_20_R4/legacy/reroute/RerouteMethodData	org/bukkit/craftbukkit/legacy/reroute/RerouteMethodData
@@ -74375,6 +74368,7 @@ c	org/bukkit/craftbukkit/v1_20_R4/persistence/CraftPersistentDataTypeRegistry$Ta
 c	org/bukkit/craftbukkit/v1_20_R4/persistence/DirtyCraftPersistentDataContainer	org/bukkit/craftbukkit/persistence/DirtyCraftPersistentDataContainer
 c	org/bukkit/craftbukkit/v1_20_R4/potion/CraftPotionEffectType	org/bukkit/craftbukkit/potion/CraftPotionEffectType
 c	org/bukkit/craftbukkit/v1_20_R4/potion/CraftPotionEffectType$1	org/bukkit/craftbukkit/potion/CraftPotionEffectType$1
+c	org/bukkit/craftbukkit/v1_20_R4/potion/CraftPotionEffectTypeCategory	org/bukkit/craftbukkit/potion/CraftPotionEffectTypeCategory
 c	org/bukkit/craftbukkit/v1_20_R4/potion/CraftPotionType	org/bukkit/craftbukkit/potion/CraftPotionType
 c	org/bukkit/craftbukkit/v1_20_R4/potion/CraftPotionUtil	org/bukkit/craftbukkit/potion/CraftPotionUtil
 c	org/bukkit/craftbukkit/v1_20_R4/profile/CraftPlayerProfile	org/bukkit/craftbukkit/profile/CraftPlayerProfile
